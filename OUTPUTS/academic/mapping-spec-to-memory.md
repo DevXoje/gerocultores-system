@@ -3,7 +3,8 @@
 > Relaciona los artefactos `SPEC/` con las secciones de la memoria académica que nutren.  
 > Indica qué artefacto SPEC debe completarse primero para desbloquear la redacción de cada sección.  
 > Generado por: sdd-explore agent — 2026-03-28  
-> Trazabilidad: `sdd/example-memories/calibration-1` en engram.
+> Trazabilidad: `sdd/example-memories/calibration-1` y `sdd/example-memories/calibration-2` en engram.  
+> **Última actualización**: 2026-03-28 — calibración desde ejemplo TaskNest [CALIBRADO DESDE EJEMPLO 2]
 
 ---
 
@@ -118,6 +119,8 @@
 - `SPEC/api-contracts.md` → tabla de endpoints con métodos, rutas y contratos JSON.
 - `DECISIONS/ADR-*.md` → justificación de la arquitectura elegida (capas, patrones).
 
+> **[CALIBRADO DESDE EJEMPLO 2]** Esta sección también debe incluir wireframes o prototipos del proceso de diseño UX (no solo la UI final). Fuente recomendada: exportación de Figma o capturas de pantalla de iteraciones de diseño. Desbloqueador adicional: disponer de al menos 2–3 pantallas prototipadas para incluir como evidencia del proceso de diseño.
+
 ---
 
 ### 6. Fases de implementación técnica
@@ -136,6 +139,8 @@
 - `DECISIONS/ADR-*.md` → problemas técnicos encontrados y decisiones adoptadas.
 - `LOGS/` → registro de problemas reales encontrados durante la implementación.
 - Capturas de pantalla propias durante el desarrollo.
+
+> **[CALIBRADO DESDE EJEMPLO 2]** Estructura recomendada: organizar POR SPRINT/SEMANA, no por tecnología. Cada sprint debe incluir: objetivo, tareas completadas, captura de pantalla del estado de la UI, y (si aplica) problema encontrado + solución adoptada. Divergencia con ejemplo 1: ninguna — ambos ejemplos coinciden en que la narrativa cronológica es la estructura correcta.
 
 ---
 
@@ -183,6 +188,8 @@
 - `OUTPUTS/test-plans/` → estrategia de pruebas por US (unitarias, integración, E2E, usabilidad).
 - `SPEC/user-stories.md` → criterios de aceptación como base para los casos de prueba.
 - `SPEC/requirements.md` → criterios de aceptación de RNF (Lighthouse score, tiempo de respuesta).
+
+> **[CALIBRADO DESDE EJEMPLO 2]** La sección debe incluir una tabla de resultados: Tipo de prueba | N.º tests | Pasados | Fallidos | Cobertura (%). Sin esta tabla, la sección tiene bajo valor percibido. Mínimo aceptable: 52 tests unitarios + tests E2E de flujos críticos.
 
 ---
 
@@ -293,4 +300,5 @@ FASE 5 — Al final de todo:
 ---
 
 *Documento generado: 2026-03-28 — sdd-explore agent — gerocultores-system*  
-*Referencia: calibración `example-calibration-buycinduro.md`*
+*Referencia: calibración `example-calibration-buycinduro.md` (ejemplo 1) y `example-calibration-tasknest.md` (ejemplo 2)*  
+*Última actualización: 2026-03-28 [CALIBRADO DESDE EJEMPLO 2]*

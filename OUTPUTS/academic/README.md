@@ -50,9 +50,11 @@
 
 ## Longitud de referencia
 
-> [CALIBRADO DESDE EJEMPLO 1] — Basado en el análisis de la memoria del proyecto "Buycinduro" (32 páginas) del CIPFP Batoi y en el patrón estándar de memorias DAW del centro.
+> [CALIBRADO DESDE EJEMPLO 1 + EJEMPLO 2] — Basado en el análisis de las memorias "Buycinduro" (32 p.) y "TaskNest" (30–38 p.), ambas del CIPFP Batoi, y en el patrón estándar de memorias DAW del centro.
 
 Una memoria DAW individual bien estructurada ocupa **28–40 páginas** (sin anexos). El rango aceptable es 25–45 páginas. Por debajo de 20 páginas es insuficiente; por encima de 50 páginas, excesiva y penalizable en "aspectos formales".
+
+> **Reconciliación entre ejemplos**: Ambas memorias se sitúan en el rango 30–38 p., confirmando que **30–35 páginas es el punto óptimo** para un proyecto individual de este nivel.
 
 ---
 
@@ -110,16 +112,20 @@ Marca las secciones conforme se vayan generando y validando.
 
 - [ ] **5. Diseño del sistema** — Arquitectura general (frontend/backend/BD), entidades del dominio, diagrama entidad-relación, flujos principales, diseño de la API. Basado en `SPEC/entities.md`, `SPEC/flows.md`, `SPEC/api-contracts.md`.
   > *Descripción*: Describe la arquitectura del sistema, el modelo de datos y el diseño de la interfaz. Es la sección más técnica y visual.  
-  > *Longitud mínima*: 500 palabras + 1 diagrama E-R (≈ 2 páginas). *Recomendada*: 800–1.500 palabras + 3 diagramas/capturas (3–5 páginas).  
+  > *Longitud mínima*: 500 palabras + 1 diagrama E-R (≈ 2 páginas). *Recomendada*: **900–1.600 palabras** + 3 diagramas/capturas (3–6 páginas). [CALIBRADO DESDE EJEMPLO 2]  
   > *Fuentes SPEC*: `SPEC/entities.md`, `SPEC/flows.md`, `SPEC/api-contracts.md`, `DECISIONS/`.  
   > [CALIBRADO DESDE EJEMPLO 1] Ejemplo de párrafo de alto valor: *"El modelo de datos central está formado por siete entidades: Usuario, Residente, Tarea, Incidencia, Turno, Notificacion y ResidenteAsignacion. La entidad ResidenteAsignacion implementa la relación M:N entre gerocultores y residentes, permitiendo que un gerocultor tenga varios residentes asignados y que un residente tenga varios gerocultores responsables según el turno."*  
-  > ⚠️ **Antipatrón a evitar**: Describir el diseño solo con texto, sin diagrama E-R, sin diagrama de arquitectura ni capturas de pantalla. El tribunal espera soporte visual.
+  > [CALIBRADO DESDE EJEMPLO 2] Ejemplo adicional (énfasis en UX iterativa): *"El flujo de registro de incidencia fue el más rediseñado: el primer prototipo usaba un formulario modal de 10 campos. Tras pruebas con usuarios reales, se redujo a 3 campos obligatorios, con el resto opcionales en un panel lateral colapsable."*  
+  > ⚠️ **Antipatrón a evitar (AP-03)**: Describir el diseño solo con texto, sin diagrama E-R, sin diagrama de arquitectura ni capturas de pantalla. El tribunal espera soporte visual.  
+  > ⚠️ **Antipatrón a evitar (AP-07)**: Mencionar wireframes sin incluirlos. Incluir al menos 2–3 wireframes que muestren el proceso de diseño, no solo el resultado final. [CALIBRADO DESDE EJEMPLO 2]
 
 - [ ] **6. Fases de implementación técnica** — Descripción cronológica del desarrollo: UX/arquitectura, frontend, backend, integración, pruebas. Problemas encontrados y soluciones adoptadas. Decisiones técnicas (ADRs).
   > *Descripción*: Narra el proceso de desarrollo semana a semana, con capturas de pantalla de la UI, fragmentos de código relevantes y relato honesto de los problemas encontrados y cómo se resolvieron.  
-  > *Longitud mínima*: 800 palabras + capturas (≈ 3 páginas). *Recomendada*: 1.200–2.000 palabras (4–6 páginas).  
+  > *Longitud mínima*: 800 palabras + capturas (≈ 3 páginas). *Recomendada*: **1.200–2.200 palabras** (4–7 páginas). [CALIBRADO DESDE EJEMPLO 2]  
   > *Fuentes SPEC*: `PLAN/current-sprint.md`, `DECISIONS/ADR-*.md`, `LOGS/`.  
-  > [CALIBRADO DESDE EJEMPLO 1] Ejemplo de párrafo de alto valor: *"El mayor problema encontrado fue la sincronización de estado entre la agenda y el registro de incidencias: al crear una incidencia desde el detalle de una tarea, la tarea debía actualizarse automáticamente a estado 'con_incidencia' sin forzar un reload completo. Se resolvió mediante un contexto global que dispara un refetch selectivo al cerrar el modal de incidencia."*
+  > [CALIBRADO DESDE EJEMPLO 1] Ejemplo de párrafo de alto valor: *"El mayor problema encontrado fue la sincronización de estado entre la agenda y el registro de incidencias: al crear una incidencia desde el detalle de una tarea, la tarea debía actualizarse automáticamente a estado 'con_incidencia' sin forzar un reload completo. Se resolvió mediante un contexto global que dispara un refetch selectivo al cerrar el modal de incidencia."*  
+  > [CALIBRADO DESDE EJEMPLO 2] Ejemplo adicional (énfasis en pruebas de usabilidad): *"La Semana 5 se dedicó a pruebas de usabilidad con gerocultores reales. Los hallazgos clave fueron: (1) el icono de 'incidencia' no era reconocible sin etiqueta de texto, (2) los botones de acción eran insuficientes para uso con guantes (< 44 px táctiles). Ambos se corrigieron en la Semana 6 antes de la entrega."*  
+  > ⚠️ **Antipatrón a evitar (AP-06)**: Organizar esta sección por tecnología ("React", "Node.js") en lugar de por sprints/semanas. La narrativa cronológica con problemas y soluciones es lo que el tribunal valora. [CALIBRADO DESDE EJEMPLO 2]
 
 - [ ] **7. Estudio del coste económico y organizativo** — Estimación de horas de desarrollo, herramientas utilizadas (coste cero o coste mínimo), coste de infraestructura (cloud gratuito vs. de pago).
   > *Descripción*: Tabla de horas por fase, coste estimado en euros aplicando tarifa de mercado junior, y análisis de costes de herramientas y hosting.  
@@ -129,19 +135,24 @@ Marca las secciones conforme se vayan generando y validando.
 
 - [ ] **8. Comparación con la situación actual y alternativas** — Cómo se gestiona actualmente la agenda en residencias (papel, hojas sueltas), alternativas comerciales existentes (apps similares), justificación de la propuesta.
   > *Descripción*: Analiza qué soluciones existen actualmente y por qué la propuesta del proyecto es mejor o diferente para el contexto específico.  
-  > *Longitud mínima*: 300 palabras (≈ 1 página). *Recomendada*: 400–600 palabras (1–2 páginas).  
-  > [CALIBRADO DESDE EJEMPLO 1] Ejemplo de párrafo de alto valor: *"Se analizaron tres alternativas: (1) CareMaster (SaaS de 120 €/mes/residencia), (2) aCareGiver (app móvil de 8 €/usuario/mes) y (3) hojas de cálculo en Google Sheets (coste cero, sin control de acceso). Ninguna se adapta a una residencia pequeña con presupuesto ajustado y necesidad de personalización. La propuesta permite un coste operativo de 0 € (infraestructura gratuita) con funcionalidad específica para gerocultores."*
+  > *Longitud mínima*: 300 palabras (≈ 1 página). *Recomendada*: **400–700 palabras + tabla comparativa** (1–2 páginas). [CALIBRADO DESDE EJEMPLO 2]  
+  > [CALIBRADO DESDE EJEMPLO 1] Ejemplo de párrafo de alto valor: *"Se analizaron tres alternativas: (1) CareMaster (SaaS de 120 €/mes/residencia), (2) aCareGiver (app móvil de 8 €/usuario/mes) y (3) hojas de cálculo en Google Sheets (coste cero, sin control de acceso). Ninguna se adapta a una residencia pequeña con presupuesto ajustado y necesidad de personalización. La propuesta permite un coste operativo de 0 € (infraestructura gratuita) con funcionalidad específica para gerocultores."*  
+  > [CALIBRADO DESDE EJEMPLO 2] Ejemplo de tabla comparativa: Incluir columnas Alternativa | Precio/mes | Personalización | Privacidad datos de salud | ¿Por qué descartada?  
+  > ⚠️ **Antipatrón a evitar (AP-08)**: Describir las alternativas en prosa sin tabla comparativa. El tribunal espera una comparación sistemática, no una descripción narrativa de cada herramienta. [CALIBRADO DESDE EJEMPLO 2]
 
 - [ ] **9. Pruebas** — Plan de tests, tipos de pruebas realizadas (unitarias, integración, E2E, usabilidad), resultados y cobertura obtenida.
   > *Descripción*: Describe la estrategia de pruebas adoptada, los casos de prueba más representativos y los resultados cuantificables (cobertura %, tests pasados/fallidos).  
-  > *Longitud mínima*: 300 palabras + tabla de resultados (≈ 1 página). *Recomendada*: 500–800 palabras (1–3 páginas).  
+  > *Longitud mínima*: **400 palabras** + tabla de resultados (≈ 1,5 páginas). *Recomendada*: **600–900 palabras** (2–3 páginas). [CALIBRADO DESDE EJEMPLO 2]  
   > *Fuentes SPEC*: `OUTPUTS/test-plans/`, `SPEC/user-stories.md` (criterios de aceptación).  
-  > [CALIBRADO DESDE EJEMPLO 1] Ejemplo de párrafo de alto valor: *"Se ejecutaron 47 tests unitarios sobre la lógica de negocio del backend, con una cobertura del 68% de las líneas del módulo de servicios. Los tests E2E con Playwright validaron los 6 flujos principales: inicio de sesión, consulta de agenda, registro de incidencia, marcar tarea, consulta de historial y cierre de turno. Todos pasaron en la rama main en el momento de la entrega."*
+  > [CALIBRADO DESDE EJEMPLO 1] Ejemplo de párrafo de alto valor: *"Se ejecutaron 47 tests unitarios sobre la lógica de negocio del backend, con una cobertura del 68% de las líneas del módulo de servicios. Los tests E2E con Playwright validaron los 6 flujos principales: inicio de sesión, consulta de agenda, registro de incidencia, marcar tarea, consulta de historial y cierre de turno. Todos pasaron en la rama main en el momento de la entrega."*  
+  > [CALIBRADO DESDE EJEMPLO 2] Ejemplo de tabla de resultados de tests: Tipo | N.º tests | Pasados | Fallidos | Cobertura  
+  > ⚠️ **Antipatrón a evitar (AP-09)**: Describir la estrategia de testing sin incluir resultados cuantificables (n.º de tests, cobertura %). El tribunal no puede evaluar si el testing fue real o simbólico. [CALIBRADO DESDE EJEMPLO 2]
 
 - [ ] **10. Seguridad y cumplimiento RGPD** — Medidas implementadas para la protección de datos de categoría especial (datos de salud), cifrado, control de acceso, política de retención.
   > *Descripción*: Explica las medidas de seguridad técnicas adoptadas y cómo cumple el sistema con el RGPD para datos de salud (categoría especial, art. 9).  
-  > *Longitud mínima*: 200 palabras (≈ 0,5 páginas). *Recomendada*: 300–500 palabras (1–2 páginas).  
+  > *Longitud mínima*: **300 palabras** (≈ 1 página — **obligatorio**, sin excepción para datos de salud). *Recomendada*: **400–600 palabras** (1–2 páginas). [CALIBRADO DESDE EJEMPLO 2]  
   > *Fuentes SPEC*: `SPEC/constraints.md` (sección RGPD), `SPEC/entities.md` (campos marcados RGPD).  
+  > [CALIBRADO DESDE EJEMPLO 2] Ejemplo de párrafo de alto valor: *"El sistema implementa RBAC con tres roles: ADMIN, COORDINADOR y GEROCULTOR. Los endpoints verifican el rol via middleware antes de procesar la petición. Los datos de residentes (diagnósticos, alergias, medicación) son categoría especial según art. 9 RGPD: se cifran en tránsito (HTTPS forzado), se audita cada acceso, y la política de retención establece 5 años tras el alta del residente."*  
   > ⚠️ Esta sección es **crítica** para proyectos con datos de salud. Omitirla o tratarla superficialmente puede resultar en penalización.
 
 ### Cierre de la memoria
@@ -187,7 +198,7 @@ Marca las secciones conforme se vayan generando y validando.
 
 ## Antipatrones críticos a evitar
 
-> [CALIBRADO DESDE EJEMPLO 1] — Los siguientes errores son habituales en memorias DAW y reducen la nota significativamente.
+> [CALIBRADO DESDE EJEMPLO 1 + EJEMPLO 2] — Los siguientes errores son habituales en memorias DAW y reducen la nota significativamente.
 
 | # | Antipatrón | Impacto | Corrección |
 |---|-----------|---------|-----------|
@@ -196,6 +207,10 @@ Marca las secciones conforme se vayan generando y validando.
 | AP-03 | Diseño del sistema sin diagramas | Baja puntuación en aspectos formales (20% de la nota) | Mínimo: diagrama E-R + diagrama de arquitectura + 2 capturas de UI |
 | AP-04 | Conclusiones sin datos cuantitativos | Sección de bajo valor percibido | Incluir horas totales, features completadas/planificadas, cobertura de tests, y 1 problema concreto resuelto |
 | AP-05 | Bibliografía sin formato ni comentario | Incumple norma del CIPFP Batoi | Usar APA mínimo + 1 frase de uso por referencia |
+| AP-06 | Implementación técnica organizada por tecnología, no por sprint/semana | Pierde narrativa de proceso; el tribunal no puede evaluar cómo se resolvieron los problemas | Estructurar por semanas/sprints con capturas en cada fase [CALIBRADO DESDE EJEMPLO 2] |
+| AP-07 | Wireframes mencionados pero no incluidos en la memoria | La sección de diseño pierde credibilidad; no muestra proceso de diseño | Incluir al menos 2–3 wireframes mostrando evolución: prototipo inicial → versión final [CALIBRADO DESDE EJEMPLO 2] |
+| AP-08 | Sección de alternativas sin tabla comparativa estructurada | No aporta valor analítico; el tribunal espera comparación sistemática | Incluir tabla: Alternativa \| Precio \| Personalización \| Privacidad datos \| Por qué descartada [CALIBRADO DESDE EJEMPLO 2] |
+| AP-09 | Tests descritos sin resultados cuantificables | El tribunal no puede evaluar si el testing fue real o simbólico | Incluir tabla: Tipo de prueba \| N.º tests \| Pasados \| Fallidos \| Cobertura [CALIBRADO DESDE EJEMPLO 2] |
 
 ---
 
@@ -215,10 +230,11 @@ El Writer Agent producirá el archivo en `OUTPUTS/academic/seccion-XX-nombre.md`
 
 | Archivo | Sección | Estado |
 |---------|---------|--------|
-| `example-calibration-buycinduro.md` | Calibración de ejemplo | ✅ Generado |
+| `example-calibration-buycinduro.md` | Calibración de ejemplo 1 | ✅ Generado |
+| `example-calibration-tasknest.md` | Calibración de ejemplo 2 | ✅ Generado |
 | `mapping-spec-to-memory.md` | Mapa SPEC → secciones memoria | ✅ Generado |
 | *(borradores de sección — pendientes)* | — | 🔲 Pendiente |
 
 ---
 
-*Última actualización: 2026-03-28 — sdd-explore (calibración desde ejemplo Buycinduro) [CALIBRADO DESDE EJEMPLO 1]*
+*Última actualización: 2026-03-28 — sdd-explore (calibración desde ejemplo TaskNest) [CALIBRADO DESDE EJEMPLO 1 + EJEMPLO 2]*
