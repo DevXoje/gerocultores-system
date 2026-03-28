@@ -1,129 +1,19 @@
 # AGENTS.md — gerocultores-system
 
-<!-- ─────────────────────────────────────────────────────────────────────────── -->
-<!-- HUMAN (ES) — Sección para el desarrollador humano                          -->
-<!-- ─────────────────────────────────────────────────────────────────────────── -->
-
-## Propósito de este archivo
-
-Este archivo sirve como contrato central para los agentes de IA que trabajan en
-este repositorio. Define roles, guardrails y reglas de automatización.
-
-- **GGA** (Gentleman Guardian Angel) lo lee en cada revisión de código para
-  verificar que los guardrails se cumplen.
-- Los agentes de IA lo consultan al inicio de cada sesión para conocer sus
-  límites y responsabilidades.
-- Los desarrolladores humanos lo leen para entender cómo colaborar con los
-  agentes y qué esperar de ellos.
-
-> **Para desarrollo detallado**: ver `AGENTS/` para los archivos completos de
-> roles, guardrails y contratos de I/O.
+<!-- AGENT-ONLY (EN) -->
+<!-- This file is machine-readable. It is consumed by GGA at code review time    -->
+<!-- and by AI agents at session start. Human-facing docs are separate.          -->
+<!-- .gga: RULES_FILE="AGENTS.md" — this file is the primary rules source.      -->
+<!-- All guardrails G01–G09 are present below in machine-readable form.          -->
 
 ---
-
-## Resumen de guardrails para el desarrollador humano
-
-> Versión resumida en español. Versión completa en inglés en `AGENTS/guardrails.md`.
-
-| Código | Regla resumida |
-|--------|---------------|
-| **G01** | No se implementa código sin user story en `SPEC/`. |
-| **G02** | Toda decisión técnica no obvia necesita un ADR en `DECISIONS/`. |
-| **G03** | No se aprueba ninguna feature sin plan de tests en `OUTPUTS/test-plans/`. |
-| **G04** | Los nombres de campos de entidades son idénticos en `SPEC/`, contratos y código. |
-| **G05** | Cero valores sensibles hardcodeados (claves API, IDs de BD, URLs de producción). |
-| **G06** | Los agentes no añaden scope fuera de `SPEC/` sin tu aprobación explícita. |
-| **G07** | Los atajos técnicos deben documentarse en un ADR o en `LOGS/`. |
-| **G08** | Cada commit de feature referencia la user story: `feat(US-XX): descripción`. |
-| **G09** | El Writer verifica que todas las secciones del TFG están cubiertas en `OUTPUTS/academic/`. |
-
----
-
-## Cómo contribuir (desarrollador humano)
-
-### Flujo de trabajo estándar
-
-```
-1. Entrevista de requisitos (Collector)  →  LOGS/raw_requirements_*.md
-2. Formalizar requisitos (Structurer)    →  SPEC/
-3. Backlog y sprint (Planner)            →  PLAN/
-4. Decisiones técnicas (Architect)       →  DECISIONS/
-5. Implementación (Developer)            →  código + notas
-6. Revisión (Reviewer / GGA)             →  APPROVED | NEEDS_REVISION | BLOCKED
-7. Tests (Tester)                        →  OUTPUTS/test-plans/
-8. Documentación académica (Writer)      →  OUTPUTS/academic/
-```
-
-### Convenciones de commits
-
-Usa el formato **Conventional Commits**:
-
-```
-<tipo>[scope]: <descripción corta>
-
-[cuerpo opcional]
-
-[pie opcional — referencias a issues o user stories]
-```
-
-**Tipos permitidos:**
-
-| Tipo | Cuándo usarlo |
-|------|--------------|
-| `feat` | Nueva funcionalidad de la app |
-| `fix` | Corrección de bug |
-| `docs` | Cambios solo de documentación |
-| `chore` | Tareas de mantenimiento (deps, config) |
-| `test` | Añadir o modificar tests |
-| `refactor` | Reestructuración sin cambio de comportamiento |
-| `style` | Formato, espaciado (sin cambio de lógica) |
-| `perf` | Mejoras de rendimiento |
-
-**Ejemplos:**
-
-```
-feat(US-03): agregar registro de incidencias por gerocultor
-fix(US-07): corregir validación de turno nocturno
-docs: actualizar README con instrucciones de despliegue
-chore: actualizar dependencias de desarrollo
-```
-
-> **Regla G08**: toda `feat` debe incluir el código `US-XX` en el scope.
-
-### Proceso de Pull Request
-
-Antes de abrir un PR verifica manualmente esta lista:
-
-- [ ] ¿La user story está en `SPEC/user-stories.md` y marcada In Progress?
-- [ ] ¿El título del PR sigue el formato `feat(US-XX): descripción`?
-- [ ] ¿Existe un plan de tests en `OUTPUTS/test-plans/test-plan-US-XX.md`?
-- [ ] ¿Las entidades nuevas están documentadas en `SPEC/entities.md`?
-- [ ] ¿Se han creado los ADRs necesarios en `DECISIONS/`?
-- [ ] ¿Se ha ejecutado GGA (`gga review`) sin errores bloqueantes?
-- [ ] ¿Se han eliminado todos los `TODO` pendientes del archivo modificado?
-- [ ] ¿Las variables de entorno sensibles están en `.env.example` y no hardcodeadas?
-
-### Onboarding del desarrollador
-
-1. Clona el repositorio y lee `README.md` y `PROJECT_BRIEF.md`.
-2. Lee este archivo (`AGENTS.md`) y `TECH_GUIDE.md`.
-3. Instala GGA: ver instrucciones en el `README.md` del proyecto.
-4. Ejecuta `gga review` para verificar que el entorno funciona.
-5. Consulta el sprint activo en `PLAN/current-sprint.md`.
-6. Antes de tocar código, busca la user story correspondiente en `SPEC/user-stories.md`.
-
----
-
-<!-- ─────────────────────────────────────────────────────────────────────────── -->
-<!-- AGENT-ONLY (EN) — Machine-readable contracts and agent directives          -->
-<!-- ─────────────────────────────────────────────────────────────────────────── -->
 
 ## Agent Overview
 
 This file is consumed by GGA at code review time and by AI agents at session start.
 Full per-agent artifacts live in:
 
-- `AGENTS/guardrails.md` — Non-negotiable guardrails (English, agent-only)
+- `AGENTS/guardrails.md` — Non-negotiable guardrails (authoritative)
 - `AGENTS/roles.md`      — Agent role definitions and scope boundaries
 - `AGENTS/contracts.md`  — I/O contracts per agent
 
@@ -156,7 +46,7 @@ Full per-agent artifacts live in:
 
 ## Guardrails (Machine-Readable)
 
-> Authoritative version. Applies to ALL agents without exception.
+> Authoritative version lives in `AGENTS/guardrails.md`. If the two diverge, `AGENTS/guardrails.md` wins.
 > GGA enforces these at every code review.
 
 ### G01 — No code without requirement
@@ -277,6 +167,35 @@ required:
 
 ---
 
+## Commit Convention (Agent-Enforced)
+
+All commits must follow **Conventional Commits** format:
+
+```
+<type>[scope]: <short description>
+
+[optional body]
+
+[optional footer — US-XX references]
+```
+
+**Allowed types:**
+
+| Type | When to use |
+|------|------------|
+| `feat` | New application feature |
+| `fix` | Bug fix |
+| `docs` | Documentation changes only |
+| `chore` | Maintenance tasks (deps, config) |
+| `test` | Adding or modifying tests |
+| `refactor` | Restructuring without behavior change |
+| `style` | Formatting, whitespace (no logic change) |
+| `perf` | Performance improvements |
+
+> **G08**: every `feat` commit MUST include the `US-XX` scope.
+
+---
+
 ## Automated Agent Workflows
 
 Agents invoke these workflows via prompt templates in `PROMPTS/`.
@@ -347,21 +266,11 @@ then sync the summary table and G01–G09 blocks in this file.
 
 ## Decisions and Tradeoffs
 
-> Why this file is structured the way it is.
-
 | Decision | Chosen approach | Rationale |
 |----------|----------------|-----------|
-| **Bilingual file** | Spanish for human sections, English for agent sections | User rule: agent content in English; human content in Spanish |
+| **Agent-only root file** | All content in English, agent-only | User rule: root AGENTS.md is exclusively for agent consumption; human docs are separate |
 | **Root AGENTS.md vs AGENTS/ directory** | Both — root has summaries, `AGENTS/` has full content | `.gga` requires `RULES_FILE=AGENTS.md` at root; full content in directory avoids bloating the root file |
 | **Guardrails duplication** | Accepted and documented | Necessary evil to satisfy GGA tooling; mitigated by clear "AGENTS/ wins" policy |
 | **PR checklist as YAML block** | Inline YAML in Markdown | Machine-parseable by GGA without requiring a separate file; human-readable too |
 | **Auto-invoke table** | Lightweight (no skill URLs) | This project doesn't use Prowler's skill URL system; prompt templates live in `PROMPTS/` |
 | **Prowler-inspired structure** | Adapted, not copied | Prowler is a large monorepo; this is a solo DAW project — skill tables and component docs don't apply |
-
----
-
-<!-- ─────────────────────────────────────────────────────────────────────────── -->
-<!-- GGA COMPATIBILITY NOTE                                                      -->
-<!-- .gga: RULES_FILE="AGENTS.md" — this file is the primary rules source.     -->
-<!-- All guardrails G01–G09 are present above in machine-readable form.         -->
-<!-- ─────────────────────────────────────────────────────────────────────────── -->

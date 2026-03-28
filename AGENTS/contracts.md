@@ -1,34 +1,60 @@
-# AGENTS — Contratos de inputs y outputs
+# AGENTS/contracts.md — I/O Contracts per Agent
+
+<!-- AGENT-ONLY (EN) — This file is for AI agent consumption. -->
+
+> Each agent has a bounded set of required inputs and guaranteed outputs.
+> Last updated: 2026-03-28
+
+---
 
 ## COLLECTOR
-Input requerido: contexto de la sesión, prompt de entrevista activo.
-Output garantizado: notas brutas en LOGS/, lista de gaps identificados.
+
+**Required input**: Active session context (project description, constraints); interview prompt script.
+**Guaranteed output**: Raw notes in `LOGS/raw_requirements_YYYY-MM-DD.md`; list of identified gaps (fields marked TODO).
+
+---
 
 ## ARCHITECT
-Input requerido: decisión técnica a documentar (contexto, opciones, criterios).
-Input opcional: SPEC/constraints.md, ADRs existentes para coherencia.
-Output garantizado: ADR en DECISIONS/ con estado PROPOSED | ACCEPTED | SUPERSEDED.
+
+**Required input**: Technical decision to document (context, options, evaluation criteria).
+**Optional input**: `SPEC/constraints.md`; existing ADRs in `DECISIONS/` for consistency.
+**Guaranteed output**: ADR in `DECISIONS/` with status `PROPOSED | ACCEPTED | SUPERSEDED`.
+
+---
 
 ## PLANNER
-Input requerido: SPEC/requirements.md o SPEC/user-stories.md actualizados.
-Input opcional: velocidad estimada, restricciones de tiempo.
-Output garantizado: PLAN/backlog.md actualizado, PLAN/current-sprint.md generado.
+
+**Required input**: Populated `SPEC/requirements.md` or `SPEC/user-stories.md`.
+**Optional input**: Estimated velocity; time constraints.
+**Guaranteed output**: Updated `PLAN/backlog.md`; generated `PLAN/current-sprint.md`.
+
+---
 
 ## DEVELOPER
-Input requerido: user story de SPEC/, ADRs relevantes, TECH_GUIDE.md.
-Input opcional: contexto de código existente, decisiones de sprint.
-Output garantizado: código implementado + notas de implementación para Reviewer.
-Output condicional: propuesta de ADR si tomó una decisión técnica durante la implementación.
+
+**Required input**: User story from `SPEC/user-stories.md`; relevant ADRs; `TECH_GUIDE.md`.
+**Optional input**: Existing code context; sprint decisions and priorities.
+**Guaranteed output**: Implemented code in the project repository; implementation notes for REVIEWER (decisions made, debt detected, TODOs).
+**Conditional output**: Proposed ADR draft if a non-obvious technical decision was made during implementation.
+
+---
 
 ## REVIEWER
-Input requerido: código a revisar, user story asociada, guardrails.md.
-Input opcional: ADRs relevantes, historial de reviews anteriores.
-Output garantizado: decisión (APPROVED | NEEDS_REVISION | BLOCKED) + lista de issues.
+
+**Required input**: Code to review; associated user story from `SPEC/user-stories.md`; `AGENTS/guardrails.md`.
+**Optional input**: Relevant ADRs; prior review history from `LOGS/`.
+**Guaranteed output**: Decision (`APPROVED | NEEDS_REVISION | BLOCKED`) with list of issues (if any); review report in `LOGS/`.
+
+---
 
 ## TESTER
-Input requerido: user story o requisito de SPEC/
-Output garantizado: plan de tests en OUTPUTS/test-plans/ con casos happy path + edge cases.
+
+**Required input**: User story or requirement from `SPEC/`.
+**Guaranteed output**: Test plan in `OUTPUTS/test-plans/test-plan-US-XX.md` with happy path cases and minimum 3 edge cases.
+
+---
 
 ## WRITER
-Input requerido: sección a redactar, fuentes en SPEC/ o DECISIONS/ o código.
-Output garantizado: borrador en OUTPUTS/academic/ o OUTPUTS/technical-docs/.
+
+**Required input**: Section to draft; source material from `SPEC/`, `DECISIONS/`, or code.
+**Guaranteed output**: Draft in `OUTPUTS/academic/` (for DAW memoria sections) OR `OUTPUTS/technical-docs/` (for technical documentation).
