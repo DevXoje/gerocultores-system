@@ -22,10 +22,7 @@
 
 ### ✔️ DONE
 
-| ID | US | Título | Descripción | Tamaño | Prioridad | Sprint |
-|----|----|--------|-------------|--------|-----------|--------|
-| T-CI-01 | — | Crear GitHub Actions CI básico | Workflows `ci.yml` y `firestore-rules-tests.yml` creados en `.github/workflows/` con fallbacks seguros para pre-scaffold | S | P1 | Sprint-0 |
-| T-CI-BP | — | Protección de rama master | Branch protection configurada en GitHub: require PR reviews (1), status checks (CI), no force-push, no delete | XS | P1 | Sprint-0 |
+_Nada completado todavía — backlog regenerado para la migración Vue + Firebase._
 
 ---
 
@@ -61,9 +58,6 @@ _Nada en revisión._
 | T-90 | — | Scaffold Express API wrapper | Nuevo: crear workspace `api/`, bootstrap Express + Admin SDK + middleware base | M | P1 | Sprint-0 |
 | T-91 | — | Configurar Firebase Emulator Suite | Nuevo: emuladores Auth/Firestore + harness de tests para Firestore Rules | S | P1 | Sprint-0 |
 | T-92 | — | Integrar CI para Emulator + Rules | Nuevo: añadir job de CI para levantar emuladores, ejecutar tests de reglas y publicar resultados | M | P1 | Sprint-0 |
-| T-CI-02 | — | Añadir FIREBASE_TOKEN a GitHub Secrets | Generar token con `firebase login:ci` y añadirlo en GitHub → Settings → Secrets. Ver `SECURITY/ci-secret-notes.md` | XS | P1 | Sprint-1 |
-| T-CI-03 | — | Añadir script test:rules a package.json | Crear `tests/rules/` con `@firebase/rules-unit-testing` + script `test:rules` en package.json | S | P1 | Sprint-1 |
-| T-CI-04 | — | Añadir firebase.json y firestore.rules | Ejecutar `firebase init`, commit de `firebase.json` y `firestore.rules` base | S | P1 | Sprint-1 |
 
 ---
 
