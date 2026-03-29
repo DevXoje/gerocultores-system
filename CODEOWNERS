@@ -1,0 +1,28 @@
+# CODEOWNERS — gerocultores-system
+#
+# This file defines code owners for critical paths in the repository.
+# Code owners are automatically requested for review when a pull request
+# modifies files in their owned paths.
+#
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything not matched below
+* @DevXoje
+
+# SDD Artifact directories — critical, require explicit review
+DECISIONS/* @DevXoje
+SPEC/* @DevXoje
+OUTPUTS/* @DevXoje
+PLAN/* @DevXoje
+
+# Security-sensitive files
+SECURITY/* @DevXoje
+
+# Repository governance files
+CONTRIBUTING.md @DevXoje
+CODEOWNERS @DevXoje
+.github/* @DevXoje
+.github/workflows/* @DevXoje
+
+# Pre-commit templates and tooling
+TOOLS/* @DevXoje
