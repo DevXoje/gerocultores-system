@@ -3,4 +3,6 @@
 > README del proyecto, documentación de API, guía de despliegue.
 > Generados por el Writer a partir de SPEC/ y DECISIONS/.
 
-Pendiente de generación tras Fase 5 (stack definido).
+- **Diseño (Stitch ↔ repo)**: [design-source.md](design-source.md)
+
+Pendiente de generación tras Fase 5 (stack definido) para el resto de artefactos técnicos.

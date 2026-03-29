@@ -197,4 +197,14 @@
 **Prioridad**: Could  
 **Estado**: Backlog
 
-*Última actualización: 2026-03-28 — Fase 2 bootstrap: Collector/Structurer*
+<!-- sdd/switch-stack-to-vue-firebase SPEC delta -->
+### Cambios en Criterios de Aceptación (Stack Firebase)
+- **US-01 (Inicio de sesión)**: 
+  - *Modificado CA-4*: La sesión persiste utilizando el SDK de Firebase Auth, manejando el ciclo de vida del token de forma automática en lugar de cookies gestionadas manualmente.
+- **US-02 (Control de acceso por rol)**:
+  - *Añadido CA-5*: Las reglas de seguridad de Firestore (Firestore Rules) rechazan de forma nativa cualquier lectura/escritura en base de datos si el rol en el token (Custom Claims) no coincide con los permisos requeridos.
+- **US-08 (Notificaciones y alertas)**:
+  - *Modificado CA-4*: Las notificaciones push nativas en segundo plano (PWA / Service Workers) quedan fuera del alcance. Las notificaciones se mostrarán in-app únicamente cuando la aplicación esté en primer plano.
+<!-- fin delta -->
+
+*Última actualización: 2026-03-29 — Fase sdd-spec*

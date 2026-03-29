@@ -18,9 +18,13 @@ saber si la decisión sigue siendo válida o si fue un compromiso temporal.
 
 ## Índice de ADRs
 
-| ID     | Título                    | Estado   | Fecha      |
-|--------|---------------------------|----------|------------|
-| ADR-01 | ← primer ADR tras Fase 5  | PROPOSED | [FECHA]    |
+| ID     | Título                                      | Estado   | Fecha      |
+|--------|---------------------------------------------|----------|------------|
+| ADR-01 | Framework Frontend                          | PROPOSED | 2026-03-28 |
+| ADR-02 | Backend y Base de Datos                     | PROPOSED | 2026-03-28 |
+| ADR-03 | Autenticación y Autorización                | PROPOSED | 2026-03-28 |
+| ADR-04 | Despliegue, Infraestructura y RGPD          | PROPOSED | 2026-03-28 |
+| ADR-05 | Stitch como fuente de diseño y exports git  | ACCEPTED | 2026-03-28 |
 
 ## Cómo crear un ADR
 

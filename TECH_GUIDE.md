@@ -38,4 +38,11 @@ TODO: framework de tests, convenciones de nomenclatura de tests, coverage mínim
 | Fetch sin manejo de errores          | Envolver en try/catch con tipo de error  |
 | Componentes de más de 200 líneas     | Dividir en componentes más pequeños      |
 
+## 7. Diseño e implementación UI
+
+- La iteración visual principal ocurre en **Google Stitch** (incl. vía MCP en el IDE).
+- Los **exports** (PNG/WebP/PDF) se versionan en `OUTPUTS/design-exports/` con la convención definida en [ADR-05](DECISIONS/ADR-05-stitch-design-source.md).
+- La **tabla de trazabilidad** Stitch ↔ archivos ↔ historias/SPEC está en [OUTPUTS/technical-docs/design-source.md](OUTPUTS/technical-docs/design-source.md).
+- Al implementar pantallas, alinear la UI con **SPEC/** (comportamiento, campos, flujos) y usar los exports como referencia visual; si el diseño exige un cambio funcional, actualizar SPEC antes de tratarlo como cerrado (G06).
+
 *Última actualización: 2026-03-28*

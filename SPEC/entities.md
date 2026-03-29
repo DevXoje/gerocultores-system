@@ -220,4 +220,23 @@ Notificacion (N) ─── (1) Usuario                                   │
 Incidencia (N) ─── (1) Tarea (opcional)                            │
 ```
 
-*Última actualización: 2026-03-28 — Fase 2 bootstrap: Collector/Structurer*
+*Última actualización: 2026-03-29 — Fase sdd-spec*
+
+<!-- sdd/switch-stack-to-vue-firebase SPEC delta -->
+## Notas de Diseño Firestore
+- **Colecciones Raíz**: `usuarios`, `residentes`, `turnos`, `notificaciones`
+- **Subcolecciones**: `tareas` e `incidencias` anidadas dentro de `residentes` (Ej: `/residentes/{residenteId}/tareas`).
+- **Mapeo IDs**: El `id` de las entidades será el ID del documento en Firestore.
+- **Relaciones N:M (Asignaciones)**: La tabla `ResidenteAsignacion` se puede implementar como un array de `usuarioIds` dentro del documento del `residente` o una subcolección, para facilitar las reglas de seguridad.
+- **Reglas de Seguridad (Firestore Rules)**:
+  - `usuarios`: Lectura solo si `request.auth.uid == resource.id` (o si rol es admin).
+  - `residentes`: Lectura solo si el `request.auth.uid` está en el array de `gerocultoresAsignados` o el rol del usuario es coordinador/admin.
+  - `tareas` e `incidencias`: Lectura/Escritura basadas en el acceso al padre (`residente`).
+- **Test Matrix de Reglas (Firestore)**:
+  - *Escenario*: Gerocultor no autenticado lee residentes -> Denegado
+  - *Escenario*: Gerocultor lee residente no asignado -> Denegado
+  - *Escenario*: Gerocultor lee residente asignado -> Permitido
+  - *Escenario*: Gerocultor actualiza perfil propio -> Permitido
+  - *Escenario*: Coordinador lee cualquier residente -> Permitido
+  - *Escenario*: Gerocultor escribe incidencia de severidad alta -> Permitido (dispara función en backend).
+<!-- fin delta -->

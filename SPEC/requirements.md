@@ -133,4 +133,16 @@
 - **Descripción**: El código debe seguir las convenciones definidas en TECH_GUIDE.md, con linting configurado y al menos un 60% de cobertura de tests en la lógica de negocio.
 - **Criterio de aceptación**: El pipeline de CI no falla en linting. La cobertura de tests es ≥ 60%.
 
-*Última actualización: 2026-03-28 — Fase 2 bootstrap: Collector/Structurer*
+<!-- sdd/switch-stack-to-vue-firebase SPEC delta -->
+### RNF-09 — Seguridad con Firestore Rules
+- **Categoría**: Seguridad / Privacidad
+- **Descripción**: El acceso directo a Firestore desde el cliente debe estar bloqueado o estrictamente limitado mediante Firebase Security Rules. Solo las operaciones permitidas explícitamente podrán ejecutarse.
+- **Criterio de aceptación**: Existe una suite de tests automatizados para las reglas de Firestore que valida accesos permitidos y denegados según el rol.
+
+### RNF-10 — PWA Excluido del Alcance
+- **Categoría**: Alcance
+- **Descripción**: Las capacidades de Progressive Web App (PWA) y el funcionamiento offline quedan explícitamente excluidos del alcance del proyecto para garantizar la entrega en plazo.
+- **Criterio de aceptación**: La aplicación requiere conexión a internet para funcionar. No se implementan Service Workers para caché offline.
+<!-- fin delta -->
+
+*Última actualización: 2026-03-29 — Fase sdd-spec*
