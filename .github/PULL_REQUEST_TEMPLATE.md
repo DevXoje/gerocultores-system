@@ -15,6 +15,16 @@ Leave blank if not an SDD-tracked change.
 
 **topic_key**: `<!-- e.g. sdd/guardrails-improvement -->`
 
+## Reviewer
+
+<!--
+Tag the primary reviewer for this PR.
+For CODEOWNERS-protected paths (DECISIONS/, SPEC/, OUTPUTS/, PLAN/) @DevXoje
+is automatically requested.
+-->
+
+**Reviewer**: @<!-- tag reviewer here -->
+
 ## Type of Change
 
 <!-- Check all that apply -->
@@ -32,8 +42,8 @@ Leave blank if not an SDD-tracked change.
 <!-- All boxes must be checked before requesting review -->
 
 ### Content Safety
-- [ ] No deletions of top-level directories (`DECISIONS/`, `SPEC/`, `OUTPUTS/`, `PLAN/`)
-- [ ] No more than 10 files deleted (if more, explain why below)
+- [ ] No deletions of `AGENTS/`, `DECISIONS/`, `SPEC/`, `OUTPUTS/`, `PLAN/` unless explicitly approved via ADR/issue
+- [ ] No more than 15 files deleted (if more, explain why below)
 - [ ] All modified files are intentional (no accidental staging)
 - [ ] No secrets, credentials, or tokens committed
 
@@ -52,7 +62,7 @@ Leave blank if not an SDD-tracked change.
 - [ ] Self-reviewed the diff — no unintended changes included
 - [ ] Breaking changes documented (if any)
 
-## If More Than 10 Files Were Deleted
+## If More Than 15 Files Were Deleted
 
 <!--
 Explain why the mass-deletion is intentional and has been approved.
