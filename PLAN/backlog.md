@@ -34,7 +34,9 @@ _Nada en progreso activo._
 
 ### 👁 REVIEW
 
-_Nada en revisión._
+| ID | US | Título | Descripción | Tamaño | Prioridad | Sprint |
+|----|----|--------|-------------|--------|-----------|--------|
+| T-REVERT-CHECK | — | Validar revert 114fd5d y merging de guardrails | Verificar completitud de archivos restaurados por revert 61c81a6; revisar y mergear manualmente `guardrails/patch-1` después de revisión; eliminar backup branch `recovery/before-revert-20260329204343` una vez confirmado. Ver `RECOVERY/revert-114fd5d-report.md`. | S | P1 | Sprint-0 |
 
 ---
 
