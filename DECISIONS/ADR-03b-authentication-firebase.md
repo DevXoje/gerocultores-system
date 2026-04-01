@@ -1,14 +1,15 @@
 # ADR-03b: Autenticación con Firebase Auth + Firestore Rules
 
-- **Estado**: DRAFT
+- **Estado**: ACCEPTED
 - **Fecha**: 2026-03-29
+- **Fecha de aceptación**: 2026-04-01
 - **Autor**: Jose Vilches Sánchez
 - **Tutor**: ANDRES MARTOS GAZQUEZ
 - **Centro**: CIPFP Batoi d'Alcoi
 - **Curso**: 2025-2026
 - **Supersede**: ADR-03 (Supabase Auth + RLS)
 
-> ⚠️ **DRAFT — Pendiente aprobación por Jose Vilches Sánchez.**
+> ✅ **ACCEPTED — Aprobado por Jose Vilches Sánchez el 2026-04-01.**
 
 ## Contexto
 
@@ -121,7 +122,7 @@ service cloud.firestore {
 
 ## Nota de aprobación
 
-> **PENDIENTE**: Este ADR requiere aprobación explícita de Jose Vilches Sánchez antes de marcar como ACCEPTED.  
+> **ACCEPTED**: Aprobado por Jose Vilches Sánchez el 2026-04-01.  
 > Fecha de creación: 2026-03-29  
 > Creado por: SDD Design Agent (IA)
 

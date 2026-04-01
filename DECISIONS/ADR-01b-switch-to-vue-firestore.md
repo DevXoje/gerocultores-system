@@ -1,14 +1,15 @@
 # ADR-01b: Switch Frontend a Vue.js + Vite + Tailwind + Pinia + Axios
 
-- **Estado**: DRAFT
+- **Estado**: ACCEPTED
 - **Fecha**: 2026-03-29
+- **Fecha de aceptación**: 2026-04-01
 - **Autor**: Jose Vilches Sánchez
 - **Tutor**: ANDRES MARTOS GAZQUEZ
 - **Centro**: CIPFP Batoi d'Alcoi
 - **Curso**: 2025-2026
 - **Supersede**: ADR-01 (React 18 + Vite + shadcn/ui + TanStack Query)
 
-> ⚠️ **DRAFT — Pendiente aprobación por Jose Vilches Sánchez.**
+> ✅ **ACCEPTED — Aprobado por Jose Vilches Sánchez el 2026-04-01.**
 
 ## Contexto
 
@@ -68,7 +69,7 @@ Se elige **Opción B: Vue 3 + Vite + Pinia + Axios + Tailwind CSS**.
 
 ## Nota de aprobación
 
-> **PENDIENTE**: Este ADR requiere aprobación explícita de Jose Vilches Sánchez antes de marcar como ACCEPTED.  
+> **ACCEPTED**: Aprobado por Jose Vilches Sánchez el 2026-04-01.  
 > Fecha de creación: 2026-03-29  
 > Creado por: SDD Design Agent (IA)
 
