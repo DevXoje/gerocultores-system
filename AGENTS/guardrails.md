@@ -157,9 +157,62 @@ SEVERITY: INCOMPLETE (pipeline-level; does not block code reviews)
 
 ---
 
+## Automated Enforcement
+
+The table below documents which guardrails are **executable** (enforced by Git hooks at commit time)
+vs. **prose-only** (enforced by GGA code review and agent logic only).
+
+| Guardrail | Executable | Hook | How it's enforced |
+|-----------|-----------|------|-------------------|
+| G01 — No code without requirement | ✅ Yes | `pre-commit` | For `feat(US-XX)` commits: verifies `US-XX` exists as a heading in `SPEC/user-stories.md`. BLOCKED if missing. Warning if feat commit lacks US-XX scope. |
+| G02 — No decision without ADR | ⬜ Prose only | — | Enforced by GGA code review and ARCHITECT agent workflow. |
+| G03 — No feature without test plan | ✅ Yes | `pre-commit` | For `feat(US-XX)` commits: verifies `OUTPUTS/test-plans/test-plan-US-XX.md` exists. BLOCKED if missing. Includes pointer to the template. |
+| G04 — Entity consistency | ⬜ Prose only | — | Enforced by GGA and REVIEWER agent field-by-field comparison. |
+| G05 — No hardcoded sensitive values | ✅ Yes | `pre-commit` | Scans ALL staged file diffs for secret patterns (API keys, passwords, connection strings, private keys). BLOCKED immediately if found. |
+| G06 — Scope lock | ⬜ Prose only | — | Enforced by DEVELOPER/PLANNER agents and GGA review. |
+| G07 — No hidden technical debt | ⬜ Prose only | — | Enforced by REVIEWER agent during code review. |
+| G08 — Commit traceability | ✅ Yes | `commit-msg` | Validates Conventional Commits format. Requires `feat(US-XX)` for all `feat` commits. BLOCKED if format is wrong or US-XX is missing from a feat commit. |
+| G09 — Academic coverage | ⬜ Prose only | — | Enforced by WRITER agent pipeline checklist in `OUTPUTS/academic/README.md`. |
+
+### Hook File Locations
+
+Git hooks live in `.git/hooks/` (not committed to the repo — local only).
+To re-install after cloning, run the setup script or copy manually:
+
+```bash
+# After cloning, re-install hooks:
+cp scripts/hooks/pre-commit  .git/hooks/pre-commit  && chmod +x .git/hooks/pre-commit
+cp scripts/hooks/commit-msg  .git/hooks/commit-msg  && chmod +x .git/hooks/commit-msg
+```
+
+> **Note**: `.git/hooks/` is not tracked by git. The canonical hook sources are maintained in
+> `scripts/hooks/` (tracked). When updating a hook, update `scripts/hooks/` first, then copy to `.git/hooks/`.
+
+### Secret Scan Patterns (G05)
+
+The pre-commit hook scans staged diffs for the following patterns (case-sensitive unless noted):
+
+| Pattern | What it catches |
+|---------|----------------|
+| `FIREBASE_API_KEY=` | Firebase Web API key |
+| `FIREBASE_APP_ID=` | Firebase App ID |
+| `apiKey: "AIza...` | Firebase config object literal |
+| `password=<value>` | Hardcoded passwords (not env var references) |
+| `secret=<value>` | Hardcoded secret values |
+| `private_key=` | Private key literals |
+| `DB_PASSWORD=` | Database password env var with value |
+| `DATABASE_URL=..@..` | Connection strings with embedded credentials |
+| `Bearer <token>` | Hardcoded Bearer tokens (≥20 chars) |
+| `-----BEGIN * PRIVATE KEY-----` | PEM-encoded private keys |
+
+`.env.example` files and binary assets are excluded from the scan.
+
+---
+
 ## Enforcement Notes
 
 - GGA reads `AGENTS.md` at repository root (configured via `.gga: RULES_FILE="AGENTS.md"`).
 - Root `AGENTS.md` contains machine-readable G01–G09 blocks that mirror this file.
 - **If root AGENTS.md and this file diverge, this file (`AGENTS/guardrails.md`) wins.**
 - Update protocol: update this file first, then sync the summary in root `AGENTS.md`.
+- Last hook update: 2026-04-01 — Added G01, G03, G05 (pre-commit) and G08 (commit-msg).

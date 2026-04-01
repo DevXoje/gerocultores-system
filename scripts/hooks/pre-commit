@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+# =============================================================================
+# pre-commit hook — gerocultores-system
+# Enforces: G01 (US reference), G03 (test plan), G05 (no secrets)
+# Compatible with bash 3.2+ and zsh on macOS (no mapfile, no bash 4+ features)
+# =============================================================================
+
+# Note: intentionally NOT using set -e here so we can collect all errors first
+# and still exit 1 at the end. set -u catches unbound variables.
+set -uo pipefail
+
+# ---------- Colors -----------------------------------------------------------
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+# ---------- Helpers ----------------------------------------------------------
+error()   { printf "${RED}${BOLD}[BLOCKED]${RESET}  %s\n" "$*" >&2; }
+warn()    { printf "${YELLOW}${BOLD}[WARNING]${RESET}  %s\n" "$*" >&2; }
+success() { printf "${GREEN}${BOLD}[OK]${RESET}       %s\n" "$*"; }
+header()  { printf "\n${BOLD}%s${RESET}\n" "$*"; }
+
+# Track overall failure state
+HOOK_FAILED=0
+
+# ======== GGA START ========
+# Gentleman Guardian Angel - Code Review
+header "── GGA Code Review ──────────────────────────────────"
+gga run || { error "GGA code review failed."; HOOK_FAILED=1; }
+# ======== GGA END ========
+
+# =============================================================================
+# Read context: staged files and pending commit message
+# Note: at pre-commit time COMMIT_EDITMSG may exist for --amend but not for
+# a fresh commit. G01/G03 checks are best-effort here; commit-msg enforces G08.
+# =============================================================================
+
+# Get staged files (newline-separated)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null || true)
+
+# Try to read pending commit message (available on --amend)
+COMMIT_MSG_FILE="${GIT_DIR:-.git}/COMMIT_EDITMSG"
+COMMIT_MSG=""
+if [ -f "$COMMIT_MSG_FILE" ]; then
+  COMMIT_MSG=$(head -1 "$COMMIT_MSG_FILE" 2>/dev/null || true)
+fi
+
+# Extract US-XX IDs from commit message using a while-read loop (bash 3.2 safe)
+# Stores unique IDs space-separated in FEAT_US_IDS_STR
+FEAT_US_IDS_STR=""
+if [ -n "$COMMIT_MSG" ]; then
+  # Use grep -oE iterating over all matches, collect unique values
+  while IFS= read -r us_id; do
+    case " $FEAT_US_IDS_STR " in
+      *" $us_id "*) ;;  # already present
+      *) FEAT_US_IDS_STR="$FEAT_US_IDS_STR $us_id" ;;
+    esac
+  done < <(printf '%s\n' "$COMMIT_MSG" | grep -oE 'US-[0-9]+' || true)
+fi
+FEAT_US_IDS_STR="${FEAT_US_IDS_STR## }"  # trim leading space
+
+# =============================================================================
+# G05 — No hardcoded sensitive values
+# Scans ALL staged file diffs for common secret patterns.
+# BLOCKED severity — fails hard.
+# =============================================================================
+header "── G05: Secrets scan ────────────────────────────────"
+
+SECRET_FOUND=0
+
+# Files to skip (binary, lockfiles, example env files, docs, hook scripts themselves)
+SKIP_EXTENSIONS='\.png$|\.jpg$|\.jpeg$|\.gif$|\.ico$|\.woff|\.ttf|\.eot|\.lock$|package-lock\.json$|\.md$'
+SKIP_FILES='\.env\.example$|\.env\.sample$|scripts/hooks/'
+
+scan_secret() {
+  local file="$1"
+  local pattern="$2"
+  local desc="$3"
+  if git diff --cached -- "$file" | grep -qE "^\+.*${pattern}"; then
+    error "G05 VIOLATION — ${desc} detected in: ${file}"
+    error "       Pattern: ${pattern}"
+    error "       Remove the hardcoded value and use an environment variable instead."
+    error "       Document it in .env.example with a placeholder value."
+    return 1
+  fi
+  return 0
+}
+
+if [ -n "$STAGED_FILES" ]; then
+  while IFS= read -r file; do
+    [ -f "$file" ] || continue
+    printf '%s\n' "$file" | grep -qE "$SKIP_EXTENSIONS" && continue
+    printf '%s\n' "$file" | grep -qE "$SKIP_FILES" && continue
+
+    scan_secret "$file" 'FIREBASE_API_KEY[[:space:]]*=' 'Firebase API key' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'FIREBASE_APP_ID[[:space:]]*=' 'Firebase App ID' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'apiKey[[:space:]]*:[[:space:]]*"AIza' 'Firebase config apiKey literal' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'password[[:space:]]*=[[:space:]]*[^$\{]' 'Hardcoded password' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'PASSWORD[[:space:]]*=[[:space:]]*[^$\{]' 'Hardcoded PASSWORD' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'secret[[:space:]]*=[[:space:]]*[^$\{]' 'Hardcoded secret' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'SECRET[[:space:]]*=[[:space:]]*[^$\{]' 'Hardcoded SECRET' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'private_key[[:space:]]*=' 'Private key value' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'PRIVATE_KEY[[:space:]]*=' 'Private key value' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'DB_PASSWORD[[:space:]]*=' 'Database password' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'DATABASE_URL[[:space:]]*=.*@' 'Database URL with credentials' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'connectionString[[:space:]]*=.*://' 'Connection string with credentials' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" 'Bearer[[:space:]]+[A-Za-z0-9_.-]{20,}' 'Hardcoded Bearer token' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+    scan_secret "$file" '-----BEGIN.*PRIVATE KEY-----' 'PEM private key' || { SECRET_FOUND=1; HOOK_FAILED=1; }
+  done <<< "$STAGED_FILES"
+fi
+
+if [ "$SECRET_FOUND" -eq 0 ]; then
+  success "G05 — No secret patterns detected in staged changes."
+fi
+
+# =============================================================================
+# G01 — No code without requirement
+# For feat(US-XX) commits: verify US-XX exists in SPEC/user-stories.md.
+# Non-feat commits → warning only.
+# =============================================================================
+header "── G01: US reference check ──────────────────────────"
+
+USER_STORIES_FILE="SPEC/user-stories.md"
+
+if [ -n "$FEAT_US_IDS_STR" ]; then
+  if [ ! -f "$USER_STORIES_FILE" ]; then
+    error "G01 VIOLATION — $USER_STORIES_FILE not found."
+    error "       Cannot verify US references. Ensure SPEC/ directory is committed."
+    HOOK_FAILED=1
+  else
+    for us_id in $FEAT_US_IDS_STR; do
+      # Look for the US-XX heading in user-stories.md (### US-01 — ...)
+      if grep -qE "^###[[:space:]]+${us_id}([[:space:]]|$)" "$USER_STORIES_FILE"; then
+        success "G01 — ${us_id} found in ${USER_STORIES_FILE}."
+      else
+        error "G01 VIOLATION — ${us_id} does NOT exist in ${USER_STORIES_FILE}."
+        error "       Add a user story entry for ${us_id} before committing this feature."
+        error "       See AGENTS/guardrails.md § G01 for the required format."
+        HOOK_FAILED=1
+      fi
+    done
+  fi
+elif [ -n "$COMMIT_MSG" ]; then
+  if printf '%s\n' "$COMMIT_MSG" | grep -qE '^feat'; then
+    warn "G01 — feat commit detected but no US-XX reference found in message."
+    warn "       Consider using: feat(US-XX): description  (see G08)"
+    warn "       Proceeding with warning — add the US reference for full compliance."
+  else
+    success "G01 — Non-feat commit. US reference check skipped."
+  fi
+else
+  success "G01 — No commit message available yet. US reference check deferred to commit-msg hook."
+fi
+
+# =============================================================================
+# G03 — No feature without test plan
+# For feat(US-XX) commits: verify OUTPUTS/test-plans/test-plan-US-XX.md exists.
+# Non-feat commits → no check.
+# =============================================================================
+header "── G03: Test plan check ─────────────────────────────"
+
+TEST_PLANS_DIR="OUTPUTS/test-plans"
+
+if [ -n "$FEAT_US_IDS_STR" ]; then
+  for us_id in $FEAT_US_IDS_STR; do
+    TEST_PLAN_FILE="${TEST_PLANS_DIR}/test-plan-${us_id}.md"
+    if [ -f "$TEST_PLAN_FILE" ]; then
+      success "G03 — Test plan found: ${TEST_PLAN_FILE}"
+    else
+      error "G03 VIOLATION — No test plan found for ${us_id}."
+      error "       Missing file: ${TEST_PLAN_FILE}"
+      error "       Ask the TESTER agent to generate it: 'Create test plan for ${us_id}'"
+      error "       Template available at: ${TEST_PLANS_DIR}/test-plan-template.md"
+      HOOK_FAILED=1
+    fi
+  done
+elif [ -n "$COMMIT_MSG" ] && printf '%s\n' "$COMMIT_MSG" | grep -qE '^feat'; then
+  warn "G03 — feat commit without US-XX reference. Test plan check skipped."
+  warn "       Add US-XX to commit message for full G03 enforcement."
+else
+  success "G03 — Non-feat commit. Test plan check skipped."
+fi
+
+# =============================================================================
+# Final result
+# =============================================================================
+header "── Result ───────────────────────────────────────────"
+
+if [ "$HOOK_FAILED" -ne 0 ]; then
+  printf "\n${RED}${BOLD}✗ Pre-commit hook FAILED. Fix the violations above before committing.${RESET}\n\n" >&2
+  exit 1
+fi
+
+printf "${GREEN}${BOLD}✓ All pre-commit checks passed.${RESET}\n\n"
+exit 0

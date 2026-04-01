@@ -249,6 +249,9 @@ mem_context: call at session start to recover prior context
 mem_session_summary: call before ending any session (mandatory)
 ```
 
+> **Canonical topic_key list and anti-patterns**: `AGENTS/engram-conventions.md`
+> All agents MUST follow the keys defined there. Do NOT invent variants.
+
 ---
 
 ## Duplication Policy

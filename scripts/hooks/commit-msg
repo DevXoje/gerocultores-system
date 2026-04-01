@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# =============================================================================
+# commit-msg hook — gerocultores-system
+# Enforces: G08 (Commit traceability — feat(US-XX): description format)
+# Compatible with bash/zsh on macOS
+# =============================================================================
+
+# ---------- Colors -----------------------------------------------------------
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+error()   { echo -e "${RED}${BOLD}[BLOCKED]${RESET}  $*" >&2; }
+warn()    { echo -e "${YELLOW}${BOLD}[WARNING]${RESET}  $*" >&2; }
+success() { echo -e "${GREEN}${BOLD}[OK]${RESET}       $*"; }
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(head -1 "$COMMIT_MSG_FILE")
+
+# =============================================================================
+# Conventional Commits format check
+# Allowed types: feat, fix, docs, chore, test, refactor, style, perf
+# =============================================================================
+
+ALLOWED_TYPES="feat|fix|docs|chore|test|refactor|style|perf"
+
+# Full conventional commit pattern (type(scope)!: description or type: description)
+CONVENTIONAL_PATTERN="^(${ALLOWED_TYPES})(\([^)]+\))?(!)?: .{1,}"
+
+if ! echo "$COMMIT_MSG" | grep -qE "$CONVENTIONAL_PATTERN"; then
+  error "G08 VIOLATION — Commit message does not follow Conventional Commits format."
+  error "       Got:      ${COMMIT_MSG}"
+  error "       Expected: <type>(<scope>): <description>"
+  error "       Types:    feat, fix, docs, chore, test, refactor, style, perf"
+  error "       Example:  feat(US-01): add login form with Firebase Auth"
+  error "       Example:  fix(US-03): correct agenda sort order"
+  error "       Example:  chore: update dependencies"
+  echo "" >&2
+  exit 1
+fi
+
+# =============================================================================
+# G08 — feat commits MUST reference a US-XX
+# Non-blocking for non-feat types, but warn if no US reference in feat commits.
+# =============================================================================
+
+COMMIT_TYPE=$(echo "$COMMIT_MSG" | grep -oE "^(${ALLOWED_TYPES})" || true)
+
+if [[ "$COMMIT_TYPE" == "feat" ]]; then
+  # Extract US-XX from scope or anywhere in the first line
+  if echo "$COMMIT_MSG" | grep -qE 'US-[0-9]+'; then
+    US_ID=$(echo "$COMMIT_MSG" | grep -oE 'US-[0-9]+' | head -1)
+    success "G08 — feat commit with US reference: ${US_ID}  ✓"
+  else
+    error "G08 VIOLATION — feat commit must reference a user story."
+    error "       Got:      ${COMMIT_MSG}"
+    error "       Required: feat(US-XX): description"
+    error "       Find your US-XX in SPEC/user-stories.md"
+    error "       If no user story exists yet, create one first (see G01)."
+    echo "" >&2
+    exit 1
+  fi
+else
+  # Non-feat: check for US reference and warn if present but wrong type
+  if echo "$COMMIT_MSG" | grep -qE 'US-[0-9]+'; then
+    warn "G08 — US reference found in non-feat commit. This is allowed but unusual."
+  fi
+  success "G08 — ${COMMIT_TYPE} commit. US reference not required."
+fi
+
+echo -e "${GREEN}${BOLD}✓ Commit message is valid.${RESET}"
+exit 0
