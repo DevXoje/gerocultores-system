@@ -27,6 +27,8 @@
 **Requisitos relacionados**: RF-01  
 **Prioridad**: Must  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/51613e717e324fd2947120c78dde6843 — App Shell - Main Layout
 
 ---
 
@@ -42,6 +44,8 @@
 **Requisitos relacionados**: RF-02  
 **Prioridad**: Must  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/d79132c34a284096acaaf9360496a812 — Dashboard - Refined v2
 
 ---
 
@@ -58,6 +62,8 @@
 **Requisitos relacionados**: RF-03  
 **Prioridad**: Must  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/17cbe20cf2da4058bd1671293d2551b5 — Daily Agenda
 
 ---
 
@@ -74,6 +80,8 @@
 **Requisitos relacionados**: RF-04  
 **Prioridad**: Must  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/fd70b595b29344339f770edc74f2d285 — Task Detail - Medication Round
 
 ---
 
@@ -90,6 +98,8 @@
 **Requisitos relacionados**: RF-05  
 **Prioridad**: Must  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/97b3ca0415b44f2eb58f515c1e031775 — Resident Detail - Eleanor Vance
 
 ---
 
@@ -107,6 +117,8 @@
 **Requisitos relacionados**: RF-06  
 **Prioridad**: Must  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/64976b271900435fbe1c86076551598d — New Incident Form - Serenity Care
 
 ---
 
@@ -123,6 +135,8 @@
 **Requisitos relacionados**: RF-07  
 **Prioridad**: Must  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/6d605871fdb340a4903ad2402167875e — Incidents Log - Serenity Care
 
 ---
 
@@ -138,6 +152,8 @@
 **Requisitos relacionados**: RF-08  
 **Prioridad**: Should  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/6e70d605ff3c4b20acd4b3b405782c08 — Critical Alerts - Serenity Care
 
 ---
 
@@ -153,6 +169,8 @@
 **Requisitos relacionados**: RF-09  
 **Prioridad**: Should  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/b21c6314296342708a666893b69b3f12 — Resident Records
 
 ---
 
@@ -168,6 +186,8 @@
 **Requisitos relacionados**: RF-10  
 **Prioridad**: Should  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/4fc0ca8a7f1b44a6a6f628be60a8aef3 — Caregiver Dashboard
 
 ---
 
@@ -182,6 +202,8 @@
 **Requisitos relacionados**: RF-11  
 **Prioridad**: Should  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/4fc0ca8a7f1b44a6a6f628be60a8aef3 — Caregiver Dashboard
 
 ---
 
@@ -196,6 +218,8 @@
 **Requisitos relacionados**: RF-12  
 **Prioridad**: Could  
 **Estado**: Backlog
+\
+Design (Stitch): projects/16168255182252500555/screens/9ef30860ae9e4a3fa1487d82e46137af — Daily Agenda - Care Management
 
 <!-- sdd/switch-stack-to-vue-firebase SPEC delta -->
 ### Cambios en Criterios de Aceptación (Stack Firebase)
