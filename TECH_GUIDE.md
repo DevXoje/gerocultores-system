@@ -27,38 +27,38 @@
 ### 1.2 Estructura de carpetas
 
 ```
-frontend/
-├── src/
-│   ├── assets/             # Imágenes estáticas, fuentes
-│   ├── components/
-│   │   ├── atoms/          # Botones, inputs, badges (sin lógica de dominio)
-│   │   ├── molecules/      # Combinaciones de atoms (tarjeta de tarea, etc.)
-│   │   └── organisms/      # Secciones completas (agenda, formulario incidencia)
-│   ├── composables/        # Lógica reutilizable (useAuth, useAgenda, etc.)
-│   ├── router/             # Vue Router 4 — index.ts + guards.ts
-│   ├── services/           # Axios calls a la Express API
-│   ├── stores/             # Pinia stores (un store por dominio)
-│   ├── types/              # Interfaces TypeScript (espejo de SPEC/entities.md)
-│   ├── views/              # Vistas/páginas (una por ruta principal)
-│   ├── App.vue
-│   └── main.ts
-├── public/
-├── index.html
-├── vite.config.ts
-├── tailwind.config.ts
-└── tsconfig.json
-
-api/
-├── src/
-│   ├── controllers/        # Handlers HTTP (request → response)
-│   ├── middleware/         # verifyAuth, errorHandler, validateBody
-│   ├── routes/             # Express Router (index.ts + modular)
-│   ├── services/           # Lógica de negocio (acceso a Firestore)
-│   └── types/              # Tipos compartidos (espejo de SPEC/entities.md)
-├── app.ts                  # Configuración Express
-├── server.ts               # Punto de entrada (puerto, listen)
-├── package.json
-└── tsconfig.json
+code/
+├── frontend/
+│   ├── src/
+│   │   ├── assets/             # Imágenes estáticas, fuentes
+│   │   ├── components/
+│   │   │   ├── atoms/          # Botones, inputs, badges (sin lógica de dominio)
+│   │   │   ├── molecules/      # Combinaciones de atoms (tarjeta de tarea, etc.)
+│   │   │   └── organisms/      # Secciones completas (agenda, formulario incidencia)
+│   │   ├── composables/        # Lógica reutilizable (useAuth, useAgenda, etc.)
+│   │   ├── router/             # Vue Router 4 — index.ts + guards.ts
+│   │   ├── services/           # Axios calls a la Express API
+│   │   ├── stores/             # Pinia stores (un store por dominio)
+│   │   ├── types/              # Interfaces TypeScript (espejo de SPEC/entities.md)
+│   │   ├── views/              # Vistas/páginas (una por ruta principal)
+│   │   ├── App.vue
+│   │   └── main.ts
+│   ├── public/
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   └── tsconfig.json
+└── api/
+    ├── src/
+    │   ├── controllers/        # Handlers HTTP (request → response)
+    │   ├── middleware/         # verifyAuth, errorHandler, validateBody
+    │   ├── routes/             # Express Router (index.ts + modular)
+    │   ├── services/           # Lógica de negocio (acceso a Firestore)
+    │   └── types/              # Tipos compartidos (espejo de SPEC/entities.md)
+    ├── app.ts                  # Configuración Express
+    ├── server.ts               # Punto de entrada (puerto, listen)
+    ├── package.json
+    └── tsconfig.json
 
 firebase/
 ├── firestore.rules         # Reglas de seguridad Firestore
@@ -68,7 +68,7 @@ firebase/
 
 ### 1.3 Convenciones de imports
 
-- Usar imports absolutos con alias `@/` para el código de `frontend/src/`.
+- Usar imports absolutos con alias `@/` para el código de `code/frontend/src/`.
 - Los tipos compartidos se importan desde `@/types/`.
 - Los servicios **nunca** se importan directamente en componentes — siempre a través de un store o composable.
 
@@ -281,16 +281,16 @@ export async function verifyAuth(req: Request, res: Response, next: NextFunction
 
 ```bash
 # Frontend — tests unitarios
-cd frontend && npm run test
+cd code/frontend && npm run test
 
 # Frontend — coverage
-cd frontend && npm run test:coverage
+cd code/frontend && npm run test:coverage
 
 # E2E (requiere servidor activo)
-cd frontend && npx playwright test
+cd code/frontend && npx playwright test
 
 # API — tests unitarios
-cd api && npm run test
+cd code/api && npm run test
 ```
 
 ---
@@ -309,7 +309,7 @@ cd api && npm run test
 
 ### 5.2 Variables de entorno
 
-**Frontend** (`frontend/.env.local`):
+    **Frontend** (`code/frontend/.env.local`):
 ```
 VITE_API_URL=http://localhost:3000
 VITE_FIREBASE_API_KEY=...
@@ -318,13 +318,14 @@ VITE_FIREBASE_PROJECT_ID=...
 VITE_FIREBASE_APP_ID=...
 ```
 
-**API** (`api/.env`):
+**API** (`code/api/.env`):
 ```
 FIREBASE_PROJECT_ID=...
 FIREBASE_CLIENT_EMAIL=...
 FIREBASE_PRIVATE_KEY=...
 PORT=3000
 NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
 ```
 
 > **G05**: Ninguna de estas variables aparece en el código fuente. Los archivos `.env` están en `.gitignore`.
@@ -379,10 +380,10 @@ NODE_ENV=development
 
 ```bash
 # Instalar dependencias del frontend
-cd frontend && npm install
+cd code/frontend && npm install
 
 # Instalar dependencias de la API
-cd api && npm install
+cd code/api && npm install
 
 # Instalar Firebase CLI (global)
 npm install -g firebase-tools
@@ -398,10 +399,10 @@ firebase emulators:start
 
 ```bash
 # Frontend (Vite dev server en http://localhost:5173)
-cd frontend && npm run dev
+cd code/frontend && npm run dev
 
 # API (Express en http://localhost:3000)
-cd api && npm run dev
+cd code/api && npm run dev
 
 # Firebase emulators (Auth: 9099, Firestore: 8080, Emulator UI: 4000)
 firebase emulators:start
@@ -411,10 +412,10 @@ firebase emulators:start
 
 ```bash
 # Build del frontend
-cd frontend && npm run build
+cd code/frontend && npm run build
 
 # Build de la API
-cd api && npm run build
+cd code/api && npm run build
 
 # Deploy completo a Firebase Hosting + Functions (si aplica)
 firebase deploy
@@ -429,8 +430,8 @@ firebase deploy --only firestore:rules
 ### 8.4 Type checking
 
 ```bash
-cd frontend && npm run type-check
-cd api && npx tsc --noEmit
+cd code/frontend && npm run type-check
+cd code/api && npx tsc --noEmit
 ```
 
 ---

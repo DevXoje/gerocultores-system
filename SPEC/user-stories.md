@@ -221,6 +221,25 @@ Design (Stitch): projects/16168255182252500555/screens/4fc0ca8a7f1b44a6a6f628be6
 \
 Design (Stitch): projects/16168255182252500555/screens/9ef30860ae9e4a3fa1487d82e46137af — Daily Agenda - Care Management
 
+---
+
+### US-13 — Verificación de disponibilidad de la API (Health Check)
+**Como** operador o sistema de monitorización, **quiero** poder consultar el estado operativo de la API mediante un endpoint público, **para** comprobar que el servicio está disponible antes de usarlo o como parte de un pipeline de despliegue.
+
+**Criterios de aceptación**:
+- [ ] CA-1: `GET /health` devuelve HTTP 200.
+- [ ] CA-2: El cuerpo de la respuesta es `{ "status": "ok", "timestamp": "<ISO-8601>" }`.
+- [ ] CA-3: El endpoint no requiere autenticación (es público).
+- [ ] CA-4: El timestamp reflejado es generado en el servidor (no en el cliente).
+- [ ] CA-5: El endpoint responde en menos de 200 ms bajo condiciones normales.
+
+**Requisitos relacionados**: RF-infra-01 (infraestructura — no funcional)  
+**Prioridad**: Must  
+**Estado**: Done  
+**Notas**: El handler está implementado en `code/api/src/routes/index.ts`. Esta user story documenta el comportamiento existente y habilita el guardrail G03.
+
+---
+
 <!-- sdd/switch-stack-to-vue-firebase SPEC delta -->
 ### Cambios en Criterios de Aceptación (Stack Firebase)
 - **US-01 (Inicio de sesión)**: 

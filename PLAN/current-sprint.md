@@ -49,8 +49,8 @@
 
 Para que el Sprint-0 se considere completado, deben cumplirse **todos** los criterios:
 
-- [ ] `npm run dev` en `frontend/` arranca sin errores en `localhost:5173`
-- [ ] `npm run build` en `frontend/` completa sin errores
+- [ ] `npm run dev` en `code/frontend/` arranca sin errores en `localhost:5173`
+- [ ] `npm run build` en `code/frontend/` completa sin errores
 - [ ] Pantalla `/login` funcional contra Firebase Auth Emulator
 - [ ] Store Pinia `auth` mantiene estado de sesión entre rutas
 - [ ] `GET /health` en la API Express responde `200`
@@ -58,7 +58,7 @@ Para que el Sprint-0 se considere completado, deben cumplirse **todos** los crit
 - [ ] `firebase emulators:start` arranca Auth + Firestore sin errores
 - [ ] `OUTPUTS/test-plans/test-plan-US-01.md` existe y está completo
 - [ ] App desplegada en Firebase Hosting (rama `develop`)
-- [ ] `frontend/.env.example` y `api/.env.example` documentan todas las variables necesarias
+- [ ] `code/frontend/.env.example` y `code/api/.env.example` documentan todas las variables necesarias
 - [ ] No hay secretos ni credenciales reales en el repositorio
 
 ---
