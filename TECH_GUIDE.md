@@ -26,23 +26,41 @@
 
 ### 1.2 Estructura de carpetas
 
+> **Frontend** sigue una arquitectura DDD (Domain-Driven Design). Ver sección 10 para la descripción detallada de cada capa.
+
 ```
 code/
 ├── firebase.json           # Configuración Firebase (hosting, firestore, emulators)
 ├── .firebaserc             # Alias del proyecto Firebase
 ├── frontend/
 │   ├── src/
-│   │   ├── assets/             # Imágenes estáticas, fuentes
-│   │   ├── components/
-│   │   │   ├── atoms/          # Botones, inputs, badges (sin lógica de dominio)
-│   │   │   ├── molecules/      # Combinaciones de atoms (tarjeta de tarea, etc.)
-│   │   │   └── organisms/      # Secciones completas (agenda, formulario incidencia)
-│   │   ├── composables/        # Lógica reutilizable (useAuth, useAgenda, etc.)
+│   │   ├── assets/
+│   │   │   └── styles/         # Resets globales, variables CSS, tokens de diseño
+│   │   ├── business/           # ← Arquitectura DDD por módulo de dominio
+│   │   │   ├── residents/      #   Módulo de residentes
+│   │   │   ├── schedule/       #   Módulo de agenda/tareas
+│   │   │   ├── incidents/      #   Módulo de incidencias
+│   │   │   └── {module}/
+│   │   │       ├── domain/
+│   │   │       │   ├── entities/       # TypeScript interfaces + Zod schemas
+│   │   │       │   ├── value-objects/  # Primitivos de dominio inmutables
+│   │   │       │   └── repositories/  # Interfaces de repositorio (puertos)
+│   │   │       ├── application/        # Casos de uso (sin dependencias de framework)
+│   │   │       ├── infrastructure/
+│   │   │       │   ├── repositories/  # Implementaciones Firebase
+│   │   │       │   └── mappers/       # Datos Firebase → entidad de dominio
+│   │   │       └── presentation/
+│   │   │           ├── atoms/         # Button, Input, Badge...
+│   │   │           ├── molecules/     # ResidentCard, IncidentRow...
+│   │   │           ├── pages/         # Vistas completas (una por ruta)
+│   │   │           └── composables/   # Puente componentes ↔ stores/repos
+│   │   ├── shared/
+│   │   │   ├── ui/             # Atoms/molecules verdaderamente cross-módulo
+│   │   │   ├── composables/    # Composables verdaderamente compartidos
+│   │   │   ├── types/          # Tipos TypeScript compartidos
+│   │   │   └── utils/          # Funciones utilitarias puras
+│   │   ├── stores/             # Solo estado global (ej: auth). Estado de módulo va en business/{module}/
 │   │   ├── router/             # Vue Router 4 — index.ts + guards.ts
-│   │   ├── services/           # Axios calls a la Express API
-│   │   ├── stores/             # Pinia stores (un store por dominio)
-│   │   ├── types/              # Interfaces TypeScript (espejo de SPEC/entities.md)
-│   │   ├── views/              # Vistas/páginas (una por ruta principal)
 │   │   ├── App.vue
 │   │   └── main.ts
 │   ├── public/
@@ -66,15 +84,22 @@ code/
 ### 1.3 Convenciones de imports
 
 - Usar imports absolutos con alias `@/` para el código de `code/frontend/src/`.
-- Los tipos compartidos se importan desde `@/types/`.
-- Los servicios **nunca** se importan directamente en componentes — siempre a través de un store o composable.
+- Los tipos compartidos se importan desde `@/shared/types/` o desde la carpeta `domain/entities/` del módulo.
+- Los componentes **nunca** importan stores o repositorios directamente — siempre a través de un composable de `presentation/composables/`.
 
 ```typescript
-// ✅ Correcto
-import { useAuthStore } from '@/stores/useAuthStore'
-import type { Residente } from '@/types/residente.types'
+// ✅ Correcto — componente importa solo composable
+import { useResidents } from '../composables/useResidents'
+import type { Resident } from '../../domain/entities/resident.schema'
 
-// ❌ Incorrecto
+// ✅ Correcto — composable importa store y repo
+import { useResidentsStore } from '@/stores/useResidentsStore'
+import { FirebaseResidentRepository } from '../../infrastructure/repositories/FirebaseResidentRepository'
+
+// ❌ Incorrecto — componente importa store directamente
+import { useResidentsStore } from '@/stores/useResidentsStore'
+
+// ❌ Incorrecto — componente importa servicio/repo directamente
 import residenteService from '../../services/residenteService'
 ```
 
@@ -93,58 +118,76 @@ import residenteService from '../../services/residenteService'
 
 ### 2.1 Patrón de store
 
-Cada dominio tiene su propio store. Estructura estándar:
+Cada módulo de dominio tiene su propio store en `business/{module}/` si el estado es específico del módulo. Solo el estado verdaderamente global (autenticación, notificaciones globales) va en `src/stores/`.
+
+**Regla crítica**: Los stores solo contienen estado + getters + mutaciones básicas. **Nunca** llaman a Firebase directamente ni contienen lógica de negocio — eso va en composables o casos de uso.
 
 ```typescript
-// stores/useAgendaStore.ts
+// stores/useResidentsStore.ts  (o business/residents/store/useResidentsStore.ts)
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Tarea } from '@/types/tarea.types'
-import { tareaService } from '@/services/tareaService'
+import type { Resident } from '@/business/residents/domain/entities/resident.schema'
 
-export const useAgendaStore = defineStore('agenda', () => {
-  // --- State ---
-  const tareas = ref<Tarea[]>([])
-  const cargando = ref(false)
+export const useResidentsStore = defineStore('residents', () => {
+  // --- State (solo estado reactivo) ---
+  const residents = ref<Resident[]>([])
+  const loading = ref(false)
   const error = ref<string | null>(null)
 
-  // --- Getters ---
-  const tareasPendientes = computed(() =>
-    tareas.value.filter(t => t.estado === 'pendiente')
+  // --- Getters (computed derivados del estado) ---
+  const activeResidents = computed(() =>
+    residents.value.filter(r => r.active)
   )
 
-  // --- Actions ---
-  async function obtenerTareasHoy() {
-    cargando.value = true
-    error.value = null
-    try {
-      tareas.value = await tareaService.getTareasHoy()
-    } catch (e) {
-      error.value = 'Error al cargar las tareas'
-    } finally {
-      cargando.value = false
+  // --- Mutations (mutaciones síncronas simples — sin lógica de negocio) ---
+  function setResidents(data: Resident[]): void {
+    residents.value = data
+  }
+
+  function updateResident(id: string, patch: Partial<Resident>): void {
+    const idx = residents.value.findIndex(r => r.id === id)
+    if (idx !== -1) {
+      residents.value[idx] = { ...residents.value[idx], ...patch }
     }
   }
 
-  return { tareas, cargando, error, tareasPendientes, obtenerTareasHoy }
+  function setLoading(val: boolean): void {
+    loading.value = val
+  }
+
+  function setError(msg: string | null): void {
+    error.value = msg
+  }
+
+  return {
+    residents,
+    loading,
+    error,
+    activeResidents,
+    setResidents,
+    updateResident,
+    setLoading,
+    setError,
+  }
 })
 ```
 
 ### 2.2 Stores disponibles
 
-| Store | Dominio | Responsabilidad |
-|-------|---------|----------------|
-| `useAuthStore` | Autenticación | Usuario actual, token, rol, login/logout |
-| `useAgendaStore` | Agenda | Tareas del día, actualizaciones de estado |
-| `useResidenteStore` | Residentes | Fichas, búsqueda, CRUD (coordinador) |
-| `useIncidenciaStore` | Incidencias | Registro, historial, filtros |
-| `useNotificacionStore` | Notificaciones | Alertas in-app, marcado como leído |
+| Store | Ubicación | Dominio | Responsabilidad |
+|-------|-----------|---------|----------------|
+| `useAuthStore` | `src/stores/` | Autenticación | Usuario actual, token, rol |
+| `useResidentsStore` | `business/residents/` | Residentes | Lista, estado de carga |
+| `useScheduleStore` | `business/schedule/` | Agenda | Tareas del día, actualizaciones |
+| `useIncidentsStore` | `business/incidents/` | Incidencias | Registro, historial |
+| `useNotificationsStore` | `src/stores/` | Notificaciones | Alertas globales in-app |
 
 ### 2.3 Reglas de estado
 
-- El estado de la UI (modal abierto, tab activo) **no** va en Pinia — va en `ref` local del componente.
-- El estado de carga (`cargando`) y error (`error`) siempre se incluyen en el store.
-- Las acciones del store son siempre `async` y nunca propagan errores — los capturan y los guardan en `error`.
+- El estado de la UI (modal abierto, tab activo) **no** va en Pinia — va en `ref` local del componente o composable.
+- Los stores **nunca** hacen llamadas async a Firebase — eso es responsabilidad del composable.
+- Los stores **nunca** contienen lógica de negocio — solo mutaciones de datos.
+- Las acciones async viven en los composables de `presentation/composables/`.
 
 ---
 
@@ -253,26 +296,32 @@ export async function verifyAuth(req: Request, res: Response, next: NextFunction
 
 **Referencia ADR**: ADR-01b (framework decidido)
 
+> **TDD es obligatorio**: escribir el test primero (RED), luego implementar (GREEN), luego refactorizar. Ver sección 10.7 para la metodología completa.
+
 ### 4.1 Frameworks
 
 | Nivel | Framework | Uso |
 |-------|-----------|-----|
-| Unit | Vitest + Vue Test Utils | Composables, stores, services, componentes |
+| Unit | Vitest + Vue Test Utils | Composables, stores, use cases, domain entities, utils |
 | E2E | Playwright | Flujos críticos de usuario (login, agenda, incidencias) |
 | Manual | Guías en `OUTPUTS/test-plans/` | Casos de uso completos, UX táctil |
 
 ### 4.2 Convenciones de nomenclatura
 
-- Tests unitarios: `nombreDelArtefacto.spec.ts` junto al archivo que testea.
+- Tests unitarios: `nombreDelArtefacto.spec.ts` junto al archivo que testea (co-location).
 - Tests E2E: `tests/e2e/nombreDelFlujo.spec.ts`.
-- Describe por comportamiento: `describe('useAuthStore', () => { it('should logout when token expires', ...) })`.
+- Describe por comportamiento: `describe('ResidentCard', () => { it('should display name when active', ...) })`.
+- Usar `vi.mock` para mockear stores y repositorios en tests de composables.
 
 ### 4.3 Coverage mínimo (MVP)
 
-- Composables: ≥ 80%
-- Stores (lógica de acciones): ≥ 70%
-- Services: mocking de Axios, todos los paths (200, 4xx, 5xx)
-- Componentes: smoke test + props principales
+| Capa | Coverage mínimo |
+|------|----------------|
+| `domain/` (entities, schemas, value-objects) | ≥ 80% líneas |
+| `application/` (use cases) | ≥ 80% líneas |
+| `presentation/composables/` | ≥ 70% líneas |
+| `infrastructure/repositories/` | Todos los paths (mock de Firestore) |
+| `presentation/molecules/` y `atoms/` | Smoke test + props principales |
 
 ### 4.4 Comandos de test
 
@@ -339,16 +388,21 @@ CORS_ORIGIN=http://localhost:5173
 
 | Anti-patrón | Alternativa |
 |-------------|-------------|
-| Lógica de negocio en componentes Vue | Separar en composables o stores |
+| Lógica de negocio en componentes Vue | Extraer a composable o caso de uso |
 | Llamadas directas a Firestore desde el frontend | Usar la Express API (excepto listeners tiempo real explícitamente decididos) |
 | Hardcodear IDs, rutas o claves de configuración | Usar `import.meta.env.VITE_*` o `process.env.*` |
-| Fetch / Axios sin manejo de errores | Envolver en try/catch; stores capturan errores |
-| Componentes de más de 200 líneas | Dividir en componentes más pequeños (Atomic Design) |
-| Importar services directamente en componentes | Siempre a través de un store o composable |
+| Fetch / Axios sin manejo de errores | Envolver en try/catch; composables capturan errores y actualizan el store |
+| Componentes de más de 200 líneas | Dividir en componentes más pequeños siguiendo el Atomic Design del módulo |
+| Importar stores directamente en componentes `.vue` | Siempre a través de un composable de `presentation/composables/` |
 | Usar `v-html` con datos del servidor | Riesgo de XSS; escapar o sanitizar siempre |
 | Queries Firestore sin índices en producción | Definir índices en `firestore.indexes.json` |
 | Token Firebase en localStorage | El SDK lo gestiona en memoria automáticamente |
 | Custom Claims actualizados sin forzar refresh del token | Forzar con `user.getIdToken(true)` después de cambiar claims |
+| `any` en TypeScript | Usar `unknown` + narrowing explícito |
+| Type assertions `as X` fuera de type guards | Crear función `assertIsX(val: unknown): asserts val is X` con Zod |
+| Llamadas a Firebase dentro de un Pinia store | Mover al composable o caso de uso en `application/` |
+| Clases Tailwind directamente en HTML del template | BEM en HTML + `@apply` en `<style scoped>` |
+| `v-for` con índice como `:key` | Usar el `id` único de la entidad |
 
 ---
 
@@ -362,8 +416,36 @@ CORS_ORIGIN=http://localhost:5173
 - Al implementar pantallas, alinear la UI con **SPEC/** (comportamiento, campos, flujos) y usar los exports como referencia visual.
 - Si el diseño exige un cambio funcional, actualizar SPEC antes de tratar el diseño como cerrado (G06).
 
-### 7.1 Tailwind CSS — convenciones
+### 7.1 Tailwind CSS — convenciones BEM
 
+- **BEM naming para TODOS los atributos `class` en HTML**: patrón `block__element--modifier`.
+- **Tailwind va en CSS, NO en HTML** — excepto en excepciones justificadas documentadas con `<!-- tailwind-exception: razón -->`.
+- Patrón: clase BEM en HTML → en `<style scoped>` esa clase BEM usa `@apply` para estilos simples/repetitivos, CSS raw para estilos complejos/únicos.
+
+```html
+<!-- HTML — solo clases BEM -->
+<div class="resident-card">
+  <span class="resident-card__name resident-card__name--inactive">Juan García</span>
+</div>
+```
+
+```css
+/* <style scoped> — BEM → Tailwind via @apply */
+.resident-card {
+  @apply rounded-lg shadow-md p-4;
+}
+.resident-card__name {
+  @apply text-sm font-medium text-gray-800;
+}
+.resident-card__name--inactive {
+  @apply text-gray-400;
+  text-decoration: line-through;          /* regla única → raw CSS */
+  text-decoration-thickness: 2px;
+}
+```
+
+- Usar `<style scoped>` en todos los componentes `.vue`.
+- Estilos globales (resets, variables CSS, tokens) en `src/assets/styles/`.
 - Usar el sistema de diseño definido en `tailwind.config.ts` (colores, tipografía, breakpoints).
 - Breakpoints principales: `sm` (640px — móvil grande), `md` (768px — tablet), `lg` (1024px — desktop).
 - Target principal: tablet 10" en orientación portrait → diseñar mobile-first.
@@ -437,60 +519,216 @@ cd code/api && npx tsc --noEmit
 
 ### 9.1 Estructura de un componente
 
+Los componentes son **dumb renderers** — toda la lógica va en composables. Los componentes **nunca** importan stores ni repositorios directamente.
+
 ```vue
 <script setup lang="ts">
-// 1. Imports de Vue y librerías
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+// 1. Imports de Vue core
+import { computed } from 'vue'
 
-// 2. Imports de stores y composables
-import { useAuthStore } from '@/stores/useAuthStore'
-import { useAgenda } from '@/composables/useAgenda'
+// 2. Imports de composables — NUNCA stores o repos directamente
+import { useResidents } from '../composables/useResidents'
 
-// 3. Imports de tipos
-import type { Tarea } from '@/types/tarea.types'
+// 3. Imports de tipos (desde domain/entities del módulo)
+import type { Resident } from '../../domain/entities/resident.schema'
 
-// 4. Props y emits
-interface Props {
-  tareaId: string
+// 4. Props — siempre tipados con defineProps<{}>()
+const props = defineProps<{
+  resident: Resident
   readonly?: boolean
-}
-const props = withDefaults(defineProps<Props>(), { readonly: false })
-const emit = defineEmits<{ (e: 'actualizada', tarea: Tarea): void }>()
+}>()
 
-// 5. Store y composables
-const authStore = useAuthStore()
-const { tareas, obtenerTareasHoy } = useAgenda()
+// 5. Emits — siempre tipados con defineEmits<{}>()
+const emit = defineEmits<{
+  select: [resident: Resident]
+  deactivate: [id: string]
+}>()
 
-// 6. State local
-const cargando = ref(false)
+// 6. Composables — llamados al nivel superior (nunca en condicionales/loops)
+const { deactivateResident } = useResidents()
 
-// 7. Computed
-const esEditable = computed(() => !props.readonly && authStore.esCoordinador)
-
-// 8. Lifecycle
-onMounted(obtenerTareasHoy)
+// 7. Computed local — mínimo; la lógica real va en composables
+const statusLabel = computed(() => props.resident.active ? 'Activo' : 'Inactivo')
 </script>
 
 <template>
-  <!-- Template limpio, sin lógica compleja -->
+  <!-- Template limpio, sin lógica compleja — usar composables/computed -->
+  <div class="resident-card" @click="emit('select', resident)">
+    <span class="resident-card__name" :class="{ 'resident-card__name--inactive': !resident.active }">
+      {{ resident.fullName }}
+    </span>
+    <span class="resident-card__status">{{ statusLabel }}</span>
+  </div>
 </template>
+
+<style scoped>
+/* BEM en HTML → @apply Tailwind en CSS */
+.resident-card {
+  @apply rounded-lg shadow-md p-4 cursor-pointer;
+}
+.resident-card__name {
+  @apply text-sm font-medium text-gray-800;
+}
+.resident-card__name--inactive {
+  @apply text-gray-400;
+  text-decoration: line-through; /* raw CSS para reglas únicas/complejas */
+}
+.resident-card__status {
+  @apply text-xs text-gray-500;
+}
+</style>
 ```
 
 ### 9.2 Reglas de la Composition API
 
-- Usar siempre `<script setup lang="ts">`.
-- No usar Options API ni la sintaxis `export default {}`.
+- Usar siempre `<script setup lang="ts">` — Options API está **PROHIBIDA**.
 - Los composables se llaman **al nivel superior** del `<script setup>` (no dentro de condicionales o loops).
 - `v-for` siempre requiere `:key` con un identificador único (nunca el índice del array).
 - `v-if` y `v-for` **no** van en el mismo elemento — usar `<template>` como wrapper.
+- Props con `defineProps<{ ... }>()` — sin runtime props object.
+- Emits con `defineEmits<{ ... }>()` — siempre declarados y tipados.
+- **No** importar stores directamente en archivos `.vue` — siempre a través de un composable de `presentation/composables/`.
 
 ### 9.3 TypeScript estricto
 
 - `strict: true` activado en `tsconfig.json`.
-- No usar `any` — si el tipo es desconocido, usar `unknown` y narrowing.
-- Los tipos de las entidades de dominio están en `src/types/` y deben coincidir exactamente con `SPEC/entities.md` (G04).
+- **`any` está PROHIBIDO** — ESLint configurado con `"@typescript-eslint/no-explicit-any": "error"`.
+- **Type assertions (`as X`) están PROHIBIDAS** — excepto dentro de funciones de type guard dedicadas con Zod.
+- Si el tipo es desconocido, usar `unknown` con narrowing explícito.
+- Los tipos de las entidades de dominio se derivan de los Zod schemas en `domain/entities/` y deben coincidir exactamente con `SPEC/entities.md` (G04).
+- Usar el operador `satisfies` para validar objetos literales sin widening de tipo.
+
+```typescript
+// ✅ Correcto — Zod schema como fuente única de verdad
+import { z } from 'zod'
+export const ResidentSchema = z.object({ id: z.string(), name: z.string() })
+export type Resident = z.infer<typeof ResidentSchema>  // tipo derivado del schema
+
+// ✅ Correcto — unknown + narrowing
+function handleError(e: unknown): string {
+  if (e instanceof Error) return e.message
+  return 'Error desconocido'
+}
+
+// ✅ Correcto — satisfies
+const config = { maxPage: 20 } satisfies Partial<AppConfig>
+
+// ❌ Prohibido — any
+const data: any = fetchSomething()
+
+// ❌ Prohibido — type assertion
+const resident = rawData as Resident
+```
 
 ---
 
-*Última actualización: 2026-04-01 — Actualizado al stack Vue 3 + Firebase (ADR-01b, ADR-02b, ADR-03b)*
+*Última actualización: 2026-04-06 — Actualizado al stack Vue 3 + Firebase + DDD frontend (ADR-01b, ADR-02b, ADR-03b)*
+
+---
+
+## 10. Arquitectura Frontend — DDD por módulos
+
+> **Referencia completa**: `AGENTS/frontend-specialist.md`
+> Esta sección es el resumen normativo. El archivo del especialista contiene ejemplos de código completos.
+
+### 10.1 Principio fundamental
+
+El frontend sigue una arquitectura **Domain-Driven Design (DDD)** organizada por módulos de dominio. Cada módulo es autocontenido con sus propias capas: `domain/`, `application/`, `infrastructure/`, `presentation/`.
+
+**Regla de dependencias** (estricta, sin excepciones):
+
+```
+presentation/pages
+    ↓ (solo puede importar de)
+presentation/composables
+    ↓
+stores (Pinia) + infrastructure/repositories
+    ↓
+application/ (use cases)
+    ↓
+domain/ (entities, value-objects, repo interfaces)
+```
+
+**Ninguna capa puede importar de una capa superior.**
+
+### 10.2 Responsabilidades por capa
+
+| Capa | Qué hace | Qué NO puede hacer |
+|------|---------|-------------------|
+| `domain/entities/` | Define tipos TypeScript via Zod schemas | Importar Vue, Pinia, Firebase, presentación |
+| `domain/repositories/` | Define interfaces de repositorio (puertos) | Contener implementación alguna |
+| `application/` | Orquesta casos de uso con entidades + repos | Importar Vue, Pinia o componentes UI |
+| `infrastructure/repositories/` | Implementa repos con Firebase/Firestore | Contener lógica de negocio |
+| `infrastructure/mappers/` | Convierte datos Firebase ↔ entidades de dominio | Llamar Firebase directamente |
+| `presentation/composables/` | Puente componentes ↔ stores/repos | Contener markup o ser importado por capas inferiores |
+| `presentation/atoms/` y `molecules/` | Renderiza UI — puramente presentacional | Importar stores, repos o composables |
+| `presentation/pages/` | Vistas de ruta — conecta composables a template | Acceder a stores o repos directamente |
+| `stores/` (Pinia) | Estado reactivo + getters + mutaciones | Llamar Firebase, contener lógica de negocio |
+
+### 10.3 Reglas TypeScript
+
+1. **`any` está PROHIBIDO** — ESLint: `"@typescript-eslint/no-explicit-any": "error"`.
+2. **Type assertions (`as X`) están PROHIBIDAS** — excepto dentro de funciones type guard con Zod.
+3. **Zod es la fuente única de verdad para entidades de dominio** — los tipos se derivan con `z.infer<typeof Schema>`.
+4. Todos los parámetros, tipos de retorno y props deben ser tipados explícitamente.
+5. Usar `satisfies` para validar objetos literales sin widening.
+
+```typescript
+// Patrón correcto: schema → tipo → type guard
+import { z } from 'zod'
+
+export const ResidentSchema = z.object({
+  id: z.string().uuid(),
+  fullName: z.string().min(1),
+  active: z.boolean(),
+})
+
+export type Resident = z.infer<typeof ResidentSchema>
+
+export function assertIsResident(val: unknown): asserts val is Resident {
+  ResidentSchema.parse(val)  // lanza ZodError si inválido
+}
+```
+
+### 10.4 Reglas Vue 3
+
+- Siempre `<script setup lang="ts">` — Options API está PROHIBIDA.
+- Props: `defineProps<{ ... }>()` — sin runtime props.
+- Emits: `defineEmits<{ ... }>()` — siempre tipados.
+- **No** importar stores directamente en `.vue` — solo composables de `presentation/composables/`.
+- Naming de archivos: PascalCase (`ResidentCard.vue`).
+
+### 10.5 Reglas Pinia
+
+- Stores: solo estado + getters + mutaciones síncronas.
+- **Sin** acciones async que llamen Firebase — eso va en el composable o use case.
+- Estado de módulo específico → `business/{module}/store/` o `business/{module}/presentation/`.
+- Estado global (auth, notificaciones globales) → `src/stores/`.
+- Naming: `use{Module}Store` (ej: `useResidentsStore`).
+
+### 10.6 Reglas CSS / BEM
+
+1. **HTML**: solo clases BEM (`block__element--modifier`).
+2. **`<style scoped>`**: clases BEM mapean a Tailwind via `@apply` (simple) o raw CSS (complejo/único).
+3. **Excepción documentada**: `<!-- tailwind-exception: razón -->` si es necesario Tailwind en HTML.
+4. Estilos globales en `src/assets/styles/` (reset, tokens, tipografía).
+
+### 10.7 TDD — Red → Green → Refactor
+
+**TDD es obligatorio** para toda la lógica de dominio y composables.
+
+```
+PARA CADA TAREA:
+1. ROJO   — Escribe el test que describe el comportamiento esperado.
+            Ejecuta: confirma que FALLA (si pasa, el test es incorrecto).
+2. VERDE  — Implementa el mínimo código para hacer pasar el test.
+            Ejecuta: confirma que PASA.
+3. REFACTOR — Limpia sin cambiar comportamiento.
+              Ejecuta: confirma que sigue PASANDO.
+```
+
+- Test runner: `vitest` — comando: `cd code/frontend && npm run test`.
+- Tests unitarios: co-ubicados (`resident.spec.ts` junto a `resident.ts`).
+- Tests E2E: `tests/e2e/{feature}.spec.ts`.
+- Mocking en composables: `vi.mock` para store y repositorio.
+- Coverage mínimo: 80% en `domain/` y `application/`, 70% en `presentation/composables/`.
