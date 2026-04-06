@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Utilidades ---
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function hasRole(rol) {
+      return isAuthenticated() && request.auth.token.rol == rol;
+    }
+    function hasAnyRole(roles) {
+      return isAuthenticated() && request.auth.token.rol in roles;
+    }
+    function isGerocultor() {
+      return hasRole('gerocultor');
+    }
+    function isCoordinador() {
+      return hasRole('coordinador');
+    }
+    function isAdministrador() {
+      return hasRole('administrador');
+    }
+    function isAccountOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isResourceOwner() {
+      return isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+
+    // --- Usuarios ---
+    // Cada usuario sólo puede leer su propio documento;
+    // sólo administradores pueden escribir (crear/actualizar roles).
+    match /usuarios/{userId} {
+      allow read: if isAccountOwner(userId);
+      allow write: if isAdministrador();
+    }
+
+    // --- Tareas ---
+    // Un gerocultor puede leer y actualizar sus propias tareas.
+    // Coordinadores y administradores tienen acceso completo de lectura/actualización.
+    // Sólo roles permitidos pueden crear tareas nuevas.
+    match /tareas/{tareaId} {
+      allow read: if isResourceOwner() || hasAnyRole(['coordinador', 'administrador']);
+      allow update: if  isResourceOwner() || hasAnyRole(['coordinador', 'administrador']);
+      allow create: if  hasAnyRole(['gerocultor', 'coordinador', 'administrador']);
+    }
+
+    // --- Residentes ---
+    // Datos sensibles: sólo coordinadores y administradores.
+    match /residentes/{residenteId} {
+      allow read: if hasAnyRole(['coordinador', 'administrador']);
+      allow write: if hasAnyRole(['coordinador', 'administrador']);
+    }
+
+    // --- Incidencias ---
+    // Gerocultores y coordinadores pueden crear incidencias.
+    // Cualquier usuario autenticado puede leerlas.
+    // Actualización y eliminación están prohibidas (inmutabilidad del registro).
+    match /incidencias/{incidenciaId} {
+      allow create: if hasAnyRole(['gerocultor', 'coordinador']);
+      allow read: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}
