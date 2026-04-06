@@ -58,7 +58,7 @@ Las versiones indicadas en la tabla corresponden a las versiones mínimas objeti
 | Herramienta | Versión | Rol en el proyecto | Licencia | URL |
 |-------------|---------|-------------------|----------|-----|
 | Git | ^2.40 | Control de versiones; ramas por feature, commits con convención `feat(US-XX):` | GPL-2.0 | https://git-scm.com |
-| GitHub | — | Repositorio remoto; GitHub Actions para CI/CD (lint + build + test + deploy) | Propietario (gratuito) | https://github.com |
+| GitHub | — | Repositorio del proyecto: **[URL_REPOSITORIO_GITHUB]** — GitHub Actions para CI/CD (lint + build + test + deploy) | Propietario (gratuito) | https://github.com |
 | GitHub Actions | — | Pipeline CI/CD: lint, type-check, build, test y `firebase deploy` en cada PR a `main` | Propietario (gratuito en repos públicos) | https://github.com/features/actions |
 | Docker Desktop | ^4.x | Entorno de desarrollo reproducible; contenedor Node.js para el backend Express | Gratuito (uso educativo) | https://www.docker.com/products/docker-desktop |
 | ESLint | ^8.x | Linting de código TypeScript/Vue; reglas compartidas frontend + backend | MIT | https://eslint.org |
@@ -78,6 +78,16 @@ Las versiones indicadas en la tabla corresponden a las versiones mínimas objeti
 |-------------|---------|-------------------|-----|
 | GGA (Gentleman Guardian Agent) | — | Revisor automático de código; valida guardrails G01-G09 en cada PR; detecta violaciones de convención de commits, entidades inconsistentes y secretos en código | — |
 | SDD (Spec-Driven Development) | — | Metodología de trabajo con agentes IA; artefactos en `SPEC/`, `DECISIONS/`, `PLAN/`, `OUTPUTS/` | — |
+
+---
+
+## Repositorio del proyecto
+
+El código fuente completo del proyecto está disponible en el siguiente repositorio de control de versiones:
+
+**GitHub**: [URL_REPOSITORIO_GITHUB]
+
+> ⚠️ **Pendiente del autor**: Sustituir `[URL_REPOSITORIO_GITHUB]` por la URL real del repositorio (p. ej. `https://github.com/jvilches/gerocultores-system`) antes de la entrega. La norma del CIPFP Batoi d'Alcoi exige que el código fuente se entregue mediante enlace a un repositorio de control de versiones.
 
 ---
 

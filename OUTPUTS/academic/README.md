@@ -228,13 +228,29 @@ El Writer Agent producirá el archivo en `OUTPUTS/academic/seccion-XX-nombre.md`
 
 ## Archivos generados en esta carpeta
 
-| Archivo | Sección | Estado |
-|---------|---------|--------|
-| `example-calibration-buycinduro.md` | Calibración de ejemplo 1 | ✅ Generado |
-| `example-calibration-tasknest.md` | Calibración de ejemplo 2 | ✅ Generado |
-| `mapping-spec-to-memory.md` | Mapa SPEC → secciones memoria | ✅ Generado |
-| *(borradores de sección — pendientes)* | — | 🔲 Pendiente |
+| Archivo | Sección | Estado | Notas |
+|---------|---------|--------|-------|
+| `example-calibration-buycinduro.md` | Calibración de ejemplo 1 | ✅ Generado | — |
+| `example-calibration-tasknest.md` | Calibración de ejemplo 2 | ✅ Generado | — |
+| `mapping-spec-to-memory.md` | Mapa SPEC → secciones memoria | ✅ Generado | — |
+| `memory-template.md` | Plantilla y guías de longitud | ✅ Generado | — |
+| `normes-checklist.md` | Checklist normas CIPFP Batoi | ✅ Generado | **Nuevo** — 2026-04-06 |
+| `resumen-ejecutivo.md` | Resumen ejecutivo (1 página) | ✅ Borrador | Pendiente datos reales |
+| `introduccion.md` | Sección 1 — Introducción | ✅ Borrador | Expandir a 600–900 palabras |
+| `fundamentos-teoricos.md` | Sección 2 — Fundamentos | ✅ Borrador | Añadir ejemplos reales |
+| `contexto.md` | Sección 3 — Contexto | ✅ Borrador | Listo para revisión |
+| `analisis-requisitos.md` | Sección 4 — Requisitos | ✅ Borrador | Listo para revisión |
+| `coste-economico.md` | Sección 7 — Coste | ✅ Borrador | Actualizar con horas reales |
+| `alternativas.md` | Sección 8 — Alternativas | ✅ Borrador | Tabla comparativa añadida |
+| `seguridad-rgpd.md` | Sección 10 — RGPD | ✅ Borrador | 580 palabras — cumple mínimo |
+| `bibliografia.md` | Sección 13 — Bibliografía | ✅ Borrador | Añadir URL repositorio GitHub |
+| `recursos.md` | Sección 14 — Recursos | ✅ Borrador | Añadir URL repositorio GitHub |
+| `diseno-sistema.md` | Sección 5 — Diseño | ✅ Borrador | ~1.950 palabras — 2026-04-06 — Requiere capturas wireframes |
+| `implementacion.md` | Sección 6 — Implementación | 🔲 Bloqueado | Requiere código desarrollado |
+| `pruebas.md` | Sección 9 — Pruebas | 🔲 Bloqueado | Requiere tests ejecutados |
+| `conclusiones.md` | Sección 11 — Conclusiones | 🔲 Bloqueado | Requiere fin de desarrollo |
+| `formacion-adicional.md` | Sección 12 — Formación | 🔲 Pendiente | Requiere input del autor |
 
 ---
 
-*Última actualización: 2026-03-28 — sdd-explore (calibración desde ejemplo TaskNest) [CALIBRADO DESDE EJEMPLO 1 + EJEMPLO 2]*
+*Última actualización: 2026-04-06 — WRITER/REVIEWER agent (Sección 5 — Diseño del sistema generada)*

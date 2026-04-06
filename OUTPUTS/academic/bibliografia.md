@@ -148,7 +148,9 @@
 
 **GitHub.** (2024). *GitHub Documentation*. GitHub, Inc. Recuperado de https://docs.github.com/
 
-> Plataforma de control de versiones y colaboración. Se ha utilizado para el repositorio del proyecto, la gestión del backlog y el pipeline de CI/CD con GitHub Actions.
+> Plataforma de control de versiones y colaboración. Se ha utilizado para el repositorio del proyecto, la gestión del backlog y el pipeline de CI/CD con GitHub Actions. El código fuente completo del proyecto está disponible en: **[URL_REPOSITORIO_GITHUB]** — sustituir por la URL real del repositorio antes de la entrega.
+
+> ⚠️ **Norma del centro**: El código fuente debe entregarse mediante enlace a un repositorio de control de versiones (GitHub/GitLab/etc.). Actualizar esta referencia con la URL real del repositorio.
 
 ---
 

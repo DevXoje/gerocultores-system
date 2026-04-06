@@ -292,7 +292,95 @@ if [[ "${SKIP_PDF}" == false ]]; then
   # pandoc+LaTeX porque evita la dependencia de TeX (~3 GB con MacTeX).
   # Chrome se detecta en orden: sistema macOS (/Applications/...), luego PATH.
   # Si Chrome no está instalado, se intentan los fallbacks LaTeX/Docker.
+  #
+  # CSS DE FORMATO (normes CIPFP Batoi d'Alcoi):
+  #   - Márgenes: left/right 2,5 cm, top/bottom 3 cm (via PDF_OPTS Puppeteer)
+  #     Los márgenes top/bottom se amplían a 3 cm para que la cabecera y el pie
+  #     de página no solapen el contenido. Limitación de Chrome/Puppeteer: los
+  #     headers/footers se renderizan en una banda separada dentro del margen.
+  #   - Fuente formal 11pt (Arial / sans-serif de fallback)
+  #   - Interlineado sencillo (line-height: 1.3)
+  #   - Cabecera: "Sistema de Gestión para Gerocultores" (via headerTemplate)
+  #   - Pie: "Jose Vilches Sánchez" (izquierda) + número de página (derecha)
+  #     Implementados via footerTemplate (Puppeteer API, no CSS @page) porque
+  #     Chrome ignora CSS Paged Media running elements (@top-center, etc.).
   # --------------------------------------------------------------------------
+
+  # CSS inline para cumplir las normas de formato del CIPFP Batoi d'Alcoi
+  # Inyectado via --css-file de md-to-pdf
+  #
+  # NOTA TÉCNICA (G07 — shortcut documentado):
+  # Chrome/Puppeteer NO soporta CSS Paged Media con running elements (@top-center,
+  # @bottom-left, @bottom-right, etc. dentro de @page). Estas reglas son ignoradas
+  # silenciosamente. La cabecera y pie de página se gestionan exclusivamente a través
+  # de las opciones headerTemplate/footerTemplate de la API Puppeteer (ver PDF_OPTS).
+  # Este CSS se limita al estilo del cuerpo del documento, tipografía y tablas.
+  # Si en el futuro se migra a WeasyPrint, restaurar las reglas @page running elements.
+  BATOI_CSS='
+body {
+  font-family: Arial, "Helvetica Neue", sans-serif;
+  font-size: 11pt;
+  line-height: 1.3;
+  color: #000;
+  margin: 0;
+  padding: 0;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: Arial, sans-serif;
+  page-break-after: avoid;
+}
+h1 { font-size: 16pt; }
+h2 { font-size: 14pt; }
+h3 { font-size: 12pt; }
+p, li {
+  line-height: 1.3;
+  margin: 0 0 0.5em 0;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 10pt;
+  line-height: 1.3;
+}
+th, td {
+  border: 1px solid #999;
+  padding: 4px 6px;
+  text-align: left;
+}
+code, pre {
+  font-size: 9pt;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 2px 4px;
+}
+pre {
+  padding: 8px;
+  overflow-x: auto;
+}
+blockquote {
+  border-left: 3px solid #999;
+  margin-left: 0;
+  padding-left: 12px;
+  color: #555;
+  font-size: 10pt;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+/* @page margins are controlled via PDF_OPTS (Puppeteer API), not CSS @page,     */
+/* because Chrome/Puppeteer ignores CSS Paged Media running elements.             */
+/* CSS @page here only sets page size — margins intentionally omitted to          */
+/* avoid conflicting with the margin set in PDF_OPTS (top/bottom 3cm for          */
+/* header/footer space, left/right 2.5cm per CIPFP Batoi format rules).           */
+@page {
+  size: A4;
+}
+'
+
+  # Escribir CSS a archivo temporal
+  TMP_CSS="$(mktemp /tmp/batoi-academic-XXXXXX.css)"
+  printf '%s' "${BATOI_CSS}" > "${TMP_CSS}"
 
   # Detectar Chrome / Chromium en el sistema
   CHROME_EXEC=""
@@ -321,14 +409,53 @@ if [[ "${SKIP_PDF}" == false ]]; then
   if [[ -n "${CHROME_EXEC}" ]] && command -v npx &>/dev/null; then
     info "Generando PDF con md-to-pdf + Chrome..."
     info "  Chrome: ${CHROME_EXEC}"
+    info "  CSS:    Normas CIPFP Batoi (fuente 11pt, interlineado 1.3, cabecera, pie)"
     # md-to-pdf outputs PDF next to the input file (same name, .pdf extension)
     LAUNCH_OPTS="{\"executablePath\": \"${CHROME_EXEC}\"}"
-    PDF_OPTS='{"format": "A4", "margin": {"top": "2.5cm", "bottom": "2.5cm", "left": "2.5cm", "right": "2.5cm"}}'
+
+    # NOTA TÉCNICA (G07 — shortcut documentado):
+    # md-to-pdf usa Puppeteer/Chrome para generar el PDF. Chrome NO soporta CSS
+    # Paged Media (@page running headers/footers con @top-center, @bottom-left, etc.)
+    # que sería la solución estándar de CSS. En cambio, Puppeteer expone
+    # displayHeaderFooter + headerTemplate + footerTemplate como opciones nativas de
+    # la API Page.printToPDF. Estas opciones aceptan HTML con estilos inline.
+    # Limitación conocida: headerTemplate/footerTemplate ignoran el CSS externo del
+    # documento — TODOS los estilos deben ser inline. Las clases .pageNumber,
+    # .totalPages, .date, .title son reemplazadas automáticamente por Puppeteer.
+    # Los márgenes top/bottom deben ser suficientemente grandes para que la cabecera
+    # y el pie sean visibles (se superponen con el área de contenido si son muy pequeños).
+    # Solución alternativa completa sería WeasyPrint, pero requiere Python + instalación
+    # adicional que se quiere evitar en este proyecto.
+    #
+    # Las opciones PDF se escriben en un archivo JSON temporal para evitar problemas
+    # de escape de comillas al pasar JSON complejo como argumento de shell.
+    TMP_PDF_OPTS="$(mktemp /tmp/md-to-pdf-opts-XXXXXX.json)"
+    cat > "${TMP_PDF_OPTS}" <<'PDFOPTS'
+{
+  "format": "A4",
+  "printBackground": true,
+  "displayHeaderFooter": true,
+  "headerTemplate": "<div style=\"font-size:9px; font-family:Arial,sans-serif; width:100%; text-align:center; padding-top:5px; color:#333; border-bottom:1px solid #ccc; margin:0 1.5cm;\">Sistema de Gesti\u00f3n para Gerocultores</div>",
+  "footerTemplate": "<div style=\"font-size:9px; font-family:Arial,sans-serif; width:100%; display:flex; justify-content:space-between; padding:0 1.5cm; color:#333;\"><span>Jose Vilches S\u00e1nchez</span><span class=\"pageNumber\"></span></div>",
+  "margin": {
+    "top": "3cm",
+    "bottom": "3cm",
+    "left": "2.5cm",
+    "right": "2.5cm"
+  }
+}
+PDFOPTS
+
+    # Márgenes: top/bottom aumentados a 3cm para que la cabecera/pie tengan espacio
+    # sin solaparse con el contenido (limitación de Puppeteer vs CSS @page).
+    PDF_OPTS="$(cat "${TMP_PDF_OPTS}")"
     npx md-to-pdf "${TMP_COMBINED_MD}" \
       --launch-options "${LAUNCH_OPTS}" \
       --pdf-options "${PDF_OPTS}" \
-      --document-title "Memoria Académica — gerocultores-system" \
+      --stylesheet "${TMP_CSS}" \
+      --document-title "Sistema de Gestión para Gerocultores" \
       2>/dev/null && PDF_OK=true || warn "md-to-pdf falló, probando fallbacks..."
+    rm -f "${TMP_PDF_OPTS}"
 
     if [[ "${PDF_OK}" == true ]] && [[ -f "${TMP_COMBINED_PDF}" ]]; then
       cp "${TMP_COMBINED_PDF}" "${OUTPUT_PDF}"
@@ -338,6 +465,7 @@ if [[ "${SKIP_PDF}" == false ]]; then
   # Intento 2: pandoc local con xelatex (si existe)
   elif command -v pandoc &>/dev/null && command -v xelatex &>/dev/null; then
     info "Generando PDF con pandoc + xelatex..."
+    info "  Normas CIPFP Batoi: fuente 11pt, márgenes 2.5cm, interlineado 1.0"
     pandoc \
       "${AVAILABLE_FILES[@]}" \
       --from=markdown \
@@ -346,15 +474,20 @@ if [[ "${SKIP_PDF}" == false ]]; then
       --output="${OUTPUT_PDF}" \
       --toc \
       --toc-depth=3 \
-      --metadata title="Memoria Académica — gerocultores-system" \
+      --metadata title="Sistema de Gestión para Gerocultores" \
       --metadata author="Jose Vilches Sánchez" \
       --variable geometry:margin=2.5cm \
       --variable fontsize=11pt \
+      --variable linestretch=1.0 \
+      --variable mainfont="Georgia" \
+      --variable sansfont="Georgia" \
+      --variable "header-includes=\\usepackage{fancyhdr}\\pagestyle{fancy}\\fancyhf{}\\fancyhead[C]{Sistema de Gestión para Gerocultores}\\fancyfoot[L]{Jose Vilches Sánchez}\\fancyfoot[R]{\\thepage}" \
       --variable lang=es 2>/dev/null && PDF_OK=true || warn "xelatex falló."
 
   # Intento 3: Docker con pandoc/extra:latest (incluye LaTeX — ~500 MB)
   elif command -v docker &>/dev/null && docker image inspect "${DOCKER_IMAGE_EXTRA}" &>/dev/null 2>&1; then
     info "Generando PDF vía Docker (${DOCKER_IMAGE_EXTRA})..."
+    info "  Normas CIPFP Batoi: fuente 11pt, márgenes 2.5cm, interlineado 1.0"
     REL_FILES_PDF=()
     for f in "${AVAILABLE_FILES[@]}"; do
       REL_FILES_PDF+=("${f#${REPO_ROOT}/}")
@@ -372,10 +505,12 @@ if [[ "${SKIP_PDF}" == false ]]; then
         --output="${REL_OUTPUT_PDF}" \
         --toc \
         --toc-depth=3 \
-        --metadata title="Memoria Académica — gerocultores-system" \
+        --metadata title="Sistema de Gestión para Gerocultores" \
         --metadata author="Jose Vilches Sánchez" \
         --variable geometry:margin=2.5cm \
         --variable fontsize=11pt \
+        --variable linestretch=1.0 \
+        --variable "header-includes=\\usepackage{fancyhdr}\\pagestyle{fancy}\\fancyhf{}\\fancyhead[C]{Sistema de Gestión para Gerocultores}\\fancyfoot[L]{Jose Vilches Sánchez}\\fancyfoot[R]{\\thepage}" \
         --variable lang=es 2>/dev/null && PDF_OK=true || warn "Docker pandoc/extra falló."
 
   # Intento 4: LibreOffice (convierte DOCX → PDF)
@@ -387,7 +522,7 @@ if [[ "${SKIP_PDF}" == false ]]; then
   fi
 
   # Limpiar temp files
-  rm -f "${TMP_COMBINED_MD}" "${TMP_COMBINED_PDF}" 2>/dev/null || true
+  rm -f "${TMP_COMBINED_MD}" "${TMP_COMBINED_PDF}" "${TMP_CSS}" 2>/dev/null || true
 
   if [[ "${PDF_OK}" == true ]] && [[ -f "${OUTPUT_PDF}" ]] && [[ -s "${OUTPUT_PDF}" ]]; then
     info "PDF generado: ${OUTPUT_PDF}"

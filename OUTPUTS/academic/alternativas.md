@@ -11,7 +11,19 @@
 
 La gestión del trabajo diario en residencias de mayores se resuelve hoy de formas muy dispares. En residencias pequeñas y medianas, lo más habitual es una combinación de hojas de cálculo Excel, cuadernos en papel y comunicación verbal entre turnos: el gerocultor saliente anota a mano las incidencias del día, y el entrante debe leer esas notas —si están legibles y están donde tocan— antes de empezar su ronda. La falta de trazabilidad entre turnos es el problema central: cuando algo falla, no hay forma rápida de saber quién hizo qué, cuándo, y con qué residente.
 
-Existen soluciones SaaS especializadas en el sector sociosanitario, como **CareMaster** o **aCareGiver**, que ofrecen módulos de gestión de tareas, fichas de residentes e informes. Sin embargo, estas plataformas presentan barreras claras para el contexto de este proyecto: son de pago con licencias mensuales por usuario (inviable para un proyecto académico sin presupuesto), están diseñadas para gestores y coordinadores, no para el uso en ronda del gerocultor, y habitualmente requieren integración con sistemas propietarios del centro (HIS, SAP) que un proyecto individual no puede replicar. Este proyecto propone una alternativa web, accesible desde cualquier dispositivo sin instalación, diseñada específicamente para el flujo de trabajo del gerocultor en planta.
+Existen soluciones SaaS (*Software as a Service*, software como servicio) especializadas en el sector sociosanitario. Analicé tres de las más utilizadas en España: **Softdep/Aleph**, **Gestion-Residencias.com** e **iCare (aCareGiver)**, además de la solución improvisada más extendida en centros pequeños: hojas de cálculo en Google Sheets. La tabla siguiente resume las características principales y el motivo por el que no se adaptan al contexto de este proyecto.
+
+### Tabla comparativa de soluciones de gestión para residencias
+
+| Solución | Precio estimado | Acceso móvil/tablet | Personalizable | Trazabilidad | Cumplimiento RGPD datos de salud | Por qué no se adapta a este proyecto |
+|----------|----------------|---------------------|----------------|--------------|----------------------------------|--------------------------------------|
+| **Softdep / Aleph** | ~80–200 €/mes por centro | Limitado (aplicación de escritorio) | Bajo (módulos cerrados) | Alta (sistema integral) | Incluido (proveedor gestiona) | Coste elevado; no diseñado para uso en ronda con tablet; requiere integración con sistemas HIS del centro |
+| **Gestion-Residencias.com** | ~50–100 €/mes | Sí, web responsive | Medio | Alta | Incluido | Precio inviable para proyecto académico; interfaz orientada a coordinadores, no a gerocultores en ronda |
+| **iCare (aCareGiver)** | ~60–150 €/mes | Sí, app móvil | Bajo (flujos predefinidos) | Media | Parcial (depende de configuración) | Licencias por usuario; diseño genérico no adaptado al perfil del gerocultor español; datos en servidores fuera de la UE según condiciones del plan básico |
+| **Google Sheets + formularios** | 0 € | Sí, web | Alto (total libertad) | Nula (sin control de versiones) | ❌ Muy bajo (sin RBAC, sin auditoría, datos sensibles en texto plano) | Sin control de acceso por rol; sin auditoría; alto riesgo RGPD con datos de salud; no escalable |
+| **gerocultores-system (MVP)** | ~0 €/mes (Firebase Spark) | Sí, diseño tablet-first | Alto (proyecto propio) | Alta (auditoría RNF-07) | Diseñado desde el inicio para datos de salud art. 9 RGPD | — (propuesta de este proyecto) |
+
+La principal limitación del MVP frente a las soluciones comerciales es que carece de soporte técnico externo, actualizaciones continuas y funcionalidades avanzadas como integración con sistemas de historial clínico (HIS) o facturación. Sin embargo, para el contexto académico y como demostración de viabilidad técnica, el MVP cubre los requisitos Must del gerocultor con un coste de infraestructura significativamente menor.
 
 ---
 
@@ -32,11 +44,11 @@ Todas las decisiones tecnológicas del proyecto pasaron por una evaluación expl
 
 ### Notas sobre las alternativas descartadas
 
-**React 18** era el stack original del proyecto (ADR-01, supersedido por ADR-01b). Lo descarté no por ser inferior técnicamente —es el framework más usado en la industria y hubiera sido igualmente válido— sino porque mi productividad real durante el desarrollo era menor que con Vue, y en un proyecto individual con deadline el factor humano pesa más que el factor técnico abstracto.
+**React 18** era el stack original del proyecto (ADR-01, supersedido por ADR-01b). No lo descarté por ser técnicamente inferior —es el framework con mayor cuota de uso en la industria en 2024 y habría sido igualmente válido— sino porque mi productividad real durante el desarrollo resultó menor que con Vue, y en un proyecto individual con plazo fijo el factor humano pesa tanto como el factor técnico.
 
-**Supabase + PostgreSQL** (ADR-02, supersedido por ADR-02b) es una opción muy competente: PostgreSQL relacional es más natural para un modelo de datos con relaciones entre entidades (residentes ↔ tareas ↔ gerocultores). Lo descarté principalmente por coherencia de ecosistema: usar Firebase Auth y mantener Supabase como backend implicaba dos consolas, dos conjuntos de credenciales y dos SDKs distintos. Concentrarlo todo en Firebase simplifica la operativa.
+**Supabase + PostgreSQL** (ADR-02, supersedido por ADR-02b) es una opción técnicamente competente: PostgreSQL relacional es más natural para un modelo de datos con relaciones entre entidades (residentes ↔ tareas ↔ gerocultores). Lo descarté principalmente por coherencia de ecosistema: usar Firebase Auth y mantener Supabase como backend implicaba dos consolas, dos conjuntos de credenciales y dos SDKs distintos. Concentrarlo todo en Firebase simplifica la operativa, aunque introduce mayor dependencia de un solo proveedor.
 
-**JWT autogestionado con Express** (descartado en ADR-03b) habría sido la opción más didáctica para la memoria DAW, pero el riesgo de introducir vulnerabilidades de seguridad en una aplicación que maneja datos de salud de categoría especial (art. 9 RGPD) no es justificable por motivos académicos.
+**JWT autogestionado con Express** (descartado en ADR-03b) habría sido la opción con mayor valor didáctico para la memoria DAW, al mostrar el ciclo completo de autenticación. Sin embargo, el riesgo de introducir vulnerabilidades de seguridad en una aplicación que maneja datos de salud de categoría especial (art. 9 RGPD) no está justificado por motivos exclusivamente académicos.
 
 ---
 
