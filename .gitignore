@@ -22,6 +22,10 @@ OUTPUTS/academic/dist/*.html
 # Firebase
 .firebase/
 
+# Firebase Emulator data (persisted locally, not committed)
+code/emulator_data/*
+!code/emulator_data/.gitkeep
+
 # Local files
 *.local
 
