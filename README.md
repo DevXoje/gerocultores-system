@@ -35,7 +35,7 @@ code/
 └── api/        ← Express + Firebase Admin SDK
 ```
 
-**Motivo**: separar el código de la aplicación del scaffolding de documentación y agentes (SPEC/, DECISIONS/, PLAN/, AGENTS/, etc.), facilitar el control de dependencias por proyecto y alinear con la configuración de Firebase Hosting (`"public": "code/frontend/dist"`).
+**Motivo**: separar el código de la aplicación del scaffolding de documentación y agentes (SPEC/, DECISIONS/, PLAN/, AGENTS/, etc.), facilitar el control de dependencias por proyecto y alinear con la configuración de Firebase Hosting (`"public": "frontend/dist"` en `code/firebase.json`).
 
 > Si ves referencias a `frontend/` o `api/` sin el prefijo `code/` en scripts o documentación anteriores, considera obsoletas esas rutas.
 
@@ -127,8 +127,11 @@ O desde la raíz, si prefieres:
 
 El emulador local simula Auth, Firestore y Hosting sin necesidad de conectarse a Firebase en la nube.
 
+> **Importante**: los archivos `firebase.json` y `.firebaserc` están ahora en `code/`. Los comandos `firebase` deben ejecutarse desde ese directorio (o usar `--config` desde la raíz).
+
 ```bash
-# Desde la raíz del repositorio
+# Desde code/
+cd code
 firebase emulators:start --import emulators/ --export-on-exit
 ```
 
@@ -220,16 +223,18 @@ npm test
 
 ### Firebase
 
-```bash
-# Iniciar emuladores (desde la raíz del repositorio)
-firebase emulators:start --import emulators/ --export-on-exit
+> **Nota**: `firebase.json` y `.firebaserc` están en `code/`. Todos los comandos `firebase` deben ejecutarse desde `code/` (o usar `--config code/firebase.json` desde la raíz).
 
-# Deploy a Firebase Hosting (requiere proyecto configurado en .firebaserc)
-firebase deploy --only hosting
-# IMPORTANTE: esto despliega code/frontend/dist/ — ejecuta `npm run build` en code/frontend antes
+```bash
+# Iniciar emuladores (desde code/)
+cd code && firebase emulators:start --import emulators/ --export-on-exit
+
+# Deploy a Firebase Hosting (requiere proyecto configurado en code/.firebaserc)
+cd code && firebase deploy --only hosting
+# IMPORTANTE: esto despliega frontend/dist/ — ejecuta `npm run build` en code/frontend antes
 
 # Deploy completo (hosting + rules + etc.)
-firebase deploy
+cd code && firebase deploy
 ```
 
 ---
@@ -241,14 +246,14 @@ firebase deploy
    cd code/frontend
    npm run build
    ```
-   Esto genera `code/frontend/dist/` (configurado en `firebase.json` como `"public": "code/frontend/dist"`).
+   Esto genera `code/frontend/dist/` (configurado en `code/firebase.json` como `"public": "frontend/dist"`).
 
 2. **Deploy a Hosting**:
    ```bash
-   # Desde la raíz del repositorio
-   firebase deploy --only hosting
+   # Desde code/
+   cd code && firebase deploy --only hosting
    ```
-   > Requiere tener el proyecto Firebase configurado en `.firebaserc` y haber ejecutado `firebase login`.
+   > Requiere tener el proyecto Firebase configurado en `code/.firebaserc` y haber ejecutado `firebase login`.
 
 3. **Verificar**:
    La URL de tu app aparecerá al final del output de `firebase deploy`.
@@ -370,7 +375,7 @@ git commit -m "chore: actualizar dependencias de code/frontend"
 ### La API no conecta a Firestore
 
 - Asegúrate de que el emulador está corriendo **antes** de arrancar la API
-- Verifica que `FIREBASE_PROJECT_ID` en `code/api/.env` coincide con el del emulador (`.firebaserc`)
+- Verifica que `FIREBASE_PROJECT_ID` en `code/api/.env` coincide con el del emulador (`code/.firebaserc`)
 - Inspecciona los logs de la API: `cd code/api && npm run dev` muestra stdout/stderr
 
 ### El frontend no puede llamar a la API
@@ -394,10 +399,10 @@ gerocultores-system/
 ├── AGENTS.md               ← instrucciones para agentes IA (en inglés, no editar)
 ├── PROJECT_BRIEF.md        ← visión, alcance y posicionamiento del producto
 ├── TECH_GUIDE.md           ← convenciones técnicas y de código
-├── firebase.json           ← configuración Firebase (hosting, emuladores)
-├── .firebaserc             ← alias del proyecto Firebase
 ├── .env.example            ← plantilla de variables de entorno
 ├── code/
+│   ├── firebase.json       ← configuración Firebase (hosting, emuladores)
+│   ├── .firebaserc         ← alias del proyecto Firebase
 │   ├── frontend/           ← Vue 3 + Vite + Tailwind CSS + TypeScript
 │   │   ├── src/            ← código fuente Vue
 │   │   ├── package.json

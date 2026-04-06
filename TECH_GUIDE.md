@@ -28,6 +28,8 @@
 
 ```
 code/
+├── firebase.json           # Configuración Firebase (hosting, firestore, emulators)
+├── .firebaserc             # Alias del proyecto Firebase
 ├── frontend/
 │   ├── src/
 │   │   ├── assets/             # Imágenes estáticas, fuentes
@@ -59,11 +61,6 @@ code/
     ├── server.ts               # Punto de entrada (puerto, listen)
     ├── package.json
     └── tsconfig.json
-
-firebase/
-├── firestore.rules         # Reglas de seguridad Firestore
-├── firestore.indexes.json  # Índices compuestos
-└── firebase.json           # Configuración Firebase (hosting, firestore, emulators)
 ```
 
 ### 1.3 Convenciones de imports
@@ -391,8 +388,8 @@ npm install -g firebase-tools
 # Login en Firebase
 firebase login
 
-# Iniciar Firebase emulators (Auth + Firestore)
-firebase emulators:start
+# Iniciar Firebase emulators (Auth + Firestore) — desde code/
+cd code && firebase emulators:start
 ```
 
 ### 8.2 Desarrollo local
@@ -404,8 +401,8 @@ cd code/frontend && npm run dev
 # API (Express en http://localhost:3000)
 cd code/api && npm run dev
 
-# Firebase emulators (Auth: 9099, Firestore: 8080, Emulator UI: 4000)
-firebase emulators:start
+# Firebase emulators (Auth: 9099, Firestore: 8080, Emulator UI: 4000) — desde code/
+cd code && firebase emulators:start
 ```
 
 ### 8.3 Build y despliegue
@@ -417,14 +414,14 @@ cd code/frontend && npm run build
 # Build de la API
 cd code/api && npm run build
 
-# Deploy completo a Firebase Hosting + Functions (si aplica)
-firebase deploy
+# Deploy completo a Firebase Hosting + Functions (si aplica) — desde code/
+cd code && firebase deploy
 
 # Deploy solo Hosting
-firebase deploy --only hosting
+cd code && firebase deploy --only hosting
 
 # Deploy solo Firestore Rules
-firebase deploy --only firestore:rules
+cd code && firebase deploy --only firestore:rules
 ```
 
 ### 8.4 Type checking
