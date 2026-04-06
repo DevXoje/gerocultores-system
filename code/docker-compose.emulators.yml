@@ -1,0 +1,33 @@
+
+# Firebase Emulator Suite — Docker Compose
+#
+# Usage (from the code/ directory):
+#   Start (background):  docker compose -f docker-compose.emulators.yml up -d
+#   Rebuild & start:     docker compose -f docker-compose.emulators.yml up --build -d
+#   Stop:                docker compose -f docker-compose.emulators.yml down
+#
+# Or use the wrapper script at the root of code/:
+#   ./start_emulators.sh          → up -d
+#   ./start_emulators.sh --build  → up --build -d
+#   ./start_emulators.sh --down   → down
+
+services:
+  firebase-emulators:
+    build:
+      context: ./          # code/ is the build context
+      dockerfile: emulator/Dockerfile
+    ports:
+      - "9099:9099"        # Authentication emulator
+      - "18080:8080"       # Firestore emulator (18080 en host → 8080 en contenedor; el 8080 lo ocupa Docker Desktop en macOS)
+      - "4000:4000"        # Emulator UI hub
+    volumes:
+      # Persist emulator data (users, documents) between container restarts.
+      # The host directory code/emulator_data/ is tracked via .gitkeep but
+      # its contents are git-ignored (see root .gitignore).
+      - ./emulator_data:/emulator_data
+    environment:
+      # Enables the emulator UI settings panel (harmless if not used).
+      FIREBASE_CLI_EXPERIMENTS: emulatoruisettings
+    # 60s de timeout para que el entrypoint tenga tiempo de exportar datos antes de SIGKILL
+    stop_grace_period: 60s
+    restart: unless-stopped
