@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
-import LoginView from '@/views/LoginView.vue'
+import LoginPage from '@/business/auth/presentation/pages/LoginPage.vue'
 import DashboardView from '@/views/DashboardView.vue'
 
 /**
@@ -17,7 +17,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    component: LoginView,
+    component: LoginPage,
     meta: { requiresAuth: false },
   },
   {

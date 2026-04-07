@@ -22,7 +22,7 @@ vi.mock('@/business/auth/useAuthStore', () => ({
 }))
 
 import { useAuthStore } from '@/business/auth/useAuthStore'
-import LoginView from './LoginView.vue'
+import LoginPage from './LoginPage.vue'
 
 // Helper: create a test router
 function createTestRouter() {
@@ -30,7 +30,7 @@ function createTestRouter() {
     history: createWebHistory(),
     routes: [
       { path: '/', component: { template: '<div />' } },
-      { path: '/login', component: LoginView },
+      { path: '/login', component: LoginPage },
       { path: '/dashboard', component: { template: '<div>Dashboard</div>' } },
     ],
   })
@@ -56,7 +56,7 @@ function mockAuthStore(overrides: {
   return store
 }
 
-describe('LoginView', () => {
+describe('LoginPage', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
@@ -68,7 +68,7 @@ describe('LoginView', () => {
     mockAuthStore({})
     const router = createTestRouter()
 
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 
@@ -85,7 +85,7 @@ describe('LoginView', () => {
     mockAuthStore({})
     const router = createTestRouter()
 
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 
@@ -100,7 +100,7 @@ describe('LoginView', () => {
     mockAuthStore({ signIn: signInMock })
 
     const router = createTestRouter()
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 
@@ -120,7 +120,7 @@ describe('LoginView', () => {
     mockAuthStore({ signIn: signInMock })
 
     const router = createTestRouter()
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 
@@ -147,7 +147,7 @@ describe('LoginView', () => {
     mockAuthStore({ isLoading: true })
 
     const router = createTestRouter()
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 
@@ -159,7 +159,7 @@ describe('LoginView', () => {
     mockAuthStore({ isLoading: true })
 
     const router = createTestRouter()
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 
@@ -175,7 +175,7 @@ describe('LoginView', () => {
     mockAuthStore({ isLoading: false })
 
     const router = createTestRouter()
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 
@@ -193,7 +193,7 @@ describe('LoginView', () => {
     const signInMock = vi.fn().mockResolvedValue(undefined)
     mockAuthStore({ signIn: signInMock })
 
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 
@@ -214,7 +214,7 @@ describe('LoginView', () => {
     mockAuthStore({ signIn: signInMock })
 
     const router = createTestRouter()
-    const wrapper = mount(LoginView, {
+    const wrapper = mount(LoginPage, {
       global: { plugins: [createPinia(), router] },
     })
 

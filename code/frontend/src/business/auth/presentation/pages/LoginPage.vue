@@ -1,40 +1,25 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/business/auth/useAuthStore'
+/**
+ * LoginPage — authentication screen.
+ *
+ * Architecture (frontend-specialist.md §4, §6):
+ *   - Pages import ONLY from presentation/composables/ — never stores or repos directly.
+ *   - BEM class names in HTML template; Tailwind via @apply in <style scoped>.
+ *
+ * Stitch reference: screen e5e3e7eea6e249929b0deef401bf083b
+ * (design-source.md row: Login screen — Care & Serenity portal)
+ */
+import { useLogin } from '../composables/useLogin'
 
-// ─── Composable dependencies ─────────────────────────────────────────────────
-// Per frontend-specialist.md §7: composables are the bridge between pages and stores.
-// However, for the auth store (global state), the page imports it directly via useAuthStore().
-// This is the established pattern for the auth module (see AGENTS.md §3).
-
-const store = useAuthStore()
-const router = useRouter()
-
-// ─── Local form state ────────────────────────────────────────────────────────
-
-const email = ref('')
-const passwordInput = ref('')
-const errorMessage = ref<string | null>(null)
-const showPassword = ref(false)
-
-// ─── Event handlers ───────────────────────────────────────────────────────────
-
-async function handleSubmit(): Promise<void> {
-  // Basic client-side guard: HTML5 `required` attributes handle the native validation,
-  // but we also check here to avoid Firebase calls with empty credentials (TC-08).
-  if (!email.value || !passwordInput.value) return
-
-  errorMessage.value = null
-
-  try {
-    await store.signIn(email.value, passwordInput.value)
-    await router.push('/dashboard')
-  } catch {
-    // Generic error message — must NOT reveal which field failed (TC-04, TC-05).
-    errorMessage.value = 'Credenciales incorrectas. Por favor intente de nuevo.'
-  }
-}
+const {
+  email,
+  passwordInput,
+  errorMessage,
+  showPassword,
+  isLoading,
+  handleSubmit,
+  togglePassword,
+} = useLogin()
 </script>
 
 <template>
@@ -72,7 +57,7 @@ async function handleSubmit(): Promise<void> {
             autocomplete="email"
             required
             data-testid="email-input"
-            :disabled="store.isLoading"
+            :disabled="isLoading"
             placeholder="nombre@care-serenity.com"
           />
         </div>
@@ -92,13 +77,13 @@ async function handleSubmit(): Promise<void> {
               autocomplete="current-password"
               required
               data-testid="password-input"
-              :disabled="store.isLoading"
+              :disabled="isLoading"
             />
             <button
               type="button"
               class="login-form__toggle-visibility"
               :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-              @click="showPassword = !showPassword"
+              @click="togglePassword"
             >
               <span class="material-symbols-outlined" aria-hidden="true">
                 {{ showPassword ? 'visibility_off' : 'visibility' }}
@@ -130,9 +115,9 @@ async function handleSubmit(): Promise<void> {
           class="login-form__submit"
           type="submit"
           data-testid="submit-button"
-          :disabled="store.isLoading"
+          :disabled="isLoading"
         >
-          <template v-if="store.isLoading">
+          <template v-if="isLoading">
             <span
               class="login-form__spinner"
               data-testid="loading-spinner"
@@ -166,7 +151,7 @@ async function handleSubmit(): Promise<void> {
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "../style.css";
+@reference "../../../../style.css";
 
 /* ─── Page wrapper ──────────────────────────────────────────────────────────── */
 .login-page {
