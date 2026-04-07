@@ -46,3 +46,24 @@ Use descriptive English names that match the Vue view name:
 After confirming a screen exists in Stitch, update `OUTPUTS/technical-docs/design-source.md`:
 - Add a row to the Vista ↔ Pantalla Stitch table
 - Include: Vue view name, Stitch screen name, screen ID, and preview URL
+
+---
+
+## Orchestrator Prompt Pattern
+
+When launching any frontend sub-agent, the orchestrator MUST use the template at:
+`PROMPTS/development/frontend-subagent-prompt-template.md`
+
+### Rules
+
+1. **Always inject the specialist FIRST** — the `<identity>` block with `frontend-specialist.md` must appear at the very top of the sub-agent prompt, before any task description or context.
+2. **Fill all `{{VARIABLES}}`** — replace `{{US_ID}}`, `{{TASK_DESCRIPTION}}`, `{{STITCH_SCREEN_ID}}`, and `{{ADDITIONAL_FILES}}` before sending.
+3. **Never bury the specialist reference** — do not mention `frontend-specialist.md` as a suggestion in the body of the prompt. It must be in the `<identity>` block with an explicit STOP instruction.
+
+### Why (Anthropic Principle)
+
+Per Anthropic's prompt engineering best practices:
+- **Put context at the top** — role and identity must come before instructions or task descriptions.
+- **Use XML structure for separation of concerns** — `<identity>`, `<pre_conditions>`, `<rules>`, `<task>`, and `<output_format>` tags make each section unambiguous.
+- **Explicit pre-condition verification** — asking the agent to confirm "✅ loaded" before proceeding forces acknowledgment and reduces silent skipping.
+- **Rules before task** — if rules appear after the task description, the agent may already have started reasoning about the task before internalizing the constraints.
