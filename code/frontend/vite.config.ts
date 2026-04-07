@@ -18,4 +18,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // Vitest configuration
+  // environment: 'jsdom' — required for Vue component tests (window, document, etc.)
+  // Unit tests (stores, use cases) also run fine in jsdom.
+  test: {
+    environment: 'jsdom',
+  },
 })
