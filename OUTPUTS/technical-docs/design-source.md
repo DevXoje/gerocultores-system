@@ -47,3 +47,14 @@ Cuando añadas o cambies un export, actualiza la fila correspondiente o crea una
 
 - Prioridad ante conflicto: **SPEC** define comportamiento y datos; el diseño en Stitch y estos exports son referencia visual.
 - ADR-05 en estado **ACCEPTED** tras este lote de exports (2026-03-28).
+
+## Vista ↔ Pantalla Stitch
+
+> Este mapeo es la referencia canónica para el agente DEVELOPER.
+> Antes de implementar cualquier vista, consulta esta tabla y abre el PNG correspondiente.
+> Si la vista no aparece aquí, créala en Stitch primero (proyecto: Dashboard - Care Home Mgmt, id: 16168255182252500555).
+
+| Vista Vue | Ruta componente | Pantalla Stitch | Export PNG |
+|-----------|----------------|-----------------|------------|
+| `LoginView.vue` | `src/views/LoginView.vue` | Login Screen | `OUTPUTS/design-exports/TBD` |
+| `DashboardView.vue` | `src/views/DashboardView.vue` | Caregiver Dashboard | `OUTPUTS/design-exports/US-03-agenda-home__caregiver-dashboard__20260328.png` |

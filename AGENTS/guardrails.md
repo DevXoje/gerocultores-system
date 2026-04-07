@@ -5,7 +5,7 @@
 
 > These guardrails apply to ALL agents without exception.
 > GGA enforces them at every code review cycle.
-> Last sync with root AGENTS.md: 2026-03-28
+> Last sync with root AGENTS.md: 2026-04-07
 
 ---
 
@@ -145,6 +145,24 @@ CHECK: Are all checklist items in OUTPUTS/academic/README.md ticked?
 SEVERITY: INCOMPLETE (pipeline-level; does not block code reviews)
 ```
 
+## G10 — No UI without Stitch reference
+
+```
+RULE: No agent may implement a view or UI component without first identifying
+      the corresponding Stitch screen in OUTPUTS/technical-docs/design-source.md.
+      If no matching screen exists, the agent must create it in Stitch first.
+SCOPE: DEVELOPER agent
+ACTION_ON_VIOLATION:
+  1. Flag as BLOCKED.
+  2. Agent must identify or create the Stitch screen before writing any Vue
+     component or CSS.
+  3. Export the screen PNG to OUTPUTS/design-exports/ and add a row to
+     OUTPUTS/technical-docs/design-source.md before resuming.
+CHECK: Does the implementation reference a screen from design-source.md?
+       Is the Stitch export file cited in the PR or commit?
+SEVERITY: BLOCKED
+```
+
 ---
 
 ## Guardrail Severity Reference
@@ -173,6 +191,7 @@ vs. **prose-only** (enforced by GGA code review and agent logic only).
 | G07 — No hidden technical debt | ⬜ Prose only | — | Enforced by REVIEWER agent during code review. |
 | G08 — Commit traceability | ✅ Yes | `commit-msg` | Validates Conventional Commits format. Requires `feat(US-XX)` for all `feat` commits. BLOCKED if format is wrong or US-XX is missing from a feat commit. |
 | G09 — Academic coverage | ⬜ Prose only | — | Enforced by WRITER agent pipeline checklist in `OUTPUTS/academic/README.md`. |
+| G10 — No UI without Stitch reference | ⬜ Prose only | — | Enforced by DEVELOPER agent and GGA review. Agent must cite design-source.md row before implementing any Vue component. |
 
 ### Hook File Locations
 
@@ -215,4 +234,4 @@ The pre-commit hook scans staged diffs for the following patterns (case-sensitiv
 - Root `AGENTS.md` contains machine-readable G01–G09 blocks that mirror this file.
 - **If root AGENTS.md and this file diverge, this file (`AGENTS/guardrails.md`) wins.**
 - Update protocol: update this file first, then sync the summary in root `AGENTS.md`.
-- Last hook update: 2026-04-01 — Added G01, G03, G05 (pre-commit) and G08 (commit-msg).
+- Last hook update: 2026-04-07 — Added G10 (prose-only; G01, G03, G05 pre-commit and G08 commit-msg remain active).

@@ -4,7 +4,7 @@
 <!-- This file is machine-readable. It is consumed by GGA at code review time    -->
 <!-- and by AI agents at session start. Human-facing docs are separate.          -->
 <!-- .gga: RULES_FILE="AGENTS.md" — this file is the primary rules source.      -->
-<!-- All guardrails G01–G09 are present below in machine-readable form.          -->
+<!-- All guardrails G01–G10 are present below in machine-readable form.          -->
 
 ---
 
@@ -124,6 +124,15 @@ ACTION_ON_VIOLATION: Mark pipeline incomplete; list missing sections.
 CHECK: Are all checklist items in OUTPUTS/academic/README.md ticked?
 ```
 
+### G10 — No UI without Stitch reference
+```
+RULE: No agent may implement a view or UI component without first identifying
+      the corresponding Stitch screen in OUTPUTS/technical-docs/design-source.md.
+      If no screen exists, create it in Stitch first.
+ACTION_ON_VIOLATION: Flag as BLOCKED; identify or create Stitch screen first.
+CHECK: Does the implementation reference a screen from design-source.md?
+```
+
 ---
 
 ## PR Validation Checklist (Agent-Readable)
@@ -154,6 +163,10 @@ required:
 
   - id: SCOPE_IN_SPEC
     description: All new features/endpoints are traceable to a SPEC/ entry
+    blocking: true
+
+  - id: STITCH_REFERENCE
+    description: Every new Vue view/component cites its Stitch source screen from design-source.md
     blocking: true
 
   - id: COMMIT_FORMAT
@@ -263,7 +276,7 @@ and `AGENTS/roles.md` to satisfy `.gga`'s `RULES_FILE=AGENTS.md` requirement.
 The authoritative full text lives in `AGENTS/`. If the two diverge, `AGENTS/` wins.
 
 **Update protocol**: When updating guardrails, update `AGENTS/guardrails.md` first,
-then sync the summary table and G01–G09 blocks in this file.
+then sync the summary table and G01–G10 blocks in this file.
 
 ---
 
