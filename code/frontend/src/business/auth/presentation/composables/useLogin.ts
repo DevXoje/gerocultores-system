@@ -10,6 +10,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/business/auth/useAuthStore'
+import { ROUTES } from '@/router/route-names'
 
 export function useLogin() {
   const store = useAuthStore()
@@ -29,7 +30,7 @@ export function useLogin() {
     errorMessage.value = null
     try {
       await store.signIn(email.value, passwordInput.value)
-      await router.push('/dashboard')
+      await router.push({ name: ROUTES.DASHBOARD.name })
     } catch {
       // Generic error message — must NOT reveal which field failed (TC-04, TC-05).
       errorMessage.value = 'Credenciales incorrectas. Por favor intente de nuevo.'

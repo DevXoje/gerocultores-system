@@ -1,28 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/business/auth/useAuthStore'
 import { routes } from './routes'
+import { createAuthGuard } from '@/business/auth/presentation/composables/useAuthGuard'
 
+/**
+ * Application router.
+ *
+ * Guard logic is delegated to the auth domain (createAuthGuard) —
+ * it does not live here (frontend-specialist.md §3, task rules).
+ *
+ * Note: useAuthStore().init() must be called before router.isReady()
+ * so that `auth.user` is populated from the Firebase Auth session on page load.
+ */
 const router = createRouter({
   history: createWebHistory(),
   routes,
 })
 
-/**
- * Navigation guard — US-02: Role-based access control.
- * Protects routes that require authentication (meta.requiresAuth === true).
- *
- * Runs before every navigation. If the destination requires auth
- * and no user is signed in, redirects to /login.
- *
- * Note: useAuthStore().init() must have been called before router.isReady()
- * so that `auth.user` is populated from the Firebase Auth session on page load.
- */
-router.beforeEach((to) => {
-  const auth = useAuthStore()
-
-  if (to.meta['requiresAuth'] === true && auth.user === null) {
-    return '/login'
-  }
-})
+router.beforeEach(createAuthGuard())
 
 export default router

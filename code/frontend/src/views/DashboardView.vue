@@ -1,14 +1,7 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/business/auth/useAuthStore'
-import { useRouter } from 'vue-router'
+import { useDashboard } from './useDashboard'
 
-const store = useAuthStore()
-const router = useRouter()
-
-async function handleSignOut(): Promise<void> {
-  await store.signOut()
-  await router.push('/login')
-}
+const { userEmail, signOut } = useDashboard()
 </script>
 
 <template>
@@ -16,11 +9,11 @@ async function handleSignOut(): Promise<void> {
     <header class="dashboard-page__header">
       <h1 class="dashboard-page__title">Panel de control</h1>
       <div class="dashboard-page__user">
-        <span class="dashboard-page__user-email">{{ store.user?.email }}</span>
+        <span class="dashboard-page__user-email">{{ userEmail }}</span>
         <button
           class="dashboard-page__signout"
           type="button"
-          @click="handleSignOut"
+          @click="signOut"
         >
           Cerrar sesión
         </button>

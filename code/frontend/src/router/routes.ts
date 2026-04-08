@@ -1,28 +1,27 @@
 import type { RouteRecordRaw } from 'vue-router'
-import LoginPage from '@/business/auth/presentation/pages/LoginPage.vue'
+import { ROUTES } from './route-names'
+import { authRoutes } from '@/business/auth/routes'
 import DashboardView from '@/views/DashboardView.vue'
 
 /**
  * Application route definitions.
  *
+ * Route paths and names are sourced from ROUTES constants — no magic strings.
+ * Each domain module exports its own routes (auth, residents, schedule, incidents).
+ *
  * meta.requiresAuth:
- *   - true  → route is protected; router guard redirects to /login if user is unauthenticated
+ *   - true  → route is protected; auth guard redirects to login if unauthenticated
  *   - false → public route; accessible without authentication
  */
 export const routes: RouteRecordRaw[] = [
   {
-    path: '/',
-    redirect: '/login',
+    path: ROUTES.HOME.path,
+    redirect: { name: ROUTES.AUTH.LOGIN.name },
   },
+  ...authRoutes,
   {
-    path: '/login',
-    name: 'login',
-    component: LoginPage,
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/dashboard',
-    name: 'dashboard',
+    path: ROUTES.DASHBOARD.path,
+    name: ROUTES.DASHBOARD.name,
     component: DashboardView,
     meta: { requiresAuth: true },
   },

@@ -2,6 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
+import { ROUTES } from '@/router/route-names'
+
+// Polyfill Temporal API for jsdom test environment (not yet available in Node jsdom)
+if (typeof globalThis.Temporal === 'undefined') {
+  Object.defineProperty(globalThis, 'Temporal', {
+    value: {
+      Now: {
+        plainDateISO: () => ({ year: new Date().getFullYear() }),
+      },
+    },
+    configurable: true,
+  })
+}
 
 // Mock firebase/auth before any imports that depend on it
 vi.mock('firebase/auth', () => ({
@@ -29,9 +42,9 @@ function createTestRouter() {
   return createRouter({
     history: createWebHistory(),
     routes: [
-      { path: '/', component: { template: '<div />' } },
-      { path: '/login', component: LoginPage },
-      { path: '/dashboard', component: { template: '<div>Dashboard</div>' } },
+      { path: ROUTES.HOME.path, component: { template: '<div />' } },
+      { path: ROUTES.AUTH.LOGIN.path, name: ROUTES.AUTH.LOGIN.name, component: LoginPage },
+      { path: ROUTES.DASHBOARD.path, name: ROUTES.DASHBOARD.name, component: { template: '<div>Dashboard</div>' } },
     ],
   })
 }
@@ -187,7 +200,7 @@ describe('LoginPage', () => {
 
   it('should redirect to /dashboard on successful login', async () => {
     const router = createTestRouter()
-    await router.push('/login')
+    await router.push(ROUTES.AUTH.LOGIN.path)
     await router.isReady()
 
     const signInMock = vi.fn().mockResolvedValue(undefined)
@@ -204,7 +217,7 @@ describe('LoginPage', () => {
     // Wait for all pending promises (async signIn + router.push) to resolve
     await flushPromises()
 
-    expect(router.currentRoute.value.path).toBe('/dashboard')
+    expect(router.currentRoute.value.path).toBe(ROUTES.DASHBOARD.path)
   })
 
   // ─── TC: Does not submit when fields are empty ────────────────────────────
