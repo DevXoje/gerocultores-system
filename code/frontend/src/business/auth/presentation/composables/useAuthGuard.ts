@@ -12,14 +12,14 @@
  */
 import type { NavigationGuard } from 'vue-router'
 import { useAuthStore } from '@/business/auth/useAuthStore'
-import { ROUTES } from '@/router/route-names'
+import { AUTH_ROUTES } from '@/business/auth/route-names'
 
 export function createAuthGuard(): NavigationGuard {
   return (to) => {
     const auth = useAuthStore()
 
     if (to.meta['requiresAuth'] === true && auth.user === null) {
-      return { name: ROUTES.AUTH.LOGIN.name }
+      return { name: AUTH_ROUTES.LOGIN.name }
     }
   }
 }

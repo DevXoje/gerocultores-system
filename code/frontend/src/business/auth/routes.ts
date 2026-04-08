@@ -5,13 +5,13 @@
  * Paths and names are sourced from ROUTES constants — no magic strings.
  */
 import type { RouteRecordRaw } from 'vue-router'
-import { ROUTES } from '@/router/route-names'
+import { AUTH_ROUTES } from './route-names'
 import LoginPage from './presentation/pages/LoginPage.vue'
 
 export const authRoutes: RouteRecordRaw[] = [
   {
-    path: ROUTES.AUTH.LOGIN.path,
-    name: ROUTES.AUTH.LOGIN.name,
+    path: AUTH_ROUTES.LOGIN.path,
+    name: AUTH_ROUTES.LOGIN.name,
     component: LoginPage,
     meta: { requiresAuth: false },
   },

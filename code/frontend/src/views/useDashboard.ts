@@ -10,7 +10,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/business/auth/useAuthStore'
-import { ROUTES } from '@/router/route-names'
+import { AUTH_ROUTES } from '@/business/auth/route-names'
 
 export function useDashboard() {
   const store = useAuthStore()
@@ -20,7 +20,7 @@ export function useDashboard() {
 
   async function signOut(): Promise<void> {
     await store.signOut()
-    await router.push({ name: ROUTES.AUTH.LOGIN.name })
+    await router.push({ name: AUTH_ROUTES.LOGIN.name })
   }
 
   return { userEmail, signOut }

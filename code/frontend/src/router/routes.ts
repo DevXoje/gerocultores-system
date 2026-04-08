@@ -1,12 +1,13 @@
 import type { RouteRecordRaw } from 'vue-router'
-import { ROUTES } from './route-names'
+import { AUTH_ROUTES } from '@/business/auth/route-names'
+import { DASHBOARD_ROUTES } from '@/views/route-names'
 import { authRoutes } from '@/business/auth/routes'
 import DashboardView from '@/views/DashboardView.vue'
 
 /**
  * Application route definitions.
  *
- * Route paths and names are sourced from ROUTES constants — no magic strings.
+ * Route paths and names are sourced from module-owned route-names constants — no magic strings.
  * Each domain module exports its own routes (auth, residents, schedule, incidents).
  *
  * meta.requiresAuth:
@@ -15,13 +16,13 @@ import DashboardView from '@/views/DashboardView.vue'
  */
 export const routes: RouteRecordRaw[] = [
   {
-    path: ROUTES.HOME.path,
-    redirect: { name: ROUTES.AUTH.LOGIN.name },
+    path: '/',
+    redirect: { name: AUTH_ROUTES.LOGIN.name },
   },
   ...authRoutes,
   {
-    path: ROUTES.DASHBOARD.path,
-    name: ROUTES.DASHBOARD.name,
+    path: DASHBOARD_ROUTES.path,
+    name: DASHBOARD_ROUTES.name,
     component: DashboardView,
     meta: { requiresAuth: true },
   },
