@@ -20,6 +20,7 @@ const {
   handleSubmit,
   togglePassword,
 } = useLogin()
+const year = Temporal.Now.plainDateISO().year;
 </script>
 
 <template>
@@ -37,29 +38,15 @@ const {
 
     <!-- Login card -->
     <div class="login-card">
-      <form
-        class="login-form"
-        data-testid="login-form"
-        @submit.prevent="handleSubmit"
-        novalidate
-      >
+      <form class="login-form" data-testid="login-form" @submit.prevent="handleSubmit" novalidate>
         <!-- Email field -->
         <div class="login-form__field">
           <label class="login-form__label" for="login-email">
             Correo electrónico
           </label>
-          <input
-            id="login-email"
-            v-model="email"
-            class="login-form__input"
-            type="email"
-            name="email"
-            autocomplete="email"
-            required
-            data-testid="email-input"
-            :disabled="isLoading"
-            placeholder="nombre@care-serenity.com"
-          />
+          <input id="login-email" v-model="email" class="login-form__input" type="email" name="email"
+            autocomplete="email" required data-testid="email-input" :disabled="isLoading"
+            placeholder="nombre@care-serenity.com" />
         </div>
 
         <!-- Password field with visibility toggle -->
@@ -68,23 +55,11 @@ const {
             Contraseña
           </label>
           <div class="login-form__input-wrapper">
-            <input
-              id="login-password"
-              v-model="passwordInput"
-              class="login-form__input login-form__input--password"
-              :type="showPassword ? 'text' : 'password'"
-              name="password"
-              autocomplete="current-password"
-              required
-              data-testid="password-input"
-              :disabled="isLoading"
-            />
-            <button
-              type="button"
-              class="login-form__toggle-visibility"
-              :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-              @click="togglePassword"
-            >
+            <input id="login-password" v-model="passwordInput" class="login-form__input login-form__input--password"
+              :type="showPassword ? 'text' : 'password'" name="password" autocomplete="current-password" required
+              data-testid="password-input" :disabled="isLoading" />
+            <button type="button" class="login-form__toggle-visibility"
+              :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'" @click="togglePassword">
               <span class="material-symbols-outlined" aria-hidden="true">
                 {{ showPassword ? 'visibility_off' : 'visibility' }}
               </span>
@@ -93,12 +68,7 @@ const {
         </div>
 
         <!-- Generic error message (TC-04, TC-05) -->
-        <div
-          v-if="errorMessage"
-          class="login-form__error"
-          data-testid="error-message"
-          role="alert"
-        >
+        <div v-if="errorMessage" class="login-form__error" data-testid="error-message" role="alert">
           <span class="material-symbols-outlined login-form__error-icon" aria-hidden="true">error</span>
           <span>{{ errorMessage }}</span>
         </div>
@@ -111,18 +81,9 @@ const {
         </div>
 
         <!-- Submit button with loading state (TC-09) -->
-        <button
-          class="login-form__submit"
-          type="submit"
-          data-testid="submit-button"
-          :disabled="isLoading"
-        >
+        <button class="login-form__submit" type="submit" data-testid="submit-button" :disabled="isLoading">
           <template v-if="isLoading">
-            <span
-              class="login-form__spinner"
-              data-testid="loading-spinner"
-              aria-hidden="true"
-            />
+            <span class="login-form__spinner" data-testid="loading-spinner" aria-hidden="true" />
             <span>Cargando...</span>
           </template>
           <template v-else>
@@ -144,7 +105,7 @@ const {
         <span class="login-footer__separator" aria-hidden="true">|</span>
         <a href="#" class="login-footer__link">Soporte Técnico</a>
       </nav>
-      <p class="login-footer__copyright">© 2024 Care &amp; Serenity Editorial. Staff Portal.</p>
+      <p class="login-footer__copyright">© {{ year }} Care &amp; Serenity Editorial. Staff Portal.</p>
     </footer>
   </div>
 </template>
@@ -220,10 +181,10 @@ const {
   background-color: var(--color-surface-container-low);
   color: var(--color-on-surface);
   transition: box-shadow 0.15s ease;
-}
 
-.login-form__input:focus {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  &:focus {
+    box-shadow: 1px 1px 10px 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  }
 }
 
 .login-form__input:disabled {
@@ -235,8 +196,7 @@ const {
 }
 
 .login-form__toggle-visibility {
-  @apply absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center
-         w-8 h-8 rounded-lg border-none bg-transparent cursor-pointer;
+  @apply absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-lg border-none bg-transparent cursor-pointer;
   color: var(--color-outline);
   transition: color 0.15s ease;
 }
@@ -279,8 +239,7 @@ const {
 
 /* ─── Submit button ──────────────────────────────────────────────────────────── */
 .login-form__submit {
-  @apply flex items-center justify-center gap-2 w-full rounded-full py-4
-         font-semibold text-base cursor-pointer border-none;
+  @apply flex items-center justify-center gap-2 w-full rounded-full py-4 font-semibold text-base cursor-pointer border-none;
   font-family: var(--font-headline);
   color: var(--color-on-primary);
   background: linear-gradient(135deg, #005050 0%, #006a6a 100%);
@@ -309,7 +268,9 @@ const {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Footer ─────────────────────────────────────────────────────────────────── */
