@@ -1,6 +1,6 @@
-# Gerocultores System
+# GeroCare
 
-> **Aplicación web para gerocultores**: agenda diaria, gestión de residentes y registro de incidencias.
+> GeroCare — **Aplicación web para gerocultores**: agenda diaria, gestión de residentes y registro de incidencias.
 > Stack: Vue 3 + TypeScript (frontend en `code/frontend`), Express + Firebase Admin (API en `code/api`), Firebase Hosting + Firestore.
 > Proyecto académico DAW — desarrollado de forma individual.
 

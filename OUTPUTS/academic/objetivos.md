@@ -2,7 +2,7 @@
 
 > **Borrador** — sección de objetivos (integrada en la Introducción o como sección propia)  
 > **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: gerocultores-system — Agenda digital para gerocultores  
+> **Proyecto**: GeroCare — Agenda digital para gerocultores  
 > **Centro**: CIPFP Batoi d'Alcoi  
 > **Generado**: 2026-03-29 — sdd-init agent  
 > **Estado**: BORRADOR — pendiente revisión y personalización por el autor  

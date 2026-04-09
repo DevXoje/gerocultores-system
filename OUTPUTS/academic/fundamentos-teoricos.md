@@ -1,6 +1,6 @@
 # 2. Fundamentos teóricos y tecnológicos
 
-> **Sección de la memoria académica DAW — gerocultores-system**  
+> **Sección de la memoria académica DAW — GeroCare**  
 > Autor: Jose Vilches Sánchez · CIPFP Batoi d'Alcoi · 2025-2026  
 > ADRs de referencia: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05  
 > Estado: BORRADOR — listo para revisión
@@ -97,6 +97,6 @@ Dentro de este ciclo ágil, adopté **Spec-Driven Development (SDD)** como metod
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — gerocultores-system*  
+*Borrador generado: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
 *ADRs fuente: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05*  
 *Extensión aproximada: 1.350 palabras*

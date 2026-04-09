@@ -1,6 +1,6 @@
 # 8. Comparación con alternativas y soluciones existentes
 
-> **Sección de la memoria académica DAW — gerocultores-system**  
+> **Sección de la memoria académica DAW — GeroCare**  
 > Autor: Jose Vilches Sánchez · CIPFP Batoi d'Alcoi · 2025-2026  
 > ADRs de referencia: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05  
 > Estado: BORRADOR — listo para revisión
@@ -21,7 +21,7 @@ Existen soluciones SaaS (*Software as a Service*, software como servicio) especi
 | **Gestion-Residencias.com** | ~50–100 €/mes | Sí, web responsive | Medio | Alta | Incluido | Precio inviable para proyecto académico; interfaz orientada a coordinadores, no a gerocultores en ronda |
 | **iCare (aCareGiver)** | ~60–150 €/mes | Sí, app móvil | Bajo (flujos predefinidos) | Media | Parcial (depende de configuración) | Licencias por usuario; diseño genérico no adaptado al perfil del gerocultor español; datos en servidores fuera de la UE según condiciones del plan básico |
 | **Google Sheets + formularios** | 0 € | Sí, web | Alto (total libertad) | Nula (sin control de versiones) | ❌ Muy bajo (sin RBAC, sin auditoría, datos sensibles en texto plano) | Sin control de acceso por rol; sin auditoría; alto riesgo RGPD con datos de salud; no escalable |
-| **gerocultores-system (MVP)** | ~0 €/mes (Firebase Spark) | Sí, diseño tablet-first | Alto (proyecto propio) | Alta (auditoría RNF-07) | Diseñado desde el inicio para datos de salud art. 9 RGPD | — (propuesta de este proyecto) |
+| **GeroCare (MVP)** | ~0 €/mes (Firebase Spark) | Sí, diseño tablet-first | Alto (proyecto propio) | Alta (auditoría RNF-07) | Diseñado desde el inicio para datos de salud art. 9 RGPD | — (propuesta de este proyecto) |
 
 La principal limitación del MVP frente a las soluciones comerciales es que carece de soporte técnico externo, actualizaciones continuas y funcionalidades avanzadas como integración con sistemas de historial clínico (HIS) o facturación. Sin embargo, para el contexto académico y como demostración de viabilidad técnica, el MVP cubre los requisitos Must del gerocultor con un coste de infraestructura significativamente menor.
 
@@ -52,6 +52,6 @@ Todas las decisiones tecnológicas del proyecto pasaron por una evaluación expl
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — gerocultores-system*  
+*Borrador generado: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
 *ADRs fuente: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05*  
 *Extensión aproximada: 560 palabras*

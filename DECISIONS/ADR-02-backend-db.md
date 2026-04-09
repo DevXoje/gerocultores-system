@@ -4,7 +4,7 @@
 PROPOSED
 
 ## Context
-El proyecto "gerocultores-system" necesita un backend para almacenar datos de residentes, turnos, e incidencias. Es un proyecto académico con 1 desarrollador y un deadline corto de ~6-7 semanas. Además, los datos de los residentes (historiales médicos, medicinas, observaciones) son datos sensibles sometidos al RGPD, por lo que la residencia de los datos en la UE es crítica.
+El proyecto "gerocultores-system" (GeroCare) necesita un backend para almacenar datos de residentes, turnos, e incidencias. Es un proyecto académico con 1 desarrollador y un deadline corto de ~6-7 semanas. Además, los datos de los residentes (historiales médicos, medicinas, observaciones) son datos sensibles sometidos al RGPD, por lo que la residencia de los datos en la UE es crítica.
 
 ## Decision
 Se decide utilizar **Supabase (Backend-as-a-Service)** como backend y base de datos relacional (PostgreSQL). Supabase se configurará en la región EU (ej. Frankfurt) para cumplir requisitos de residencia de datos, utilizando **Row-Level Security (RLS)** para control estricto de accesos por roles.

@@ -2,7 +2,7 @@
 
 > **Borrador** — sección 10 de la memoria académica DAW  
 > **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: Agenda digital para gerocultores — gerocultores-system  
+> **Proyecto**: GeroCare — Agenda digital para gerocultores  
 > **Centro**: CIPFP Batoi d'Alcoi  
 > **Generado**: 2026-04-06 — WRITER agent  
 > **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
@@ -12,7 +12,7 @@
 
 ## 10.1 Clasificación de los datos tratados
 
-gerocultores-system gestiona tres categorías de datos con distinto nivel de sensibilidad según el Reglamento General de Protección de Datos (RGPD, Reglamento UE 2016/679).
+GeroCare gestiona tres categorías de datos con distinto nivel de sensibilidad según el Reglamento General de Protección de Datos (RGPD, Reglamento UE 2016/679).
 
 En primer lugar, **datos de categoría especial** (art. 9 RGPD): diagnósticos médicos, alergias, medicación activa y pautas de administración, preferencias de cuidado asociadas a condiciones de salud, y la descripción e información de severidad de las incidencias registradas. En el modelo de datos del sistema, estos campos están identificados explícitamente como `<!-- RGPD: dato sensible -->` en `SPEC/entities.md`. Los campos afectados son `Residente.diagnosticos`, `Residente.alergias`, `Residente.medicacion`, `Residente.preferencias`, `Residente.fechaNacimiento`, `Residente.foto`, `Incidencia.descripcion` e `Incidencia.severidad`.
 
@@ -60,6 +60,6 @@ Las medidas descritas en las secciones anteriores están documentadas en los ADR
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — gerocultores-system*  
+*Borrador generado: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
 *Fuentes: SPEC/constraints.md, SPEC/entities.md, DECISIONS/ADR-03b-authentication-firebase.md, DECISIONS/ADR-04b-deployment-rgpd.md, SPEC/requirements.md (RNF-03, RNF-07, RNF-09)*  
 *Engram topic key: academic/seguridad-rgpd*

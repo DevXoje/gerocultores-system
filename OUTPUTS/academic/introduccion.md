@@ -2,7 +2,7 @@
 
 > **Borrador** — sección 1 de la memoria académica DAW  
 > **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: Agenda digital para gerocultores — gerocultores-system  
+> **Proyecto**: GeroCare — Agenda digital para gerocultores  
 > **Centro**: CIPFP Batoi d'Alcoi  
 > **Generado**: 2026-03-29 — sdd-init agent  
 > **Estado**: BORRADOR — pendiente revisión y personalización por el autor  

@@ -2,7 +2,7 @@
 
 > **Borrador** — para la memoria académica DAW (puede integrarse en sección 1 o como sección propia antes del análisis de requisitos)  
 > **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: gerocultores-system — Agenda digital para gerocultores  
+> **Proyecto**: GeroCare — Agenda digital para gerocultores  
 > **Centro**: CIPFP Batoi d'Alcoi  
 > **Generado**: 2026-03-29 — sdd-init agent  
 > **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
@@ -54,6 +54,6 @@ Durante el desarrollo se aplican nueve guardrails (G01..G09) definidos en `AGENT
 
 ---
 
-*Borrador generado: 2026-03-29 — sdd-init agent — gerocultores-system*  
+*Borrador generado: 2026-03-29 — sdd-init agent — GeroCare (gerocultores-system)*  
 *Fuentes: PLAN/backlog.md, PLAN/current-sprint.md, SPEC/constraints.md, AGENTS.md*  
 *Engram topic key: academic/metodologia*

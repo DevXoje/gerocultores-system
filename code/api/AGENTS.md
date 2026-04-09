@@ -7,7 +7,7 @@
 
 ## Module
 
-**gerocultores-system — Express REST API**
+**GeroCare — Express REST API (gerocultores-system)**
 
 This module is the backend layer: receives HTTP requests from the Vue frontend, validates them, applies business logic, and reads/writes Firestore via Firebase Admin SDK.
 

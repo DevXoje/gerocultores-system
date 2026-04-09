@@ -7,7 +7,7 @@
 
 ## 1. Module Overview
 
-**Module**: Frontend — Vue 3 SPA for gerocultores-system
+**Module**: Frontend — Vue 3 SPA for GeroCare (gerocultores-system)
 **Purpose**: Daily scheduling, resident management, and incident reporting for care staff. Tablet and mobile first.
 **Project type**: DAW academic project (CIPFP Batoi, solo developer)
 **Deadline**: 2026-05-18

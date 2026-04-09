@@ -3,7 +3,7 @@
 > **Autor**: Jose Vilches Sánchez  
 > **Tutor**: Andres Martos Gazquez  
 > **Centro**: CIPFP Batoi d'Alcoi  
-> **Proyecto**: Sistema de Gestión para Gerocultores  
+> **Proyecto**: GeroCare — Sistema de Gestión para Gerocultores  
 > **Estado**: BORRADOR — 2026-04-06  
 > **Longitud objetivo**: ~1.800–2.200 palabras (páginas 20–25 de la memoria)
 

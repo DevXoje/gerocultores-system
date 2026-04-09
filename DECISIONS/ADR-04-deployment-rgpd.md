@@ -4,7 +4,7 @@
 PROPOSED
 
 ## Context
-El desarrollo "gerocultores-system" almacenará información relativa a turnos, medicamentos, e incidentes de salud de personas mayores. Según el Reglamento General de Protección de Datos (RGPD) en Europa, estos son datos personales de categoría especial (datos relativos a la salud), requiriendo medidas estrictas de confidencialidad e integridad (Art. 32 RGPD) e idealmente alojamiento dentro de la Unión Europea para simplificar el cumplimiento normativo.
+El desarrollo "gerocultores-system" (GeroCare) almacenará información relativa a turnos, medicamentos, e incidentes de salud de personas mayores. Según el Reglamento General de Protección de Datos (RGPD) en Europa, estos son datos personales de categoría especial (datos relativos a la salud), requiriendo medidas estrictas de confidencialidad e integridad (Art. 32 RGPD) e idealmente alojamiento dentro de la Unión Europea para simplificar el cumplimiento normativo.
 
 ## Decision
 Se decide un modelo de **hosting en la Unión Europea (EU Region)** tanto para el frontend (Vercel/Netlify EU edge functions) como para la base de datos y autenticación (Supabase Frankfurt). Se implementará un **Plan CI/CD minimalista** con cifrado en reposo y tránsito, junto con anonimización estricta para datos de prueba.

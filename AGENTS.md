@@ -21,7 +21,7 @@ Full per-agent artifacts live in:
 
 - **Project**: gerocultores-system
 - **Type**: DAW academic project (individual, solo developer)
-- **Description**: Web app for caregivers (gerocultores): daily scheduling,
+- **Description**: GeroCare — Web app for caregivers (gerocultores): daily scheduling,
   resident management, and incident reporting. Tablet and mobile first.
 - **Deadline**: 2026-05-18
 - **Stack**: TBD (to be resolved via ADR-01 through ADR-04 in `DECISIONS/`)

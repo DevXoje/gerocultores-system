@@ -5,7 +5,7 @@
 
 ## Descripción del software
 
-App para gerocultores: agenda diaria, gestión de residentes e incidencias. Uso ágil en tablet y móvil. Historial por residente y alertas de incidencias críticas.
+**GeroCare** — App para gerocultores: agenda diaria, gestión de residentes e incidencias. Uso ágil en tablet y móvil. Historial por residente y alertas de incidencias críticas.
 
 ## Contexto académico
 

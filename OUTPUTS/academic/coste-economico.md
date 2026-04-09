@@ -102,11 +102,11 @@ Existen en el mercado soluciones SaaS especializadas en la gestión de residenci
 - **iCare (aCareGiver)**: herramienta orientada a gerocultores y centros sociosanitarios. Precio variable según licencias (estimación: **60–150 €/mes**).
 - **Google Sheets + formularios**: solución improvisada empleada en muchas residencias pequeñas. Coste nominal cero, pero sin control de acceso, sin auditoría y con alto riesgo RGPD para datos de salud.
 
-En comparación, el MVP de **gerocultores-system** tiene un coste marginal de infraestructura de **~0 €/mes** durante la fase académica (Firebase Spark Plan). Si se desplegara en producción real, el coste de infraestructura ascendería a unos **4–5 €/mes**, frente a los 50–200 €/mes de las soluciones comerciales. La diferencia principal es que las soluciones comerciales incluyen soporte, actualizaciones continuas y cumplimiento RGPD gestionado por el proveedor, mientras que el MVP académico requeriría mantenimiento propio.
+En comparación, el MVP de **GeroCare** tiene un coste marginal de infraestructura de **~0 €/mes** durante la fase académica (Firebase Spark Plan). Si se desplegara en producción real, el coste de infraestructura ascendería a unos **4–5 €/mes**, frente a los 50–200 €/mes de las soluciones comerciales. La diferencia principal es que las soluciones comerciales incluyen soporte, actualizaciones continuas y cumplimiento RGPD gestionado por el proveedor, mientras que el MVP académico requeriría mantenimiento propio.
 
 La principal aportación del proyecto no es competir en precio con plataformas establecidas, sino demostrar que es técnicamente viable construir un sistema funcional, seguro y adaptado a un contexto concreto (residencia mediana, España) con tecnologías modernas de código abierto y una infraestructura de coste mínimo.
 
 ---
 
-*Sección generada: 2026-04-06 — WRITER agent — gerocultores-system*  
+*Sección generada: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
 *Fuentes: `PLAN/backlog.md`, `PLAN/tasks-summary.md`, `DECISIONS/ADR-04b-deployment-rgpd.md`*

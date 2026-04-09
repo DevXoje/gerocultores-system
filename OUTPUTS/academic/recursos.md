@@ -1,13 +1,13 @@
 # 14. Recursos utilizados
 
-> **Sección de la memoria académica DAW — gerocultores-system**  
+> **Sección de la memoria académica DAW — GeroCare**  
 > Autor: Jose Vilches Sánchez · CIPFP Batoi d'Alcoi · 2025-2026  
 > ADRs de referencia: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05  
 > Estado: BORRADOR — completar versiones exactas al finalizar el desarrollo
 
 ---
 
-El stack tecnológico de gerocultores-system está formado íntegramente por herramientas de código abierto (licencias MIT o Apache 2.0) y servicios en la nube con plan gratuito suficiente para el alcance académico. El coste directo en herramientas y hosting es cero, lo que fue un requisito explícito en `SPEC/constraints.md`. La única excepción es Docker Desktop, que requiere licencia de pago para uso comercial pero es gratuito para uso educativo e individual.
+El stack tecnológico de **GeroCare** está formado íntegramente por herramientas de código abierto (licencias MIT o Apache 2.0) y servicios en la nube con plan gratuito suficiente para el alcance académico. El coste directo en herramientas y hosting es cero, lo que fue un requisito explícito en `SPEC/constraints.md`. La única excepción es Docker Desktop, que requiere licencia de pago para uso comercial pero es gratuito para uso educativo e individual.
 
 Las versiones indicadas en la tabla corresponden a las versiones mínimas objetivo definidas en los ADRs. Las versiones exactas instaladas en el proyecto se actualizarán en esta sección cuando el scaffold esté completo (Sprint 0). Para las dependencias de Node.js, el fichero `package.json` del repositorio es la fuente de verdad de versiones exactas.
 
@@ -91,7 +91,7 @@ El código fuente completo del proyecto está disponible en el siguiente reposit
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — gerocultores-system*  
+*Borrador generado: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
 *ADRs fuente: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05*  
 *Extensión aproximada: 380 palabras (sin contar tablas)*  
 *⚠️ Completar: versiones exactas desde `package.json` al finalizar Sprint 0*

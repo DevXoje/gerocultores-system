@@ -13,7 +13,7 @@
 
 ## Contexto
 
-El proyecto "gerocultores-system" eligió inicialmente React 18 + TanStack Query + shadcn/ui (ADR-01). Tras evaluar las fortalezas del desarrollador y la complejidad del proyecto frente al deadline (2026-05-18), se propone pivotar a Vue.js 3 con Vite como bundler. Vue ofrece una curva de aprendizaje más suave con la Composition API, y Pinia proporciona gestión de estado más directa que Redux/Zustand.
+El proyecto "gerocultores-system" (GeroCare) eligió inicialmente React 18 + TanStack Query + shadcn/ui (ADR-01). Tras evaluar las fortalezas del desarrollador y la complejidad del proyecto frente al deadline (2026-05-18), se propone pivotar a Vue.js 3 con Vite como bundler. Vue ofrece una curva de aprendizaje más suave con la Composition API, y Pinia proporciona gestión de estado más directa que Redux/Zustand.
 
 Adicionalmente, PWA/Offline se excluyen explícitamente del scope (ver propuesta `sdd/switch-stack-to-vue-firebase/proposal`). Esto reduce complejidad.
 

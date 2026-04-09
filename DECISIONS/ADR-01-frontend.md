@@ -4,7 +4,7 @@
 PROPOSED
 
 ## Context
-El proyecto "gerocultores-system" es una aplicación web (PWA) orientada a tablets y móviles para el uso diario de cuidadores en residencias. El deadline para el MVP es ajustado (~6-7 semanas) al ser un proyecto académico de DAW con un solo desarrollador. Las redes en las residencias suelen ser lentas o irregulares, por lo que el soporte offline parcial o total es clave. Necesitamos un framework maduro, rápido de desarrollar y con buen ecosistema para interfaces complejas (formularios, agendas).
+El proyecto "gerocultores-system" desarrolla **GeroCare**, una aplicación web (PWA) orientada a tablets y móviles para el uso diario de cuidadores en residencias. El deadline para el MVP es ajustado (~6-7 semanas) al ser un proyecto académico de DAW con un solo desarrollador. Las redes en las residencias suelen ser lentas o irregulares, por lo que el soporte offline parcial o total es clave. Necesitamos un framework maduro, rápido de desarrollar y con buen ecosistema para interfaces complejas (formularios, agendas).
 
 ## Decision
 Se propone utilizar **React 18 con Vite** como framework frontend, complementado con **Tailwind CSS** y componentes **shadcn/ui**. Para la gestión de estado asíncrono y soporte offline, se utilizará **TanStack Query (React Query)**. 
