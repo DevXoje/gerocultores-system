@@ -65,7 +65,7 @@ function mockAuthStore(overrides: {
     signOut: vi.fn().mockResolvedValue(undefined),
   }
   const store = { ...defaults, ...overrides }
-  vi.mocked(useAuthStore).mockReturnValue(store as ReturnType<typeof useAuthStore>)
+  vi.mocked(useAuthStore).mockReturnValue(store as unknown as ReturnType<typeof useAuthStore>)
   return store
 }
 

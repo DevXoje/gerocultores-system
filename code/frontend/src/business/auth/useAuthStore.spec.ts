@@ -20,6 +20,7 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  type UserCredential,
 } from 'firebase/auth'
 import { useAuthStore } from './useAuthStore'
 
@@ -55,7 +56,7 @@ describe('useAuthStore', () => {
     const mockUser = makeMockUser('test.gerocultor@example.com')
     vi.mocked(signInWithEmailAndPassword).mockResolvedValueOnce({
       user: mockUser,
-    } as ReturnType<typeof signInWithEmailAndPassword> extends Promise<infer T> ? Promise<T> : never)
+    } as unknown as UserCredential)
 
     const store = useAuthStore()
     await store.signIn('test.gerocultor@example.com', 'Test1234!')
@@ -98,7 +99,7 @@ describe('useAuthStore', () => {
     const mockUser = makeMockUser('test.gerocultor@example.com')
     vi.mocked(signInWithEmailAndPassword).mockResolvedValueOnce({
       user: mockUser,
-    } as ReturnType<typeof signInWithEmailAndPassword> extends Promise<infer T> ? Promise<T> : never)
+    } as unknown as UserCredential)
     vi.mocked(firebaseSignOut).mockResolvedValueOnce()
 
     const store = useAuthStore()
@@ -122,7 +123,7 @@ describe('useAuthStore', () => {
     // Mock captures the isLoading state mid-flight (when signIn has set it to true)
     vi.mocked(signInWithEmailAndPassword).mockImplementationOnce(async () => {
       loadingStates.push(store.isLoading)
-      return { user: mockUser } as ReturnType<typeof signInWithEmailAndPassword> extends Promise<infer T> ? Promise<T> : never
+      return { user: mockUser } as unknown as UserCredential
     })
 
     await store.signIn('test.gerocultor@example.com', 'Test1234!')
@@ -169,7 +170,7 @@ describe('useAuthStore', () => {
     const mockUser = makeMockUser('test.gerocultor@example.com')
 
     vi.mocked(onAuthStateChanged).mockImplementationOnce((_auth, callback) => {
-      if (typeof callback === 'function') callback(mockUser as Parameters<typeof callback>[0])
+      if (typeof callback === 'function') callback(mockUser as unknown as Parameters<typeof callback>[0])
       return vi.fn()
     })
 
