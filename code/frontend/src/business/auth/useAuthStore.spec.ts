@@ -20,18 +20,59 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  type User,
   type UserCredential,
+  type IdTokenResult,
 } from 'firebase/auth'
 import { useAuthStore } from './useAuthStore'
 
-// Helper: make a mock Firebase User-like object
-function makeMockUser(email: string) {
+// Helper: make a fully-typed mock Firebase User
+// Only the fields actually accessed by useAuthStore.ts are given non-trivial values.
+// All other required User fields are provided as minimal stubs so the object
+// satisfies the full User interface without any type suppression.
+function makeMockUser(email: string): User {
+  const mockIdTokenResult: IdTokenResult = {
+    authTime: '2026-01-01T00:00:00Z',
+    expirationTime: '2026-01-01T01:00:00Z',
+    issuedAtTime: '2026-01-01T00:00:00Z',
+    signInProvider: 'password',
+    signInSecondFactor: null,
+    token: 'mock-id-token',
+    claims: { role: 'gerocultor' },
+  }
+
   return {
+    // UserInfo fields
     uid: 'uid-123',
     email,
-    getIdTokenResult: vi.fn().mockResolvedValue({
-      claims: { role: 'gerocultor' },
-    }),
+    displayName: null,
+    phoneNumber: null,
+    photoURL: null,
+    providerId: 'password',
+    // User fields
+    emailVerified: true,
+    isAnonymous: false,
+    metadata: {},
+    providerData: [],
+    refreshToken: '',
+    tenantId: null,
+    // User methods — only getIdTokenResult is called by the store
+    getIdTokenResult: vi.fn().mockResolvedValue(mockIdTokenResult),
+    getIdToken: vi.fn().mockResolvedValue('mock-id-token'),
+    delete: vi.fn().mockResolvedValue(undefined),
+    reload: vi.fn().mockResolvedValue(undefined),
+    toJSON: vi.fn().mockReturnValue({}),
+  }
+}
+
+// Helper: build a fully-typed UserCredential mock.
+// The store only accesses `credential.user` — the other fields are required
+// by the UserCredential interface and are given their actual string-literal values.
+function makeMockCredential(user: User): UserCredential {
+  return {
+    user,
+    providerId: 'password',
+    operationType: 'signIn',
   }
 }
 
@@ -54,9 +95,7 @@ describe('useAuthStore', () => {
 
   it('should set user and role on successful signIn', async () => {
     const mockUser = makeMockUser('test.gerocultor@example.com')
-    vi.mocked(signInWithEmailAndPassword).mockResolvedValueOnce({
-      user: mockUser,
-    } as unknown as UserCredential)
+    vi.mocked(signInWithEmailAndPassword).mockResolvedValueOnce(makeMockCredential(mockUser))
 
     const store = useAuthStore()
     await store.signIn('test.gerocultor@example.com', 'Test1234!')
@@ -97,9 +136,7 @@ describe('useAuthStore', () => {
 
   it('should clear user and role on signOut', async () => {
     const mockUser = makeMockUser('test.gerocultor@example.com')
-    vi.mocked(signInWithEmailAndPassword).mockResolvedValueOnce({
-      user: mockUser,
-    } as unknown as UserCredential)
+    vi.mocked(signInWithEmailAndPassword).mockResolvedValueOnce(makeMockCredential(mockUser))
     vi.mocked(firebaseSignOut).mockResolvedValueOnce()
 
     const store = useAuthStore()
@@ -123,7 +160,7 @@ describe('useAuthStore', () => {
     // Mock captures the isLoading state mid-flight (when signIn has set it to true)
     vi.mocked(signInWithEmailAndPassword).mockImplementationOnce(async () => {
       loadingStates.push(store.isLoading)
-      return { user: mockUser } as unknown as UserCredential
+      return makeMockCredential(mockUser)
     })
 
     await store.signIn('test.gerocultor@example.com', 'Test1234!')
@@ -170,7 +207,8 @@ describe('useAuthStore', () => {
     const mockUser = makeMockUser('test.gerocultor@example.com')
 
     vi.mocked(onAuthStateChanged).mockImplementationOnce((_auth, callback) => {
-      if (typeof callback === 'function') callback(mockUser as unknown as Parameters<typeof callback>[0])
+      // mockUser satisfies User fully — no cast needed
+      if (typeof callback === 'function') callback(mockUser)
       return vi.fn()
     })
 

@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { createPinia, setActivePinia } from 'pinia'
+import { createTestingPinia } from '@pinia/testing'
 import { createRouter, createWebHistory } from 'vue-router'
 import { ROUTES } from '@/router/route-names'
+import { useAuthStore } from '@/business/auth/useAuthStore'
 
 // Polyfill Temporal API for jsdom test environment (not yet available in Node jsdom)
 if (typeof globalThis.Temporal === 'undefined') {
@@ -29,12 +30,6 @@ vi.mock('@/services/firebase', () => ({
   auth: {},
 }))
 
-// Mock useAuthStore to control its behavior in component tests
-vi.mock('@/business/auth/useAuthStore', () => ({
-  useAuthStore: vi.fn(),
-}))
-
-import { useAuthStore } from '@/business/auth/useAuthStore'
 import LoginPage from './LoginPage.vue'
 
 // Helper: create a test router
@@ -49,40 +44,37 @@ function createTestRouter() {
   })
 }
 
-// Helper: create a mock store
-function mockAuthStore(overrides: {
-  isLoading?: boolean
-  user?: { email: string } | null
-  role?: string | null
-  signIn?: ReturnType<typeof vi.fn>
-  signOut?: ReturnType<typeof vi.fn>
-}) {
-  const defaults = {
-    isLoading: false,
-    user: null,
-    role: null,
-    signIn: vi.fn().mockResolvedValue(undefined),
-    signOut: vi.fn().mockResolvedValue(undefined),
-  }
-  const store = { ...defaults, ...overrides }
-  vi.mocked(useAuthStore).mockReturnValue(store as unknown as ReturnType<typeof useAuthStore>)
-  return store
+/**
+ * Creates a testing pinia and returns the auth store with all actions auto-spied.
+ *
+ * @pinia/testing stubs all store actions as vi.fn() returning undefined by default.
+ * Configure signIn / signOut return values per test via vi.fn().mockResolvedValue(...)
+ */
+function createTestPinia(initialState?: { auth?: { isLoading?: boolean } }) {
+  const pinia = createTestingPinia({
+    createSpy: vi.fn,
+    initialState,
+  })
+  const store = useAuthStore(pinia)
+  // Ensure signIn and signOut are proper async spies (return Promises)
+  store.signIn = vi.fn().mockResolvedValue(undefined)
+  store.signOut = vi.fn().mockResolvedValue(undefined)
+  return { pinia, store }
 }
 
 describe('LoginPage', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
     vi.clearAllMocks()
   })
 
   // ─── TC: Renders email + password inputs and submit button ────────────────
 
   it('should render email input, password input and submit button', () => {
-    mockAuthStore({})
+    const { pinia } = createTestPinia()
     const router = createTestRouter()
 
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     const emailInput = wrapper.find('input[type="email"]')
@@ -95,11 +87,11 @@ describe('LoginPage', () => {
   })
 
   it('should have accessible labels for email and password fields', () => {
-    mockAuthStore({})
+    const { pinia } = createTestPinia()
     const router = createTestRouter()
 
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     const labels = wrapper.findAll('label')
@@ -109,12 +101,13 @@ describe('LoginPage', () => {
   // ─── TC: Calls store.signIn with correct credentials on submit ────────────
 
   it('should call store.signIn with email and password on form submit', async () => {
+    const { pinia, store } = createTestPinia()
     const signInMock = vi.fn().mockResolvedValue(undefined)
-    mockAuthStore({ signIn: signInMock })
+    store.signIn = signInMock
 
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     await wrapper.find('input[type="email"]').setValue('test.gerocultor@example.com')
@@ -127,14 +120,14 @@ describe('LoginPage', () => {
   // ─── TC: Shows error message when login fails ─────────────────────────────
 
   it('should show generic error message when signIn fails', async () => {
-    const signInMock = vi.fn().mockRejectedValue(
+    const { pinia, store } = createTestPinia()
+    store.signIn = vi.fn().mockRejectedValue(
       Object.assign(new Error('auth/wrong-password'), { code: 'auth/wrong-password' })
     )
-    mockAuthStore({ signIn: signInMock })
 
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     await wrapper.find('input[type="email"]').setValue('test@example.com')
@@ -157,11 +150,10 @@ describe('LoginPage', () => {
   // ─── TC: Shows loading indicator while isLoading is true ─────────────────
 
   it('should disable submit button while isLoading is true', () => {
-    mockAuthStore({ isLoading: true })
-
+    const { pinia } = createTestPinia({ auth: { isLoading: true } })
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     const submitButton = wrapper.find('button[type="submit"]')
@@ -169,11 +161,10 @@ describe('LoginPage', () => {
   })
 
   it('should show a loading indicator while isLoading is true', () => {
-    mockAuthStore({ isLoading: true })
-
+    const { pinia } = createTestPinia({ auth: { isLoading: true } })
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     // Either a spinner element or loading text must be visible
@@ -185,11 +176,10 @@ describe('LoginPage', () => {
   })
 
   it('should enable submit button when isLoading is false', () => {
-    mockAuthStore({ isLoading: false })
-
+    const { pinia } = createTestPinia({ auth: { isLoading: false } })
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     const submitButton = wrapper.find('button[type="submit"]')
@@ -203,11 +193,11 @@ describe('LoginPage', () => {
     await router.push(ROUTES.AUTH.LOGIN.path)
     await router.isReady()
 
-    const signInMock = vi.fn().mockResolvedValue(undefined)
-    mockAuthStore({ signIn: signInMock })
+    const { pinia, store } = createTestPinia()
+    store.signIn = vi.fn().mockResolvedValue(undefined)
 
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     await wrapper.find('input[type="email"]').setValue('test@example.com')
@@ -223,12 +213,13 @@ describe('LoginPage', () => {
   // ─── TC: Does not submit when fields are empty ────────────────────────────
 
   it('should not call store.signIn when email is empty', async () => {
+    const { pinia, store } = createTestPinia()
     const signInMock = vi.fn()
-    mockAuthStore({ signIn: signInMock })
+    store.signIn = signInMock
 
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
-      global: { plugins: [createPinia(), router] },
+      global: { plugins: [pinia, router] },
     })
 
     // Only fill password, leave email empty
