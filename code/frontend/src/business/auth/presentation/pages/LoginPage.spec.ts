@@ -39,7 +39,11 @@ function createTestRouter() {
     routes: [
       { path: ROUTES.HOME.path, component: { template: '<div />' } },
       { path: ROUTES.AUTH.LOGIN.path, name: ROUTES.AUTH.LOGIN.name, component: LoginPage },
-      { path: ROUTES.DASHBOARD.path, name: ROUTES.DASHBOARD.name, component: { template: '<div>Dashboard</div>' } },
+      {
+        path: ROUTES.DASHBOARD.path,
+        name: ROUTES.DASHBOARD.name,
+        component: { template: '<div>Dashboard</div>' },
+      },
     ],
   })
 }
@@ -121,9 +125,11 @@ describe('LoginPage', () => {
 
   it('should show generic error message when signIn fails', async () => {
     const { pinia, store } = createTestPinia()
-    store.signIn = vi.fn().mockRejectedValue(
-      Object.assign(new Error('auth/wrong-password'), { code: 'auth/wrong-password' })
-    )
+    store.signIn = vi
+      .fn()
+      .mockRejectedValue(
+        Object.assign(new Error('auth/wrong-password'), { code: 'auth/wrong-password' })
+      )
 
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
@@ -169,7 +175,8 @@ describe('LoginPage', () => {
 
     // Either a spinner element or loading text must be visible
     const hasSpinner = wrapper.find('[data-testid="loading-spinner"]').exists()
-    const hasLoadingText = wrapper.text().toLowerCase().includes('cargando') ||
+    const hasLoadingText =
+      wrapper.text().toLowerCase().includes('cargando') ||
       wrapper.text().toLowerCase().includes('loading')
 
     expect(hasSpinner || hasLoadingText).toBe(true)

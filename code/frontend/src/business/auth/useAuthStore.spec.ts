@@ -172,9 +172,7 @@ describe('useAuthStore', () => {
   })
 
   it('should set isLoading=false after failed signIn', async () => {
-    vi.mocked(signInWithEmailAndPassword).mockRejectedValueOnce(
-      new Error('auth/wrong-password')
-    )
+    vi.mocked(signInWithEmailAndPassword).mockRejectedValueOnce(new Error('auth/wrong-password'))
 
     const store = useAuthStore()
     try {

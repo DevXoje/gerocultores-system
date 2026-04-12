@@ -1,9 +1,9 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ─── Custom font families ───────────────────────────────────────────────────── */
 @theme {
-  --font-headline: "Manrope", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-headline: 'Manrope', sans-serif;
+  --font-body: 'Inter', sans-serif;
 
   /* ─── Color tokens (Care & Serenity design system) ──────────────────────── */
   --color-surface: #f6faf9;

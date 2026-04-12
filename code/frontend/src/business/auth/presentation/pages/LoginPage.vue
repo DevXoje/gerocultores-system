@@ -20,7 +20,7 @@ const {
   handleSubmit,
   togglePassword,
 } = useLogin()
-const year = Temporal.Now.plainDateISO().year;
+const year = Temporal.Now.plainDateISO().year
 </script>
 
 <template>
@@ -38,28 +38,45 @@ const year = Temporal.Now.plainDateISO().year;
 
     <!-- Login card -->
     <div class="login-card">
-      <form class="login-form" data-testid="login-form" @submit.prevent="handleSubmit" novalidate>
+      <form class="login-form" data-testid="login-form" novalidate @submit.prevent="handleSubmit">
         <!-- Email field -->
         <div class="login-form__field">
-          <label class="login-form__label" for="login-email">
-            Correo electrónico
-          </label>
-          <input id="login-email" v-model="email" class="login-form__input" type="email" name="email"
-            autocomplete="email" required data-testid="email-input" :disabled="isLoading"
-            placeholder="nombre@care-serenity.com" />
+          <label class="login-form__label" for="login-email"> Correo electrónico </label>
+          <input
+            id="login-email"
+            v-model="email"
+            class="login-form__input"
+            type="email"
+            name="email"
+            autocomplete="email"
+            required
+            data-testid="email-input"
+            :disabled="isLoading"
+            placeholder="nombre@care-serenity.com"
+          />
         </div>
 
         <!-- Password field with visibility toggle -->
         <div class="login-form__field">
-          <label class="login-form__label" for="login-password">
-            Contraseña
-          </label>
+          <label class="login-form__label" for="login-password"> Contraseña </label>
           <div class="login-form__input-wrapper">
-            <input id="login-password" v-model="passwordInput" class="login-form__input login-form__input--password"
-              :type="showPassword ? 'text' : 'password'" name="password" autocomplete="current-password" required
-              data-testid="password-input" :disabled="isLoading" />
-            <button type="button" class="login-form__toggle-visibility"
-              :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'" @click="togglePassword">
+            <input
+              id="login-password"
+              v-model="passwordInput"
+              class="login-form__input login-form__input--password"
+              :type="showPassword ? 'text' : 'password'"
+              name="password"
+              autocomplete="current-password"
+              required
+              data-testid="password-input"
+              :disabled="isLoading"
+            />
+            <button
+              type="button"
+              class="login-form__toggle-visibility"
+              :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              @click="togglePassword"
+            >
               <span class="material-symbols-outlined" aria-hidden="true">
                 {{ showPassword ? 'visibility_off' : 'visibility' }}
               </span>
@@ -69,7 +86,9 @@ const year = Temporal.Now.plainDateISO().year;
 
         <!-- Generic error message (TC-04, TC-05) -->
         <div v-if="errorMessage" class="login-form__error" data-testid="error-message" role="alert">
-          <span class="material-symbols-outlined login-form__error-icon" aria-hidden="true">error</span>
+          <span class="material-symbols-outlined login-form__error-icon" aria-hidden="true"
+            >error</span
+          >
           <span>{{ errorMessage }}</span>
         </div>
 
@@ -81,14 +100,21 @@ const year = Temporal.Now.plainDateISO().year;
         </div>
 
         <!-- Submit button with loading state (TC-09) -->
-        <button class="login-form__submit" type="submit" data-testid="submit-button" :disabled="isLoading">
+        <button
+          class="login-form__submit"
+          type="submit"
+          data-testid="submit-button"
+          :disabled="isLoading"
+        >
           <template v-if="isLoading">
             <span class="login-form__spinner" data-testid="loading-spinner" aria-hidden="true" />
             <span>Cargando...</span>
           </template>
           <template v-else>
             <span>Iniciar sesión</span>
-            <span class="material-symbols-outlined login-form__submit-icon" aria-hidden="true">arrow_forward</span>
+            <span class="material-symbols-outlined login-form__submit-icon" aria-hidden="true"
+              >arrow_forward</span
+            >
           </template>
         </button>
       </form>
@@ -105,7 +131,9 @@ const year = Temporal.Now.plainDateISO().year;
         <span class="login-footer__separator" aria-hidden="true">|</span>
         <a href="#" class="login-footer__link">Soporte Técnico</a>
       </nav>
-      <p class="login-footer__copyright">© {{ year }} Care &amp; Serenity Editorial. Staff Portal.</p>
+      <p class="login-footer__copyright">
+        © {{ year }} Care &amp; Serenity Editorial. Staff Portal.
+      </p>
     </footer>
   </div>
 </template>
@@ -134,7 +162,9 @@ const year = Temporal.Now.plainDateISO().year;
 .login-header__icon {
   font-size: 1.5rem;
   color: var(--color-primary);
-  font-variation-settings: 'FILL' 1, 'wght' 400;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400;
 }
 
 .login-header__title {
@@ -244,7 +274,9 @@ const year = Temporal.Now.plainDateISO().year;
   color: var(--color-on-primary);
   background: linear-gradient(135deg, #005050 0%, #006a6a 100%);
   box-shadow: 0px 8px 24px rgba(0, 80, 80, 0.25);
-  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .login-form__submit:hover:not(:disabled) {

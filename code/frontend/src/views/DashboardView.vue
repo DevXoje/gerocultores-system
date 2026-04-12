@@ -10,11 +10,7 @@ const { userEmail, signOut } = useDashboard()
       <h1 class="dashboard-page__title">Panel de control</h1>
       <div class="dashboard-page__user">
         <span class="dashboard-page__user-email">{{ userEmail }}</span>
-        <button
-          class="dashboard-page__signout"
-          type="button"
-          @click="signOut"
-        >
+        <button class="dashboard-page__signout" type="button" @click="signOut">
           Cerrar sesión
         </button>
       </div>

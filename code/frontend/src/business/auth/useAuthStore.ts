@@ -67,12 +67,11 @@ export const useAuthStore = defineStore('auth', () => {
    */
   async function init(): Promise<void> {
     return new Promise((resolve) => {
-      // unsubscribeFn is assigned synchronously by onAuthStateChanged before
-      // the callback can ever be invoked (the callback is async / microtask).
-      // We use a mutable holder to avoid TDZ issues inside the callback.
-      let unsubscribeFn: (() => void) | undefined
+      // Use an object container so the callback can reference the unsubscribe
+      // function even when the mock invokes the callback synchronously (TDZ-safe).
+      const holder: { unsubscribe?: () => void } = {}
 
-      unsubscribeFn = onAuthStateChanged(auth, async (firebaseUser) => {
+      holder.unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           await loadRoleFromToken(firebaseUser)
           user.value = firebaseUser
@@ -80,7 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
           user.value = null
           role.value = null
         }
-        if (unsubscribeFn) unsubscribeFn()
+        if (holder.unsubscribe) holder.unsubscribe()
         resolve()
       })
     })
