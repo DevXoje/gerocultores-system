@@ -60,10 +60,15 @@ CHECK: Does a US-XX or RF-XX entry exist in SPEC/ for this code?
 
 ### G02 — No technical decision without ADR
 ```
-RULE: Every relevant technical decision must have an ADR in DECISIONS/.
-      "Relevant" = the answer to "why X?" is not immediately obvious.
+RULE: Every relevant technical decision must have a corresponding ADR in DECISIONS/.
+      "Relevant" = any choice where the answer to "why X and not Y?" is non-obvious.
+      Examples: framework selection, auth strategy, data model, offline strategy.
+      NOT relevant: standard plugin usage derived from an already-documented stack decision,
+      tooling config files (ESLint, Prettier, Playwright) that are corollaries of an existing ADR.
+SCOPE: ARCHITECT, DEVELOPER agents. Does NOT apply to CI tooling config files.
 ACTION_ON_VIOLATION: Create ADR in PROPOSED state before proceeding.
-CHECK: Is there an ADR in DECISIONS/ covering this architectural choice?
+CHECK: Is there an ADR in DECISIONS/ that covers this architectural choice?
+SEVERITY: NEEDS_REVISION (PROPOSED ADR acceptable during active development)
 ```
 
 ### G03 — No feature without test plan
@@ -79,16 +84,24 @@ CHECK: Does OUTPUTS/test-plans/test-plan-US-XX.md exist?
 RULE: Field names and types of domain entities MUST be identical in
       SPEC/entities.md, SPEC/api-contracts.md, and in code.
       No aliases or renames across layers.
+SCOPE: Domain entity files ONLY (models, DTOs, Pinia stores, API contracts).
+       Does NOT apply to: config files, tooling setup, test fixtures, or non-domain code.
 ACTION_ON_VIOLATION: Flag as NEEDS_REVISION with exact field mismatch listed.
 CHECK: Do field names in code match SPEC/entities.md exactly?
+SEVERITY: NEEDS_REVISION
 ```
 
 ### G05 — No hardcoded sensitive values
 ```
 RULE: Environment variables, API keys, database IDs, and production URLs
       MUST NOT appear directly in source code.
+SCOPE: All source files. SENSITIVE VALUES only: API keys, tokens, passwords,
+       connection strings, production hostnames. 
+       NOT sensitive: localhost URLs, local port numbers, filesystem paths (dist/, node_modules/),
+       tool ignore patterns, or development-only configuration.
 ACTION_ON_VIOLATION: Flag as BLOCKED; remove and replace with env var or config.
 CHECK: No secrets in source files. .env.example present for all required vars.
+SEVERITY: BLOCKED (only for actual secrets, not for localhost/tooling config)
 ```
 
 ### G06 — Scope lock

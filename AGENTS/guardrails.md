@@ -30,7 +30,12 @@ SEVERITY: BLOCKED
 RULE: Every relevant technical decision must have a corresponding ADR in DECISIONS/.
       "Relevant" = any choice where the answer to "why X and not Y?" is non-obvious.
       Examples: framework selection, auth strategy, data model, offline strategy.
-SCOPE: ARCHITECT, DEVELOPER agents
+      NOT relevant: standard plugin usage derived from an already-documented stack decision,
+      tooling config files (ESLint, Prettier, Playwright) that are corollaries of an existing ADR.
+SCOPE: ARCHITECT, DEVELOPER agents. Does NOT apply to CI tooling config files.
+       NOTE: Standard plugin/tool usage that is a direct corollary of an already-accepted ADR
+       does NOT require a new ADR. Example: @vitejs/plugin-vue is required by ADR-01b (Vue 3 + Vite);
+       eslint-plugin-vue is required by the linting setup in ADR-06.
 ACTION_ON_VIOLATION:
   1. Create ADR in PROPOSED state before continuing.
   2. Log in LOGS/CHANGELOG.md with tag [DECISION].
@@ -60,7 +65,10 @@ RULE: Field names and types of all domain entities MUST be identical across:
         - SPEC/api-contracts.md
         - Source code (models, DTOs, DB schemas)
       No aliases, abbreviations, or renames are allowed between layers.
-SCOPE: DEVELOPER, REVIEWER agents
+SCOPE: DEVELOPER, REVIEWER agents. Domain entity files ONLY (models, DTOs, Pinia stores, API contracts).
+       NOTE: Config files, tooling setup files (eslint.config.js, playwright.config.ts, vite.config.ts),
+       and test utilities are excluded from entity consistency checks.
+       Does NOT apply to: config files, tooling setup, test fixtures, or non-domain code.
 ACTION_ON_VIOLATION:
   1. Flag as NEEDS_REVISION.
   2. List every field mismatch with exact location (file + line).
@@ -74,14 +82,19 @@ SEVERITY: NEEDS_REVISION
 ```
 RULE: Environment variables, API keys, database IDs, connection strings,
       and production URLs MUST NOT appear in source code.
-SCOPE: DEVELOPER, REVIEWER agents
+SCOPE: DEVELOPER, REVIEWER agents. SENSITIVE VALUES only: API keys, tokens, passwords,
+       connection strings, production hostnames.
 ALLOWED: .env files (not committed), .env.example (committed, with placeholder values)
+         localhost URLs and local port numbers in development tooling config
+         (playwright.config.ts, vite.config.ts) are NOT sensitive values and are
+         NOT subject to G05. Filesystem paths (dist/, node_modules/), tool ignore
+         patterns, and development-only configuration are also NOT sensitive.
 ACTION_ON_VIOLATION:
   1. Flag as BLOCKED immediately.
   2. Remove the hardcoded value from source.
   3. Replace with env var reference and document in .env.example.
 CHECK: No secrets in source files. .env.example present for all required vars?
-SEVERITY: BLOCKED
+SEVERITY: BLOCKED (only for actual secrets, not for localhost/tooling config)
 ```
 
 ## G06 — Scope lock

@@ -24,5 +24,13 @@ export default defineConfig({
   // Unit tests (stores, use cases) also run fine in jsdom.
   test: {
     environment: 'jsdom',
+    include: ['src/**/*.spec.ts', 'src/**/*.test.ts'],
+    exclude: ['node_modules', 'e2e/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/**/*.ts', 'src/**/*.vue'],
+      exclude: ['src/**/*.spec.ts', 'src/main.ts'],
+    },
   },
 })

@@ -30,7 +30,15 @@ FILE_PATTERNS="*.ts,*.tsx,*.js,*.jsx"
 # Examples:
 #   EXCLUDE_PATTERNS="*.test.ts,*.spec.ts"
 #   EXCLUDE_PATTERNS="*_test.go,*.mock.ts"
-EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts"
+#
+# Excluded categories:
+#   - Test files: *.spec.ts / *.test.ts — test logic, not domain code
+#   - Type declarations: *.d.ts — generated, not authored
+#   - Tooling config files: vite.config.ts, playwright.config.ts, eslint.config.js
+#     These are CI/DX tooling corollaries of ADR-01b and ADR-06.
+#     They contain no domain logic and are excluded from GGA review scope
+#     (same rationale as excluding *.spec.ts — tooling ≠ application code).
+EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts,vite.config.ts,playwright.config.ts,eslint.config.js"
 
 # File containing code review rules
 # Default: AGENTS.md
