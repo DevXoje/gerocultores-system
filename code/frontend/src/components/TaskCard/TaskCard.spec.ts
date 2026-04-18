@@ -4,7 +4,7 @@
  * US-03: Consulta de agenda diaria
  * Tools: Vitest 4 + @vue/test-utils 2
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TaskCard from './TaskCard.vue'
 import type { TareaResponse } from '@/business/agenda/domain/entities/tarea.types'
