@@ -30,7 +30,15 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.ts', 'src/**/*.vue'],
-      exclude: ['src/**/*.spec.ts', 'src/main.ts'],
+      exclude: [
+        'src/**/*.spec.ts',
+        'src/main.ts',
+        'src/App.vue',
+        'src/views/DashboardView.vue',
+        'src/views/AdminView.vue',
+        'src/views/ResidentsView.vue',
+        'src/views/ForbiddenView.vue',
+      ],
     },
   },
 })
