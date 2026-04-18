@@ -10,7 +10,7 @@ type UserRole = 'admin' | 'gerocultor'
  */
 export function requireRole(...roles: string[]): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const userRole = req.user?.['role'] as UserRole | undefined
+    const userRole = req.user?.['rol'] as UserRole | undefined
 
     if (!userRole || !roles.includes(userRole)) {
       res.status(403).json({ error: 'Acceso no autorizado', code: 'FORBIDDEN' })

@@ -75,7 +75,7 @@ describe('requireRole factory', () => {
     vi.clearAllMocks()
   })
 
-  it('should return 403 when user has role "gerocultor" and requireRole("coordinador") is applied', async () => {
+  it('should return 403 when user has role "gerocultor" and requireRole("admin") is applied', async () => {
     const fakeDecoded = {
       uid: 'uid-gerocultor-01',
       email: 'gerocultor@example.com',
@@ -84,22 +84,22 @@ describe('requireRole factory', () => {
     mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
 
     const res = await request(app)
-      .get('/api/protected/coordinador-only')
+      .get('/api/protected/admin-only')
       .set('Authorization', 'Bearer valid-token')
     expect(res.status).toBe(403)
     expect(res.body).toMatchObject({ error: expect.any(String) })
   })
 
-  it('should call next() when user has role "coordinador" and requireRole("coordinador") is applied', async () => {
+  it('should call next() when user has role "admin" and requireRole("admin") is applied', async () => {
     const fakeDecoded = {
-      uid: 'uid-coordinador-01',
-      email: 'coordinador@example.com',
-      rol: 'coordinador',
+      uid: 'uid-admin-01',
+      email: 'admin@example.com',
+      rol: 'admin',
     }
     mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
 
     const res = await request(app)
-      .get('/api/protected/coordinador-only')
+      .get('/api/protected/admin-only')
       .set('Authorization', 'Bearer valid-token')
     expect(res.status).toBe(200)
   })
