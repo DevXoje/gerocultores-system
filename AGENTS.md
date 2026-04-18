@@ -303,3 +303,76 @@ then sync the summary table and G01–G10 blocks in this file.
 | **PR checklist as YAML block** | Inline YAML in Markdown | Machine-parseable by GGA without requiring a separate file; human-readable too |
 | **Auto-invoke table** | Lightweight (no skill URLs) | This project doesn't use Prowler's skill URL system; prompt templates live in `PROMPTS/` |
 | **Prowler-inspired structure** | Adapted, not copied | Prowler is a large monorepo; this is a solo DAW project — skill tables and component docs don't apply |
+
+---
+
+## GGA Review Context
+
+> This section exists exclusively to give GGA the project context it needs to avoid false positives.
+> GGA only sees staged files — it cannot browse SPEC/, test-plans, or design-source.md on its own.
+
+### Valid User Stories (SPEC/user-stories.md)
+
+All of the following US entries exist and are approved in `SPEC/user-stories.md`:
+
+| ID | Title |
+|----|-------|
+| US-01 | Inicio de sesión |
+| US-02 | Control de acceso por rol |
+| US-03 | Consulta de agenda diaria |
+| US-04 | Actualizar estado de una tarea |
+| US-05 | Consulta de ficha de residente |
+| US-06 | Registro de incidencia |
+| US-07 | Historial de incidencias de un residente |
+| US-08 | Recibir notificaciones de alertas críticas |
+| US-09 | Alta y gestión de residentes |
+| US-10 | Gestión de cuentas de usuarios |
+| US-11 | Resumen de fin de turno |
+| US-12 | Vista de agenda semanal |
+| US-13 | Verificación de disponibilidad de la API (Health Check) |
+
+### Existing Test Plans (OUTPUTS/test-plans/)
+
+The following test plan files exist and satisfy G03:
+
+- `test-plan-US-01.md` → US-01 (login)
+- `test-plan-US-02.md` → US-02 (role-based access)
+- `test-plan-US-03.md` → US-03 (daily agenda)
+- `test-plan-US-04.md` → US-04 (task status update)
+- `test-plan-US-10.md` → US-10 (user account management)
+- `test-plan-US-13.md` → US-13 (health check)
+
+### Valid Roles
+
+This project has **exactly two roles**: `'admin'` and `'gerocultor'`.
+Any reference to `coordinador`, `administrador`, or any other role is a G04/G06 violation.
+
+### Entity Field Names (canonical — SPEC/entities.md)
+
+**Usuario** (auth + Firestore `users` collection):
+
+| Field | Type |
+|-------|------|
+| `uid` | `string` |
+| `email` | `string` |
+| `displayName` | `string \| null` |
+| `role` | `'admin' \| 'gerocultor'` |
+| `disabled` | `boolean` |
+| `createdAt` | `Date \| null` |
+
+### Stitch Screens (OUTPUTS/technical-docs/design-source.md)
+
+The following Vue views have a corresponding Stitch screen reference (G10 satisfied):
+
+| Vue View | Stitch Screen |
+|----------|--------------|
+| `LoginView.vue` | Login - Care & Serenity |
+| `DashboardView.vue` | Caregiver Dashboard |
+| `UsersView.vue` | Resident Records (admin user management layout) |
+
+### Firebase Configuration (G05 note)
+
+`verifyAuth.ts` and `firebase.ts` use Firebase Admin SDK initialized from environment variables
+(`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`).
+No hardcoded credentials exist. `.env.example` documents all required variables.
+`adminAuth` is a reference to the initialized Firebase Admin Auth instance — not a hardcoded value.

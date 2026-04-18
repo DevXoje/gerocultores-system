@@ -246,7 +246,7 @@ El Writer Agent producirá el archivo en `OUTPUTS/academic/seccion-XX-nombre.md`
 | `bibliografia.md` | Sección 13 — Bibliografía | ✅ Borrador | Añadir URL repositorio GitHub |
 | `recursos.md` | Sección 14 — Recursos | ✅ Borrador | Añadir URL repositorio GitHub |
 | `diseno-sistema.md` | Sección 5 — Diseño | ✅ Borrador | ~1.950 palabras — 2026-04-06 — Requiere capturas wireframes |
-| `implementacion.md` | Sección 6 — Implementación | 🔲 Bloqueado | Requiere código desarrollado |
+| `implementacion.md` | Sección 6 — Implementación | ✅ Borrador | Sprint-1 completado — 2026-04-18 |
 | `pruebas.md` | Sección 9 — Pruebas | 🔲 Bloqueado | Requiere tests ejecutados |
 | `conclusiones.md` | Sección 11 — Conclusiones | 🔲 Bloqueado | Requiere fin de desarrollo |
 | `formacion-adicional.md` | Sección 12 — Formación | 🔲 Pendiente | Requiere input del autor |
