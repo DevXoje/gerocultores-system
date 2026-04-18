@@ -100,9 +100,9 @@ describe('useUsers', () => {
 
   describe('fetchUsers()', () => {
     it('calls GET /admin/users with a Bearer token', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockReturnValue(
-        mockFetchSuccess({ data: mockUsers })
-      )
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockReturnValue(mockFetchSuccess({ data: mockUsers }))
 
       const { fetchUsers } = useUsers()
       await fetchUsers()
@@ -116,9 +116,7 @@ describe('useUsers', () => {
     })
 
     it('populates `users` ref with the response data on success', async () => {
-      vi.spyOn(globalThis, 'fetch').mockReturnValue(
-        mockFetchSuccess({ data: mockUsers })
-      )
+      vi.spyOn(globalThis, 'fetch').mockReturnValue(mockFetchSuccess({ data: mockUsers }))
 
       const { users, fetchUsers } = useUsers()
       await fetchUsers()
@@ -138,9 +136,7 @@ describe('useUsers', () => {
     })
 
     it('sets `error` when the server returns a non-ok response', async () => {
-      vi.spyOn(globalThis, 'fetch').mockReturnValue(
-        mockFetchError(403, 'Forbidden')
-      )
+      vi.spyOn(globalThis, 'fetch').mockReturnValue(mockFetchError(403, 'Forbidden'))
 
       const { error, fetchUsers } = useUsers()
       await fetchUsers()
@@ -203,7 +199,8 @@ describe('useUsers', () => {
 
   describe('updateRole()', () => {
     it('calls PATCH /admin/users/:uid/role with correct body and Bearer token', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
         // updateRole PATCH call
         .mockReturnValueOnce(mockFetchSuccess({}))
         // fetchUsers GET call (refresh after update)
@@ -222,8 +219,9 @@ describe('useUsers', () => {
     })
 
     it('calls fetchUsers() after a successful updateRole to refresh the list', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch')
-        .mockReturnValueOnce(mockFetchSuccess({}))          // PATCH
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockReturnValueOnce(mockFetchSuccess({})) // PATCH
         .mockReturnValueOnce(mockFetchSuccess({ data: mockUsers })) // GET refresh
 
       const { updateRole, users } = useUsers()
@@ -236,9 +234,7 @@ describe('useUsers', () => {
     })
 
     it('sets `error` when updateRole server call fails', async () => {
-      vi.spyOn(globalThis, 'fetch').mockReturnValue(
-        mockFetchError(500, 'Internal Server Error')
-      )
+      vi.spyOn(globalThis, 'fetch').mockReturnValue(mockFetchError(500, 'Internal Server Error'))
 
       const { error, updateRole } = useUsers()
       await updateRole('uid-1', 'admin')
@@ -251,8 +247,9 @@ describe('useUsers', () => {
 
   describe('disableUser()', () => {
     it('calls PATCH /admin/users/:uid/disable with Bearer token', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch')
-        .mockReturnValueOnce(mockFetchSuccess({}))          // PATCH
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockReturnValueOnce(mockFetchSuccess({})) // PATCH
         .mockReturnValueOnce(mockFetchSuccess({ data: mockUsers })) // GET refresh
 
       const { disableUser } = useUsers()
@@ -265,9 +262,10 @@ describe('useUsers', () => {
     })
 
     it('calls fetchUsers() after a successful disableUser to refresh the list', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch')
-        .mockReturnValueOnce(mockFetchSuccess({}))                   // PATCH
-        .mockReturnValueOnce(mockFetchSuccess({ data: mockUsers }))  // GET refresh
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockReturnValueOnce(mockFetchSuccess({})) // PATCH
+        .mockReturnValueOnce(mockFetchSuccess({ data: mockUsers })) // GET refresh
 
       const { disableUser, users } = useUsers()
       await disableUser('uid-1')
@@ -277,9 +275,7 @@ describe('useUsers', () => {
     })
 
     it('sets `error` when disableUser server call fails', async () => {
-      vi.spyOn(globalThis, 'fetch').mockReturnValue(
-        mockFetchError(404, 'User not found')
-      )
+      vi.spyOn(globalThis, 'fetch').mockReturnValue(mockFetchError(404, 'User not found'))
 
       const { error, disableUser } = useUsers()
       await disableUser('uid-1')
