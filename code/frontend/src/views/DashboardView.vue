@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { useDashboard } from './useDashboard'
+import { useAuthStore } from '../business/auth/useAuthStore'
+import { computed } from 'vue'
 
-const { userEmail, signOut } = useDashboard()
+const auth = useAuthStore()
+const userEmail = computed(() => auth.user?.email ?? '')
+const signOut = () => auth.signOut()
 </script>
 
 <template>
