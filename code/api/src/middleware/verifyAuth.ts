@@ -1,7 +1,6 @@
-import type { Request, Response, NextFunction, RequestHandler } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import { adminAuth } from '../services/firebase'
-
-type UserRole = 'gerocultor' | 'coordinador' | 'administrador'
+export { requireRole } from './requireRole'
 
 /**
  * verifyAuth — validates the Firebase ID Token from Authorization: Bearer <token>.
@@ -32,24 +31,5 @@ export async function verifyAuth(req: Request, res: Response, next: NextFunction
   } catch {
     // firebase-admin throws when token is expired, malformed, or revoked
     res.status(401).json({ error: 'Token inválido o expirado', code: 'UNAUTHORIZED' })
-  }
-}
-
-/**
- * requireRole — factory that returns a RequestHandler enforcing role-based access.
- * Must be used AFTER verifyAuth in the middleware chain.
- *
- * Usage: router.get('/admin', verifyAuth, requireRole('coordinador'), controller.method)
- */
-export function requireRole(...roles: UserRole[]): RequestHandler {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const userRole = req.user?.['rol'] as UserRole | undefined
-
-    if (!userRole || !roles.includes(userRole)) {
-      res.status(403).json({ error: 'Acceso no autorizado', code: 'FORBIDDEN' })
-      return
-    }
-
-    next()
   }
 }

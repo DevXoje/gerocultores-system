@@ -1,5 +1,7 @@
 import { Router } from 'express'
-import { verifyAuth, requireRole } from '../middleware/verifyAuth'
+import { verifyAuth } from '../middleware/verifyAuth'
+import { requireRole } from '../middleware/requireRole'
+import adminUsersRouter from './admin.users.routes'
 
 const router = Router()
 
@@ -18,11 +20,8 @@ protectedRouter.get('/', (_req, res) => {
   res.json({ status: 'authenticated' })
 })
 
-// Coordinador-only route — requires coordinador or administrador role
-protectedRouter.get('/coordinador-only', requireRole('coordinador', 'administrador'), (_req, res) => {
-  res.json({ status: 'authorized' })
-})
 
 router.use('/api/protected', protectedRouter)
+router.use('/api/admin/users', adminUsersRouter)
 
 export default router
