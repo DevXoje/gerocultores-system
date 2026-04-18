@@ -22,8 +22,17 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run preview',
+    command: 'npm run build && npm run preview',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+    env: {
+      VITE_FIREBASE_API_KEY: process.env.VITE_FIREBASE_API_KEY ?? 'dummy-api-key',
+      VITE_FIREBASE_AUTH_DOMAIN: process.env.VITE_FIREBASE_AUTH_DOMAIN ?? 'dummy.firebaseapp.com',
+      VITE_FIREBASE_PROJECT_ID: process.env.VITE_FIREBASE_PROJECT_ID ?? 'dummy-project',
+      VITE_FIREBASE_STORAGE_BUCKET: process.env.VITE_FIREBASE_STORAGE_BUCKET ?? 'dummy.appspot.com',
+      VITE_FIREBASE_MESSAGING_SENDER_ID: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? '000000000000',
+      VITE_FIREBASE_APP_ID: process.env.VITE_FIREBASE_APP_ID ?? '1:000000000000:web:dummy',
+    },
   },
 })
