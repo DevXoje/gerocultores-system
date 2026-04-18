@@ -153,10 +153,10 @@ describe('UsersView', () => {
     expect(wrapper.find('table').exists()).toBe(true)
 
     // Column headers
-    const headers = wrapper.findAll('th').map(th => th.text())
-    expect(headers.some(h => /nombre/i.test(h))).toBe(true)
-    expect(headers.some(h => /email/i.test(h))).toBe(true)
-    expect(headers.some(h => /rol/i.test(h))).toBe(true)
+    const headers = wrapper.findAll('th').map((th) => th.text())
+    expect(headers.some((h) => /nombre/i.test(h))).toBe(true)
+    expect(headers.some((h) => /email/i.test(h))).toBe(true)
+    expect(headers.some((h) => /rol/i.test(h))).toBe(true)
 
     // At least the first user's data must be visible
     expect(wrapper.text()).toContain('Ana García')
@@ -280,7 +280,7 @@ describe('UsersView', () => {
   // ─── onMounted ─────────────────────────────────────────────────────────────
 
   it('calls fetchUsers on mount', async () => {
-    const wrapper = mountView()
+    mountView()
     await flushPromises()
 
     expect(mockFetchUsers).toHaveBeenCalledOnce()

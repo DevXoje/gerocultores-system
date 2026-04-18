@@ -57,13 +57,16 @@ async function handleDisable(uid: string): Promise<void> {
     <div v-if="error" class="users-view__error" role="alert">
       <span class="users-view__error-icon" aria-hidden="true">⚠</span>
       <span class="users-view__error-message">{{ error }}</span>
-      <button type="button" class="users-view__retry-btn" @click="fetchUsers">
-        Reintentar
-      </button>
+      <button type="button" class="users-view__retry-btn" @click="fetchUsers">Reintentar</button>
     </div>
 
     <!-- Loading skeleton -->
-    <div v-else-if="loading" class="users-view__skeleton" aria-busy="true" aria-label="Cargando usuarios">
+    <div
+      v-else-if="loading"
+      class="users-view__skeleton"
+      aria-busy="true"
+      aria-label="Cargando usuarios"
+    >
       <template v-for="n in 5" :key="n">
         <div class="users-view__skeleton-row">
           <div class="users-view__skeleton-cell users-view__skeleton-cell--wide" />
@@ -115,7 +118,9 @@ async function handleDisable(uid: string): Promise<void> {
               <td class="users-view__td">
                 <span
                   class="users-view__badge"
-                  :class="userItem.active ? 'users-view__badge--active' : 'users-view__badge--inactive'"
+                  :class="
+                    userItem.active ? 'users-view__badge--active' : 'users-view__badge--inactive'
+                  "
                 >
                   {{ userItem.active ? 'Activo' : 'Inactivo' }}
                 </span>
@@ -143,9 +148,7 @@ async function handleDisable(uid: string): Promise<void> {
         </tbody>
       </table>
 
-      <p v-if="users.length === 0" class="users-view__empty">
-        No hay usuarios registrados.
-      </p>
+      <p v-if="users.length === 0" class="users-view__empty">No hay usuarios registrados.</p>
     </div>
   </div>
 </template>

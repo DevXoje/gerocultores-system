@@ -11,10 +11,12 @@
 1. [Branch Policy — No Direct Pushes to `master`](#branch-policy)
 2. [Commit Message Conventions](#commit-message-conventions)
 3. [Pull Request Requirements](#pull-request-requirements)
-4. [Mass-Deletion Guardrail](#mass-deletion-guardrail)
-5. [Pre-commit Hook Setup](#pre-commit-hook-setup)
-6. [Emergency Rollback Procedures](#emergency-rollback-procedures)
-7. [Contact Points](#contact-points)
+4. [QA Gate — Pre-merge](#qa-gate--pre-merge)
+5. [QA Gate — Post-merge](#qa-gate--post-merge)
+6. [Mass-Deletion Guardrail](#mass-deletion-guardrail)
+7. [Pre-commit Hook Setup](#pre-commit-hook-setup)
+8. [Emergency Rollback Procedures](#emergency-rollback-procedures)
+9. [Contact Points](#contact-points)
 
 ---
 
@@ -107,6 +109,31 @@ All PRs must:
 5. **Not mass-delete files** — see [Mass-Deletion Guardrail](#mass-deletion-guardrail).
 
 For guardrail and SDD artifact policy details, refer to `AGENTS/guardrails.md` (if present) or the SDD memory artifacts in Engram under project `gerocultores-system`.
+
+---
+
+## QA Gate — Pre-merge
+
+Before merging any PR into `develop`, the reviewer MUST:
+
+1. **Check all CI checks are green** — Lint, Type-check, Test, Build, E2E, GitGuardian, build_and_preview.
+2. **Open the Firebase Hosting Preview Channel URL** — posted automatically by the `firebase-hosting-pull-request` action as a PR comment.
+3. **Manually validate** the screens affected by the PR:
+   - Navigate to each changed route/view
+   - Verify the UI renders correctly
+   - Test the happy path (valid input/action)
+   - Test at least one error path (invalid input, unauthorized access, etc.)
+4. **Only then approve and merge.**
+
+---
+
+## QA Gate — Post-merge
+
+After merging into `develop`, the reviewer MUST:
+
+1. Wait for the `deploy-staging` workflow to finish deploying to the `staging` Firebase Hosting channel.
+2. Open the staging URL and repeat the same manual validation performed in the pre-merge gate.
+3. If any regression is found, open a `fix:` PR immediately — do not leave regressions in `develop`.
 
 ---
 

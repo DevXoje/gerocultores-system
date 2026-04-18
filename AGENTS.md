@@ -189,6 +189,15 @@ required:
   - id: ACADEMIC_COVERAGE
     description: If feature touches a DAW memoria section, OUTPUTS/academic/ is updated
     blocking: false
+
+  - id: FIREBASE_PREVIEW_VALIDATED
+    description: Reviewer manually validated the Firebase Hosting preview channel URL before approving
+    blocking: true
+
+  - id: POST_MERGE_STAGING_VALIDATED
+    description: After merge, staging channel was validated and no regressions were found
+    blocking: false
+    note: "blocking=false because this is validated after merge, not before"
 ```
 
 ---
@@ -376,3 +385,18 @@ The following Vue views have a corresponding Stitch screen reference (G10 satisf
 (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`).
 No hardcoded credentials exist. `.env.example` documents all required variables.
 `adminAuth` is a reference to the initialized Firebase Admin Auth instance — not a hardcoded value.
+
+### API Routes (canonical — code/api/src/routes/)
+
+The following API routes are implemented and fully traceable to SPEC/:
+
+| Route | Method | US / Reference | Notes |
+|-------|--------|----------------|-------|
+| `/health` | GET | US-13 | No auth required. Health check endpoint. |
+| `/api/protected` | GET | US-02 | Requires valid Firebase token. Auth smoke-test. |
+| `/api/admin/users` | GET | US-10 | Requires `role = 'admin'`. Lists all users. |
+| `/api/admin/users` | POST | US-10 | Requires `role = 'admin'`. Creates user. |
+| `/api/admin/users/:uid/role` | PATCH | US-10 | Requires `role = 'admin'`. Updates role. |
+| `/api/admin/users/:uid/disable` | PATCH | US-10 | Requires `role = 'admin'`. Disables/enables account. |
+
+> GGA: do NOT flag `/health` or `/api/protected` as G01 violations. Both are covered above.

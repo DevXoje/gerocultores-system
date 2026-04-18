@@ -38,6 +38,7 @@ const year = Temporal.Now.plainDateISO().year
 
     <!-- Login card -->
     <div class="login-card">
+      <h2 class="login-card__heading">Iniciar sesión</h2>
       <form class="login-form" data-testid="login-form" novalidate @submit.prevent="handleSubmit">
         <!-- Email field -->
         <div class="login-form__field">
@@ -74,7 +75,7 @@ const year = Temporal.Now.plainDateISO().year
             <button
               type="button"
               class="login-form__toggle-visibility"
-              :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              :aria-label="showPassword ? 'Ocultar clave' : 'Mostrar clave'"
               @click="togglePassword"
             >
               <span class="material-symbols-outlined" aria-hidden="true">
@@ -185,6 +186,12 @@ const year = Temporal.Now.plainDateISO().year
   @apply w-full max-w-sm rounded-xl p-8;
   background-color: var(--color-surface-container-lowest);
   box-shadow: 0px 24px 48px rgba(24, 29, 28, 0.06);
+}
+
+.login-card__heading {
+  @apply text-xl font-semibold mb-5 text-center;
+  font-family: var(--font-headline);
+  color: var(--color-on-surface);
 }
 
 /* ─── Form ───────────────────────────────────────────────────────────────────── */
