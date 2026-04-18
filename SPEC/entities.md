@@ -20,19 +20,19 @@
 
 ## Usuario
 
-Representa a cualquier persona con acceso al sistema (gerocultor, coordinador, administrador).
+Representa a cualquier persona con acceso al sistema (gerocultor, admin).
+
+> **Nota de implementación**: Los nombres de campo usan inglés en código, API y Firestore.
+> Los roles válidos son exactamente dos: `'admin'` y `'gerocultor'`.
 
 | Campo | Tipo | Requerido | Descripción |
 |-------|------|-----------|-------------|
-| `id` | `string` (UUID) | sí | Identificador único |
-| `nombre` | `string` | sí | Nombre de pila |
-| `apellidos` | `string` | sí | Apellidos |
+| `uid` | `string` | sí | Identificador único (Firebase Auth UID) |
 | `email` | `string` | sí | Correo electrónico (usado como login) |
-| `passwordHash` | `string` | sí | Hash de la contraseña (bcrypt) |
-| `rol` | `enum('gerocultor', 'coordinador', 'administrador')` | sí | Rol del usuario |
-| `activo` | `boolean` | sí | `true` si la cuenta está activa |
-| `creadoEn` | `Date` | sí | Timestamp de creación |
-| `ultimoAcceso` | `Date \| null` | no | Último inicio de sesión |
+| `displayName` | `string \| null` | no | Nombre visible del usuario |
+| `role` | `enum('admin', 'gerocultor')` | sí | Rol del usuario (Firebase Custom Claim) |
+| `disabled` | `boolean` | sí | `true` si la cuenta está desactivada |
+| `createdAt` | `Date \| null` | no | Timestamp de creación (Firebase Auth metadata) |
 
 **Relaciones**:
 - Un `Usuario` de rol `gerocultor` tiene asignados 0..N `Residente`.
@@ -41,8 +41,9 @@ Representa a cualquier persona con acceso al sistema (gerocultor, coordinador, a
 
 **Reglas de negocio**:
 - El campo `email` debe ser único en el sistema.
-- `passwordHash` nunca se envía al cliente.
-- Un usuario con `activo = false` no puede autenticarse.
+- Un usuario con `disabled = true` no puede autenticarse.
+- El rol se almacena como Firebase Custom Claim (`role`) y en Firestore colección `users`.
+- Solo usuarios con `role = 'admin'` pueden crear, modificar o desactivar cuentas.
 
 ---
 
