@@ -1,5 +1,11 @@
 # GeroCare
 
+![License](https://img.shields.io/badge/License-MIT-blue.svg) ![Deadline](https://img.shields.io/badge/Deadline-2026--05--18-important)
+
+![Vue](https://img.shields.io/badge/Vue-3.5.32-4FC08D?logo=vue.js&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-3178C6?logo=typescript&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js->=16-339933?logo=node.js&logoColor=white) ![Firebase](https://img.shields.io/badge/Firebase-Active-FFCA28?logo=firebase&logoColor=black) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Installed-06B6D4?logo=tailwindcss&logoColor=white)
+
+![CI](https://github.com/DevXoje/gerocultores-system/actions/workflows/ci.yml/badge.svg) ![tests](https://img.shields.io/badge/tests-pendiente-yellow) ![coverage](https://img.shields.io/badge/coverage-pendiente-yellow)
+
 > GeroCare — **Aplicación web para gerocultores**: agenda diaria, gestión de residentes y registro de incidencias.
 > Stack: Vue 3 + TypeScript (frontend en `code/frontend`), Express + Firebase Admin (API en `code/api`), Firebase Hosting + Firestore.
 > Proyecto académico DAW — desarrollado de forma individual.
