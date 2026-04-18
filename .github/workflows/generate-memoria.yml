@@ -1,0 +1,52 @@
+name: Generate Memoria Académica (PDF)
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-pdf:
+    name: Build PDF and Upload Artifact
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm i -g md-to-pdf
+          # Install chromium so md-to-pdf/puppeteer can use it
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+
+      - name: Extract Version & SHA
+        id: vars
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
+          echo "FILE_NAME=memoria-academica-v${VERSION}-${SHORT_SHA}.pdf" >> $GITHUB_ENV
+
+      - name: Generate PDF
+        run: |
+          chmod +x ./scripts/build-academic-docx.sh
+          # The script relies on npx and a chromium browser being available
+          ./scripts/build-academic-docx.sh
+
+          # Rename the output to include version and SHA
+          mv OUTPUTS/academic/dist/memoria-gerocultores.pdf "${{ env.FILE_NAME }}"
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FILE_NAME }}
+          path: ${{ env.FILE_NAME }}
+          retention-days: 90
