@@ -280,7 +280,7 @@ describe('UsersView', () => {
   // ─── onMounted ─────────────────────────────────────────────────────────────
 
   it('calls fetchUsers on mount', async () => {
-    const wrapper = mountView()
+    mountView()
     await flushPromises()
 
     expect(mockFetchUsers).toHaveBeenCalledOnce()
