@@ -58,7 +58,9 @@ describe('TaskCard — render', () => {
     const tarea = makeTarea({ notas: 'Paciente colaborador' })
     const wrapper = mount(TaskCard, { props: { tarea } })
 
-    expect(wrapper.get('[data-testid="task-card-notes-tarea-001"]').text()).toBe('Paciente colaborador')
+    expect(wrapper.get('[data-testid="task-card-notes-tarea-001"]').text()).toBe(
+      'Paciente colaborador'
+    )
   })
 
   it('does not render notes element when notas is null', () => {
@@ -74,7 +76,9 @@ describe('TaskCard — render', () => {
       props: { tarea, assignedToDisplayName: 'María García' },
     })
 
-    expect(wrapper.get('[data-testid="task-card-assignee-tarea-001"]').text()).toContain('María García')
+    expect(wrapper.get('[data-testid="task-card-assignee-tarea-001"]').text()).toContain(
+      'María García'
+    )
   })
 
   it('does not render assignee when prop is absent', () => {
@@ -88,14 +92,18 @@ describe('TaskCard — render', () => {
     const tarea = makeTarea({ estado: 'completada' })
     const wrapper = mount(TaskCard, { props: { tarea } })
 
-    expect(wrapper.get('[data-testid="task-card-title-tarea-001"]').classes()).toContain('task-card__title--done')
+    expect(wrapper.get('[data-testid="task-card-title-tarea-001"]').classes()).toContain(
+      'task-card__title--done'
+    )
   })
 
   it('does not apply line-through class when estado is pendiente', () => {
     const tarea = makeTarea({ estado: 'pendiente' })
     const wrapper = mount(TaskCard, { props: { tarea } })
 
-    expect(wrapper.get('[data-testid="task-card-title-tarea-001"]').classes()).not.toContain('task-card__title--done')
+    expect(wrapper.get('[data-testid="task-card-title-tarea-001"]').classes()).not.toContain(
+      'task-card__title--done'
+    )
   })
 
   it('has role="article" on the root element', () => {
