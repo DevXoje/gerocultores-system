@@ -5,7 +5,7 @@
 
 > These guardrails apply to ALL agents without exception.
 > GGA enforces them at every code review cycle.
-> Last sync with root AGENTS.md: 2026-03-28
+> Last sync with root AGENTS.md: 2026-04-07
 
 ---
 
@@ -30,7 +30,12 @@ SEVERITY: BLOCKED
 RULE: Every relevant technical decision must have a corresponding ADR in DECISIONS/.
       "Relevant" = any choice where the answer to "why X and not Y?" is non-obvious.
       Examples: framework selection, auth strategy, data model, offline strategy.
-SCOPE: ARCHITECT, DEVELOPER agents
+      NOT relevant: standard plugin usage derived from an already-documented stack decision,
+      tooling config files (ESLint, Prettier, Playwright) that are corollaries of an existing ADR.
+SCOPE: ARCHITECT, DEVELOPER agents. Does NOT apply to CI tooling config files.
+       NOTE: Standard plugin/tool usage that is a direct corollary of an already-accepted ADR
+       does NOT require a new ADR. Example: @vitejs/plugin-vue is required by ADR-01b (Vue 3 + Vite);
+       eslint-plugin-vue is required by the linting setup in ADR-06.
 ACTION_ON_VIOLATION:
   1. Create ADR in PROPOSED state before continuing.
   2. Log in LOGS/CHANGELOG.md with tag [DECISION].
@@ -60,7 +65,10 @@ RULE: Field names and types of all domain entities MUST be identical across:
         - SPEC/api-contracts.md
         - Source code (models, DTOs, DB schemas)
       No aliases, abbreviations, or renames are allowed between layers.
-SCOPE: DEVELOPER, REVIEWER agents
+SCOPE: DEVELOPER, REVIEWER agents. Domain entity files ONLY (models, DTOs, Pinia stores, API contracts).
+       NOTE: Config files, tooling setup files (eslint.config.js, playwright.config.ts, vite.config.ts),
+       and test utilities are excluded from entity consistency checks.
+       Does NOT apply to: config files, tooling setup, test fixtures, or non-domain code.
 ACTION_ON_VIOLATION:
   1. Flag as NEEDS_REVISION.
   2. List every field mismatch with exact location (file + line).
@@ -74,14 +82,19 @@ SEVERITY: NEEDS_REVISION
 ```
 RULE: Environment variables, API keys, database IDs, connection strings,
       and production URLs MUST NOT appear in source code.
-SCOPE: DEVELOPER, REVIEWER agents
+SCOPE: DEVELOPER, REVIEWER agents. SENSITIVE VALUES only: API keys, tokens, passwords,
+       connection strings, production hostnames.
 ALLOWED: .env files (not committed), .env.example (committed, with placeholder values)
+         localhost URLs and local port numbers in development tooling config
+         (playwright.config.ts, vite.config.ts) are NOT sensitive values and are
+         NOT subject to G05. Filesystem paths (dist/, node_modules/), tool ignore
+         patterns, and development-only configuration are also NOT sensitive.
 ACTION_ON_VIOLATION:
   1. Flag as BLOCKED immediately.
   2. Remove the hardcoded value from source.
   3. Replace with env var reference and document in .env.example.
 CHECK: No secrets in source files. .env.example present for all required vars?
-SEVERITY: BLOCKED
+SEVERITY: BLOCKED (only for actual secrets, not for localhost/tooling config)
 ```
 
 ## G06 — Scope lock
@@ -145,6 +158,24 @@ CHECK: Are all checklist items in OUTPUTS/academic/README.md ticked?
 SEVERITY: INCOMPLETE (pipeline-level; does not block code reviews)
 ```
 
+## G10 — No UI without Stitch reference
+
+```
+RULE: No agent may implement a view or UI component without first identifying
+      the corresponding Stitch screen in OUTPUTS/technical-docs/design-source.md.
+      If no matching screen exists, the agent must create it in Stitch first.
+SCOPE: DEVELOPER agent
+ACTION_ON_VIOLATION:
+  1. Flag as BLOCKED.
+  2. Agent must identify or create the Stitch screen before writing any Vue
+     component or CSS.
+  3. Export the screen PNG to OUTPUTS/design-exports/ and add a row to
+     OUTPUTS/technical-docs/design-source.md before resuming.
+CHECK: Does the implementation reference a screen from design-source.md?
+       Is the Stitch export file cited in the PR or commit?
+SEVERITY: BLOCKED
+```
+
 ---
 
 ## Guardrail Severity Reference
@@ -157,9 +188,63 @@ SEVERITY: INCOMPLETE (pipeline-level; does not block code reviews)
 
 ---
 
+## Automated Enforcement
+
+The table below documents which guardrails are **executable** (enforced by Git hooks at commit time)
+vs. **prose-only** (enforced by GGA code review and agent logic only).
+
+| Guardrail | Executable | Hook | How it's enforced |
+|-----------|-----------|------|-------------------|
+| G01 — No code without requirement | ✅ Yes | `pre-commit` | For `feat(US-XX)` commits: verifies `US-XX` exists as a heading in `SPEC/user-stories.md`. BLOCKED if missing. Warning if feat commit lacks US-XX scope. |
+| G02 — No decision without ADR | ⬜ Prose only | — | Enforced by GGA code review and ARCHITECT agent workflow. |
+| G03 — No feature without test plan | ✅ Yes | `pre-commit` | For `feat(US-XX)` commits: verifies `OUTPUTS/test-plans/test-plan-US-XX.md` exists. BLOCKED if missing. Includes pointer to the template. |
+| G04 — Entity consistency | ⬜ Prose only | — | Enforced by GGA and REVIEWER agent field-by-field comparison. |
+| G05 — No hardcoded sensitive values | ✅ Yes | `pre-commit` | Scans ALL staged file diffs for secret patterns (API keys, passwords, connection strings, private keys). BLOCKED immediately if found. |
+| G06 — Scope lock | ⬜ Prose only | — | Enforced by DEVELOPER/PLANNER agents and GGA review. |
+| G07 — No hidden technical debt | ⬜ Prose only | — | Enforced by REVIEWER agent during code review. |
+| G08 — Commit traceability | ✅ Yes | `commit-msg` | Validates Conventional Commits format. Requires `feat(US-XX)` for all `feat` commits. BLOCKED if format is wrong or US-XX is missing from a feat commit. |
+| G09 — Academic coverage | ⬜ Prose only | — | Enforced by WRITER agent pipeline checklist in `OUTPUTS/academic/README.md`. |
+| G10 — No UI without Stitch reference | ⬜ Prose only | — | Enforced by DEVELOPER agent and GGA review. Agent must cite design-source.md row before implementing any Vue component. |
+
+### Hook File Locations
+
+Git hooks live in `.git/hooks/` (not committed to the repo — local only).
+To re-install after cloning, run the setup script or copy manually:
+
+```bash
+# After cloning, re-install hooks:
+cp scripts/hooks/pre-commit  .git/hooks/pre-commit  && chmod +x .git/hooks/pre-commit
+cp scripts/hooks/commit-msg  .git/hooks/commit-msg  && chmod +x .git/hooks/commit-msg
+```
+
+> **Note**: `.git/hooks/` is not tracked by git. The canonical hook sources are maintained in
+> `scripts/hooks/` (tracked). When updating a hook, update `scripts/hooks/` first, then copy to `.git/hooks/`.
+
+### Secret Scan Patterns (G05)
+
+The pre-commit hook scans staged diffs for the following patterns (case-sensitive unless noted):
+
+| Pattern | What it catches |
+|---------|----------------|
+| `FIREBASE_API_KEY=` | Firebase Web API key |
+| `FIREBASE_APP_ID=` | Firebase App ID |
+| `apiKey: "AIza...` | Firebase config object literal |
+| `password=<value>` | Hardcoded passwords (not env var references) |
+| `secret=<value>` | Hardcoded secret values |
+| `private_key=` | Private key literals |
+| `DB_PASSWORD=` | Database password env var with value |
+| `DATABASE_URL=..@..` | Connection strings with embedded credentials |
+| `Bearer <token>` | Hardcoded Bearer tokens (≥20 chars) |
+| `-----BEGIN * PRIVATE KEY-----` | PEM-encoded private keys |
+
+`.env.example` files and binary assets are excluded from the scan.
+
+---
+
 ## Enforcement Notes
 
 - GGA reads `AGENTS.md` at repository root (configured via `.gga: RULES_FILE="AGENTS.md"`).
 - Root `AGENTS.md` contains machine-readable G01–G09 blocks that mirror this file.
 - **If root AGENTS.md and this file diverge, this file (`AGENTS/guardrails.md`) wins.**
 - Update protocol: update this file first, then sync the summary in root `AGENTS.md`.
+- Last hook update: 2026-04-07 — Added G10 (prose-only; G01, G03, G05 pre-commit and G08 commit-msg remain active).

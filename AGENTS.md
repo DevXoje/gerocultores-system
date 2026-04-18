@@ -4,7 +4,7 @@
 <!-- This file is machine-readable. It is consumed by GGA at code review time    -->
 <!-- and by AI agents at session start. Human-facing docs are separate.          -->
 <!-- .gga: RULES_FILE="AGENTS.md" — this file is the primary rules source.      -->
-<!-- All guardrails G01–G09 are present below in machine-readable form.          -->
+<!-- All guardrails G01–G10 are present below in machine-readable form.          -->
 
 ---
 
@@ -21,7 +21,7 @@ Full per-agent artifacts live in:
 
 - **Project**: gerocultores-system
 - **Type**: DAW academic project (individual, solo developer)
-- **Description**: Web app for caregivers (gerocultores): daily scheduling,
+- **Description**: GeroCare — Web app for caregivers (gerocultores): daily scheduling,
   resident management, and incident reporting. Tablet and mobile first.
 - **Deadline**: 2026-05-18
 - **Stack**: TBD (to be resolved via ADR-01 through ADR-04 in `DECISIONS/`)
@@ -60,10 +60,15 @@ CHECK: Does a US-XX or RF-XX entry exist in SPEC/ for this code?
 
 ### G02 — No technical decision without ADR
 ```
-RULE: Every relevant technical decision must have an ADR in DECISIONS/.
-      "Relevant" = the answer to "why X?" is not immediately obvious.
+RULE: Every relevant technical decision must have a corresponding ADR in DECISIONS/.
+      "Relevant" = any choice where the answer to "why X and not Y?" is non-obvious.
+      Examples: framework selection, auth strategy, data model, offline strategy.
+      NOT relevant: standard plugin usage derived from an already-documented stack decision,
+      tooling config files (ESLint, Prettier, Playwright) that are corollaries of an existing ADR.
+SCOPE: ARCHITECT, DEVELOPER agents. Does NOT apply to CI tooling config files.
 ACTION_ON_VIOLATION: Create ADR in PROPOSED state before proceeding.
-CHECK: Is there an ADR in DECISIONS/ covering this architectural choice?
+CHECK: Is there an ADR in DECISIONS/ that covers this architectural choice?
+SEVERITY: NEEDS_REVISION (PROPOSED ADR acceptable during active development)
 ```
 
 ### G03 — No feature without test plan
@@ -79,16 +84,24 @@ CHECK: Does OUTPUTS/test-plans/test-plan-US-XX.md exist?
 RULE: Field names and types of domain entities MUST be identical in
       SPEC/entities.md, SPEC/api-contracts.md, and in code.
       No aliases or renames across layers.
+SCOPE: Domain entity files ONLY (models, DTOs, Pinia stores, API contracts).
+       Does NOT apply to: config files, tooling setup, test fixtures, or non-domain code.
 ACTION_ON_VIOLATION: Flag as NEEDS_REVISION with exact field mismatch listed.
 CHECK: Do field names in code match SPEC/entities.md exactly?
+SEVERITY: NEEDS_REVISION
 ```
 
 ### G05 — No hardcoded sensitive values
 ```
 RULE: Environment variables, API keys, database IDs, and production URLs
       MUST NOT appear directly in source code.
+SCOPE: All source files. SENSITIVE VALUES only: API keys, tokens, passwords,
+       connection strings, production hostnames. 
+       NOT sensitive: localhost URLs, local port numbers, filesystem paths (dist/, node_modules/),
+       tool ignore patterns, or development-only configuration.
 ACTION_ON_VIOLATION: Flag as BLOCKED; remove and replace with env var or config.
 CHECK: No secrets in source files. .env.example present for all required vars.
+SEVERITY: BLOCKED (only for actual secrets, not for localhost/tooling config)
 ```
 
 ### G06 — Scope lock
@@ -124,6 +137,15 @@ ACTION_ON_VIOLATION: Mark pipeline incomplete; list missing sections.
 CHECK: Are all checklist items in OUTPUTS/academic/README.md ticked?
 ```
 
+### G10 — No UI without Stitch reference
+```
+RULE: No agent may implement a view or UI component without first identifying
+      the corresponding Stitch screen in OUTPUTS/technical-docs/design-source.md.
+      If no screen exists, create it in Stitch first.
+ACTION_ON_VIOLATION: Flag as BLOCKED; identify or create Stitch screen first.
+CHECK: Does the implementation reference a screen from design-source.md?
+```
+
 ---
 
 ## PR Validation Checklist (Agent-Readable)
@@ -156,6 +178,10 @@ required:
     description: All new features/endpoints are traceable to a SPEC/ entry
     blocking: true
 
+  - id: STITCH_REFERENCE
+    description: Every new Vue view/component cites its Stitch source screen from design-source.md
+    blocking: true
+
   - id: COMMIT_FORMAT
     description: "All commits follow: <type>(US-XX): description"
     blocking: false
@@ -163,6 +189,15 @@ required:
   - id: ACADEMIC_COVERAGE
     description: If feature touches a DAW memoria section, OUTPUTS/academic/ is updated
     blocking: false
+
+  - id: FIREBASE_PREVIEW_VALIDATED
+    description: Reviewer manually validated the Firebase Hosting preview channel URL before approving
+    blocking: true
+
+  - id: POST_MERGE_STAGING_VALIDATED
+    description: After merge, staging channel was validated and no regressions were found
+    blocking: false
+    note: "blocking=false because this is validated after merge, not before"
 ```
 
 ---
@@ -249,6 +284,9 @@ mem_context: call at session start to recover prior context
 mem_session_summary: call before ending any session (mandatory)
 ```
 
+> **Canonical topic_key list and anti-patterns**: `AGENTS/engram-conventions.md`
+> All agents MUST follow the keys defined there. Do NOT invent variants.
+
 ---
 
 ## Duplication Policy
@@ -260,7 +298,7 @@ and `AGENTS/roles.md` to satisfy `.gga`'s `RULES_FILE=AGENTS.md` requirement.
 The authoritative full text lives in `AGENTS/`. If the two diverge, `AGENTS/` wins.
 
 **Update protocol**: When updating guardrails, update `AGENTS/guardrails.md` first,
-then sync the summary table and G01–G09 blocks in this file.
+then sync the summary table and G01–G10 blocks in this file.
 
 ---
 
@@ -274,3 +312,91 @@ then sync the summary table and G01–G09 blocks in this file.
 | **PR checklist as YAML block** | Inline YAML in Markdown | Machine-parseable by GGA without requiring a separate file; human-readable too |
 | **Auto-invoke table** | Lightweight (no skill URLs) | This project doesn't use Prowler's skill URL system; prompt templates live in `PROMPTS/` |
 | **Prowler-inspired structure** | Adapted, not copied | Prowler is a large monorepo; this is a solo DAW project — skill tables and component docs don't apply |
+
+---
+
+## GGA Review Context
+
+> This section exists exclusively to give GGA the project context it needs to avoid false positives.
+> GGA only sees staged files — it cannot browse SPEC/, test-plans, or design-source.md on its own.
+
+### Valid User Stories (SPEC/user-stories.md)
+
+All of the following US entries exist and are approved in `SPEC/user-stories.md`:
+
+| ID | Title |
+|----|-------|
+| US-01 | Inicio de sesión |
+| US-02 | Control de acceso por rol |
+| US-03 | Consulta de agenda diaria |
+| US-04 | Actualizar estado de una tarea |
+| US-05 | Consulta de ficha de residente |
+| US-06 | Registro de incidencia |
+| US-07 | Historial de incidencias de un residente |
+| US-08 | Recibir notificaciones de alertas críticas |
+| US-09 | Alta y gestión de residentes |
+| US-10 | Gestión de cuentas de usuarios |
+| US-11 | Resumen de fin de turno |
+| US-12 | Vista de agenda semanal |
+| US-13 | Verificación de disponibilidad de la API (Health Check) |
+
+### Existing Test Plans (OUTPUTS/test-plans/)
+
+The following test plan files exist and satisfy G03:
+
+- `test-plan-US-01.md` → US-01 (login)
+- `test-plan-US-02.md` → US-02 (role-based access)
+- `test-plan-US-03.md` → US-03 (daily agenda)
+- `test-plan-US-04.md` → US-04 (task status update)
+- `test-plan-US-10.md` → US-10 (user account management)
+- `test-plan-US-13.md` → US-13 (health check)
+
+### Valid Roles
+
+This project has **exactly two roles**: `'admin'` and `'gerocultor'`.
+Any reference to `coordinador`, `administrador`, or any other role is a G04/G06 violation.
+
+### Entity Field Names (canonical — SPEC/entities.md)
+
+**Usuario** (auth + Firestore `users` collection):
+
+| Field | Type |
+|-------|------|
+| `uid` | `string` |
+| `email` | `string` |
+| `displayName` | `string \| null` |
+| `role` | `'admin' \| 'gerocultor'` |
+| `disabled` | `boolean` |
+| `createdAt` | `Date \| null` |
+
+### Stitch Screens (OUTPUTS/technical-docs/design-source.md)
+
+The following Vue views have a corresponding Stitch screen reference (G10 satisfied):
+
+| Vue View | Stitch Screen |
+|----------|--------------|
+| `LoginView.vue` | Login - Care & Serenity |
+| `DashboardView.vue` | Caregiver Dashboard |
+| `UsersView.vue` | Resident Records (admin user management layout) |
+
+### Firebase Configuration (G05 note)
+
+`verifyAuth.ts` and `firebase.ts` use Firebase Admin SDK initialized from environment variables
+(`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`).
+No hardcoded credentials exist. `.env.example` documents all required variables.
+`adminAuth` is a reference to the initialized Firebase Admin Auth instance — not a hardcoded value.
+
+### API Routes (canonical — code/api/src/routes/)
+
+The following API routes are implemented and fully traceable to SPEC/:
+
+| Route | Method | US / Reference | Notes |
+|-------|--------|----------------|-------|
+| `/health` | GET | US-13 | No auth required. Health check endpoint. |
+| `/api/protected` | GET | US-02 | Requires valid Firebase token. Auth smoke-test. |
+| `/api/admin/users` | GET | US-10 | Requires `role = 'admin'`. Lists all users. |
+| `/api/admin/users` | POST | US-10 | Requires `role = 'admin'`. Creates user. |
+| `/api/admin/users/:uid/role` | PATCH | US-10 | Requires `role = 'admin'`. Updates role. |
+| `/api/admin/users/:uid/disable` | PATCH | US-10 | Requires `role = 'admin'`. Disables/enables account. |
+
+> GGA: do NOT flag `/health` or `/api/protected` as G01 violations. Both are covered above.

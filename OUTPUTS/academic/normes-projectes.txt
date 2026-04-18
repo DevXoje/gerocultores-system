@@ -1,0 +1,53 @@
+
+
+--- PÁGINA 1 ---
+NORMES I RECOMANACIONS
+Avaluació. Criteris de qualificació.
+La qualificació del mòdul de Projecte serà numèrica, fins un 10 i sense decimals.
+Els criteris de qualificació, com a percentatge de la nota final, seran els següents:
+a) Aspectes formals (presentació, estructura documental, organització i redacció, entre altres): 20%
+b) Continguts (dificultat, grau de resolució de la proposta, originalitat, actualitat, alternatives presentades i resultats 
+obtinguts, entre altres): 50%
+c) Exposició i defensa (qualitat de l’exposició oral i de les respostes a les preguntes plantejades pels membres del 
+tribunal): 30%
+Drets d'autor
+Segons marca la normativa:
+Els autors i les autores dels projectes tenen plena disposició i dret exclusiu a l’explotació del projecte presentat, sense 
+més limitacions que les contingudes en el Reial decret legislatiu 1/1996, de 12 d’abril, en matèria de propietat industrial i 
+intel·lectual, sense perjudici que hauran de cedir al centre el projecte a efectes acadèmics.
+Consells i altres normes
+• Format de la memòria final. Obligatòriament, s'ha de lliurar en format document PDF amb les següents orientacions de 
+format:
+- Màrgens no superiors a 2,5 cm, 
+- Tipus de lletra formal, de 10, 11 o 12, 
+- Interlineat senzill.
+- Capçalera de pàgina: títol del projecte.
+- Peu de pàgina: nom de l'alumne, número de pàgina.
+• Convé incloure exemples reals existents on s'utilitze la tecnologia estudiada/implementada.
+• Sempre que es puga, s’hauran d’incloure imatges (esquemes, figures i fotos)  amb les següents orientacions:
+- S'hauran de comentar i explicar (abans o després).
+- Les imatges han de ser nítides, ben proporcionades, de grandària adequada a la informació que continguen. 
+- Amb peu d'imatge que diga el contingut, la font o origen de la imatge quan faça falta, i numerades. 
+• Es poden incloure captures de la pantalla, però sense abusar.
+• Caldrà destacar els conceptes importants i la terminologia, i explicar-la la primera volta que aparega.
+• S'ha de fugir de copiar i copiar al peu de la lletra. 
+• La majoria de les vegades convindrà resumir. Els aspectes més importants, en canvi, poden ser ampliats. 
+• S’haurà d'adaptar la redacció d'una manera coherent, narrat des del punt de vista de l'alumne.
+• No s’ha de fer propaganda dels productes/tecnologies que s'utilitzen, com fan les empreses fabricants en els seus butl-
+letins publicitaris i manuals. Quan s’utilitze informació dels fabricants, s’haurà de canviar la redacció i ser crítics.
+• S'ha d'intentar que siga el més entenedor i útil possible.
+• El códi font, si hi haguera, s'ha d'entregar mitjantçant enllaç a algun repositori de control de versions com github, gitlab, 
+etc.
+Dates d'entrega
+• El projecte no es podra presentar fins que no es tinguen tots els mòduls aprovats i una vegada finalitzada la FCT.
+• Previ acord amb el tutor individual, es recomana fer una primera entrega parcial abans del 30 d'abril.
+• La data de entrega final del projecte sera la primera setmana de Juny (ja es concretará). Per als alumnes que tinguen 
+que presentar-se a la convocatòria extraordinaria la data podra ser posterior.
+• Les dates de les presentacions orals del projectes es publicaran més avant. Es faran al llarg del mes de juny. Es fara 
+public un calendari de exposicions amb la data i l'hora exacta.
+• L'exposició oral durarà un màxim de 20 minuts.
+(Cada tutor individual acordarà amb cada alumne allò que convé centrar-se, per així ajustar-se al temps.)
+I al final de cada presentació pot haver-hi preguntes per part dels professors membres del tribunal.
+• El tribunal estarà format per tres professors: cap de departament, el tutor de grup i el tutor individual.
+• Per últim, recordeu que en el cas d'haver-se implementat el projecte en una empresa real, cal excloure aquella 
+informació que siga confidencial en la versió que entregue al centre.

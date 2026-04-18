@@ -1,18 +1,19 @@
 # ADR-01b: Switch Frontend a Vue.js + Vite + Tailwind + Pinia + Axios
 
-- **Estado**: DRAFT
+- **Estado**: ACCEPTED
 - **Fecha**: 2026-03-29
+- **Fecha de aceptación**: 2026-04-01
 - **Autor**: Jose Vilches Sánchez
 - **Tutor**: ANDRES MARTOS GAZQUEZ
 - **Centro**: CIPFP Batoi d'Alcoi
 - **Curso**: 2025-2026
 - **Supersede**: ADR-01 (React 18 + Vite + shadcn/ui + TanStack Query)
 
-> ⚠️ **DRAFT — Pendiente aprobación por Jose Vilches Sánchez.**
+> ✅ **ACCEPTED — Aprobado por Jose Vilches Sánchez el 2026-04-01.**
 
 ## Contexto
 
-El proyecto "gerocultores-system" eligió inicialmente React 18 + TanStack Query + shadcn/ui (ADR-01). Tras evaluar las fortalezas del desarrollador y la complejidad del proyecto frente al deadline (2026-05-18), se propone pivotar a Vue.js 3 con Vite como bundler. Vue ofrece una curva de aprendizaje más suave con la Composition API, y Pinia proporciona gestión de estado más directa que Redux/Zustand.
+El proyecto "gerocultores-system" (GeroCare) eligió inicialmente React 18 + TanStack Query + shadcn/ui (ADR-01). Tras evaluar las fortalezas del desarrollador y la complejidad del proyecto frente al deadline (2026-05-18), se propone pivotar a Vue.js 3 con Vite como bundler. Vue ofrece una curva de aprendizaje más suave con la Composition API, y Pinia proporciona gestión de estado más directa que Redux/Zustand.
 
 Adicionalmente, PWA/Offline se excluyen explícitamente del scope (ver propuesta `sdd/switch-stack-to-vue-firebase/proposal`). Esto reduce complejidad.
 
@@ -68,7 +69,7 @@ Se elige **Opción B: Vue 3 + Vite + Pinia + Axios + Tailwind CSS**.
 
 ## Nota de aprobación
 
-> **PENDIENTE**: Este ADR requiere aprobación explícita de Jose Vilches Sánchez antes de marcar como ACCEPTED.  
+> **ACCEPTED**: Aprobado por Jose Vilches Sánchez el 2026-04-01.  
 > Fecha de creación: 2026-03-29  
 > Creado por: SDD Design Agent (IA)
 

@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Environment variables (G05 — no secrets in git)
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+api/.env
+api/.env.local
+
+# Build outputs
+frontend/dist/
+api/dist/
+
+# Academic memory generated outputs (regenerate with scripts/build-academic-docx.sh)
+OUTPUTS/academic/dist/*.docx
+OUTPUTS/academic/dist/*.pdf
+OUTPUTS/academic/dist/*.html
+
+# Firebase
+.firebase/
+
+# Firebase Emulator data (persisted locally, not committed)
+code/emulator_data/*
+!code/emulator_data/.gitkeep
+
+# Local files
+*.local
+
+# Editor
+.DS_Store
+.vscode/settings.json
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript build info
+*.tsbuildinfo

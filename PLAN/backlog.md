@@ -1,8 +1,9 @@
 # Backlog Kanban — gerocultores-system
 
-> Fuente de verdad del Planner. Actualizado: 2026-03-29.
-> Stack: Vue 3 + Vite + Tailwind + Pinia + Firebase Auth/Firestore + Express API wrapper + Hosting TBD
-> Deadline: 2026-05-18 | Sprints: Sprint-0 (setup) → Sprint-6 (entrega final)
+> Fuente de verdad del Planner. Actualizado: 2026-04-01.
+> Stack: Vue 3 + Vite + TS + Tailwind + Pinia + Firebase Auth/Firestore EU + Express API wrapper + Firebase Hosting
+> Deadline: 2026-05-18 | Sprints: Sprint-0 (scaffold + auth básica) → Sprint-6 (entrega final)
+> **Sprint-0 replanned** 2026-04-01: sprint original (→ 2026-04-04) venció con 0 tareas. Nuevo período: 2026-04-01 → 2026-04-14.
 
 <!-- sdd/switch-stack-to-vue-firebase TASKS delta -->
 
@@ -22,7 +23,7 @@
 
 ### ✔️ DONE
 
-_Nada completado todavía — backlog regenerado para la migración Vue + Firebase._
+_Nada completado todavía._
 
 ---
 
@@ -40,48 +41,71 @@ _Nada en progreso activo._
 
 ---
 
-### ✅ READY — Sprint-0 (listas para empezar)
+### ✅ READY — Sprint-0 Replanned (2026-04-01 → 2026-04-14)
 
 | ID | US | Título | Descripción | Tamaño | Prioridad | Sprint |
 |----|----|--------|-------------|--------|-----------|--------|
-| T-01 | — | Inicializar repositorio Git | Sin cambios sobre el T-01 original: repo, `.gitignore`, README y convenciones base sin secretos | XS | P1 | Sprint-0 |
-| T-02 | — | Scaffold Vite + Vue 3 + TS | Actualiza el T-02 original: sustituye React 18 por Vue 3 + TypeScript y valida HMR | S | P1 | Sprint-0 |
-| T-03 | — | Configurar Tailwind CSS para Vue | Actualiza el T-03 original para `frontend/` con content paths Vue y estilos base tablet-first | S | P1 | Sprint-0 |
-| T-04 | — | Sistema base de componentes Tailwind/Atomic | Reemplaza el T-04 original (`shadcn/ui`) por atoms/molecules base accesibles en `frontend/src/components/` | S | P1 | Sprint-0 |
-| T-05 | — | Configurar ESLint + Prettier + Husky | Amplía el T-05 original a frontend + api + reglas comunes de TypeScript | S | P1 | Sprint-0 |
-| T-06 | — | Crear proyecto Firebase en región EU | Reemplaza el T-06 original de Supabase por Firebase Auth + Firestore en `europe-west1|3` | S | P1 | Sprint-0 |
-| T-07 | — | Configurar Firebase client SDK | Reemplaza el T-07 original: crear `frontend/src/lib/firebase.ts` y `.env.example` con `VITE_FIREBASE_*` | XS | P1 | Sprint-0 |
-| T-09 | — | Configurar GitHub Actions CI | Actualiza el T-09 original para lint + type-check + build + tests de frontend/api y reglas | M | P1 | Sprint-0 |
-| T-10 | — | Estructura monorepo frontend/api/shared | Actualiza el T-10 original: estructura Vue + Express + tests + assets compartidos | S | P1 | Sprint-0 |
-| T-11 | — | Configurar Vue Router 4 | Reemplaza el T-11 original de React Router por rutas base `/login`, `/`, `/unauthorized`, `404` | S | P1 | Sprint-0 |
-| T-12 | — | Configurar Pinia por dominio | Reemplaza el T-12 original de TanStack Query por stores `auth`, `agenda`, `residente`, `incidencia`, `turno`, `notificacion` | S | P1 | Sprint-0 |
-| T-88 | — | Evaluar Firebase Hosting vs opciones GCP | Nuevo bloqueante Sprint-0: comparar Firebase Hosting, Cloud Run y variantes según ADR-04b | S | P1 | Sprint-0 |
-| T-89 | — | TODO — Formalizar elección de hosting | Nuevo bloqueante Sprint-0: documentar la opción elegida en ADR-04b; no implementa deploy hasta decisión explícita | XS | P1 | Sprint-0 |
-| T-90 | — | Scaffold Express API wrapper | Nuevo: crear workspace `api/`, bootstrap Express + Admin SDK + middleware base | M | P1 | Sprint-0 |
-| T-91 | — | Configurar Firebase Emulator Suite | Nuevo: emuladores Auth/Firestore + harness de tests para Firestore Rules | S | P1 | Sprint-0 |
-| T-92 | — | Integrar CI para Emulator + Rules | Nuevo: añadir job de CI para levantar emuladores, ejecutar tests de reglas y publicar resultados | M | P1 | Sprint-0 |
+| T-S0-01 | — | Scaffold Vue 3 + TS con Vite | `npm create vite@latest frontend -- --template vue-ts`; validar HMR y estructura base | S | P1 | Sprint-0 |
+| T-S0-02 | — | Instalar dependencias base | `tailwindcss`, `pinia`, `vue-router`, `axios` — configurar Tailwind con content paths Vue | S | P1 | Sprint-0 |
+| T-S0-03 | — | Configurar Firebase project en consola + `.env.example` | Proyecto Firebase en región EU; `frontend/.env.example` y `api/.env.example` con todas las variables `VITE_FIREBASE_*` y `FIREBASE_*` | S | P1 | Sprint-0 |
+| T-S0-04 | US-01 | Implementar login con Firebase Auth — LoginView + useAuthStore | `LoginView.vue` con formulario, `useAuthStore` Pinia, rutas `/login` y `/` con guard básico | M | P1 | Sprint-0 |
+| T-S0-05 | — | Scaffold API Express — `/health` + middleware `verifyAuth` | `api/src/index.ts` con Express + `firebase-admin`; `GET /health`; middleware `verifyAuth` que valida token | M | P1 | Sprint-0 |
+| T-S0-06 | — | Configurar Firebase Emulator Suite | `firebase.json`, `firestore.rules` base, `firebase emulators:start` funcional; frontend apunta al emulador en modo dev | S | P1 | Sprint-0 |
+| T-S0-07 | US-01 | Test plan US-01 — verificar/completar `test-plan-US-01.md` | Verificar que `OUTPUTS/test-plans/test-plan-US-01.md` existe y cubre: login OK, credenciales incorrectas, sesión persistente, logout | XS | P1 | Sprint-0 |
+| T-S0-08 | — | Deploy inicial a Firebase Hosting (rama develop) | `firebase deploy --only hosting`; app accesible en URL Firebase Hosting; `.firebaserc` configurado | M | P1 | Sprint-0 |
+
+---
+
+### ⏸ REPLANNED — Sprint-0 original (tareas del sprint anterior, caducado 2026-04-04)
+
+> Estas tareas del Sprint-0 original (2026-03-29 → 2026-04-04) se archivan como replanned.
+> Las absorbidas por el nuevo Sprint-0 están marcadas. Las restantes entran en Sprint-1.
+
+| ID | US | Título | Estado | Absorbe en |
+|----|----|--------|--------|------------|
+| T-01 | — | Inicializar repositorio Git | Absorbida | T-S0-01 (repo ya existe) |
+| T-02 | — | Scaffold Vite + Vue 3 + TS | Absorbida | T-S0-01 |
+| T-03 | — | Configurar Tailwind CSS para Vue | Absorbida | T-S0-02 |
+| T-04 | — | Sistema base de componentes Tailwind/Atomic | Diferida | Sprint-1 |
+| T-05 | — | Configurar ESLint + Prettier + Husky | Diferida | Sprint-1 |
+| T-06 | — | Crear proyecto Firebase en región EU | Absorbida | T-S0-03 |
+| T-07 | — | Configurar Firebase client SDK | Absorbida | T-S0-03 |
+| T-09 | — | Configurar GitHub Actions CI | Diferida | Sprint-1 |
+| T-10 | — | Estructura monorepo frontend/api/shared | Absorbida | T-S0-01 + T-S0-05 |
+| T-11 | — | Configurar Vue Router 4 | Absorbida | T-S0-04 (parcialmente) |
+| T-12 | — | Configurar Pinia por dominio | Absorbida | T-S0-04 (store auth) |
+| T-88 | — | Evaluar Firebase Hosting vs opciones GCP | Simplificada | Firebase Hosting por defecto; ADR-04b en Sprint-1 |
+| T-89 | — | Formalizar elección de hosting | Diferida | Sprint-1 via ADR-04b |
+| T-90 | — | Scaffold Express API wrapper | Absorbida | T-S0-05 |
+| T-91 | — | Configurar Firebase Emulator Suite | Absorbida | T-S0-06 |
+| T-92 | — | Integrar CI para Emulator + Rules | Diferida | Sprint-1 |
 
 ---
 
 ### 🔲 BACKLOG
 
-#### Sprint-1: Auth + App Shell + base de migración (2026-04-05 → 2026-04-11)
+#### Sprint-1: Auth completa + App Shell + CI + deploy (2026-04-15 → 2026-04-25)
 
 | ID | US | Título | Descripción | Tamaño | Prioridad | Sprint |
 |----|----|--------|-------------|--------|-----------|--------|
-| T-08 | — | Configurar deploy inicial tras decisión de hosting | Actualiza y mueve el T-08 original desde Sprint-0: preparar deploy según T-89 y ADR-04b | M | P1 | Sprint-1 |
-| T-13 | US-01 | Pantalla de Login en Vue | Actualiza el T-13 original con `LoginView.vue`, validación y feedback accesible | M | P1 | Sprint-1 |
-| T-14 | US-01 | Integrar Firebase Auth (email/pass) | Reemplaza el T-14 original de Supabase Auth por `signInWithEmailAndPassword` y manejo de token | M | P1 | Sprint-1 |
-| T-15 | US-01 | Logout y limpieza de sesión | Actualiza el T-15 original con `signOut`, limpieza Pinia y revocación/invalidación definida por backend | S | P1 | Sprint-1 |
-| T-16 | US-01 | Persistencia de sesión con Pinia | Reemplaza el T-16 original (`AuthContext`) por `useAuthStore` + listeners Firebase | M | P1 | Sprint-1 |
-| T-17 | US-02 | Colección `usuarios` + custom claims | Reemplaza el T-17 original (`profiles`) por bootstrap Firestore + claims de rol | M | P1 | Sprint-1 |
-| T-18 | US-02 | Reglas Firestore + middleware Express RBAC | Reemplaza el T-18 original de RLS por defensa en profundidad Auth + Rules + Express | L | P1 | Sprint-1 |
-| T-19 | US-02 | Guards de navegación Vue Router | Reemplaza el T-19 original (`ProtectedRoute`) por guards 401/403 basados en claims | M | P1 | Sprint-1 |
-| T-20 | US-02 | Manejo de acceso no autorizado (403) | Mantiene el T-20 original con `UnauthorizedView.vue` y respuesta API consistente | S | P2 | Sprint-1 |
-| T-21 | — | Layout principal (AppShell) | Actualiza el T-21 original para Vue + navegación responsive + rol visible | M | P1 | Sprint-1 |
-| T-22 | — | Tema de diseño y tokens Tailwind | Actualiza el T-22 original con paleta, tipografía y componentes mobile/tablet-first | S | P2 | Sprint-1 |
-| T-23 | — | Página 404 Not Found | Mantiene el T-23 original adaptado a Vue Router | XS | P3 | Sprint-1 |
-| T-93 | — | Diseñar mapeo Supabase → Firestore | Nuevo: definir equivalencias de tablas/colecciones, seeds demo e impacto sobre IDs y auditoría | M | P1 | Sprint-1 |
+| T-04 | — | Sistema base de componentes Tailwind/Atomic | Diferida de Sprint-0: atoms/molecules base accesibles en `frontend/src/components/` | S | P1 | Sprint-1 |
+| T-05 | — | Configurar ESLint + Prettier + Husky | Diferida de Sprint-0: reglas para frontend + api + hooks pre-commit | S | P1 | Sprint-1 |
+| T-09 | — | Configurar GitHub Actions CI | Diferida de Sprint-0: lint + type-check + build + tests frontend/api y reglas | M | P1 | Sprint-1 |
+| T-89 | — | Formalizar elección de hosting en ADR-04b | Diferida de Sprint-0: documentar la opción elegida en ADR-04b | XS | P1 | Sprint-1 |
+| T-92 | — | Integrar CI para Emulator + Rules | Diferida de Sprint-0: job CI para levantar emuladores y ejecutar tests de reglas | M | P1 | Sprint-1 |
+| T-08 | — | Configurar deploy listo en Firebase Hosting | Mueve el T-08 original: preparar deploy completo según ADR-04b | M | P1 | Sprint-1 |
+| T-13 | US-01 | Pantalla de Login en Vue (completa) | `LoginView.vue` completa con validación, feedback accesible y tests | M | P1 | Sprint-1 |
+| T-14 | US-01 | Integrar Firebase Auth (email/pass) completo | `signInWithEmailAndPassword`, manejo de token, persistencia Pinia | M | P1 | Sprint-1 |
+| T-15 | US-01 | Logout y limpieza de sesión | `signOut`, limpieza Pinia, revocación de token | S | P1 | Sprint-1 |
+| T-16 | US-01 | Persistencia de sesión con Pinia | `useAuthStore` + listeners Firebase `onAuthStateChanged` | M | P1 | Sprint-1 |
+| T-17 | US-02 | Colección `usuarios` + custom claims | Bootstrap Firestore + claims de rol en Firebase Auth | M | P1 | Sprint-1 |
+| T-18 | US-02 | Reglas Firestore + middleware Express RBAC | Defensa en profundidad Auth + Rules + Express | L | P1 | Sprint-1 |
+| T-19 | US-02 | Guards de navegación Vue Router | Guards 401/403 basados en claims | M | P1 | Sprint-1 |
+| T-20 | US-02 | Manejo de acceso no autorizado (403) | `UnauthorizedView.vue` y respuesta API consistente | S | P2 | Sprint-1 |
+| T-21 | — | Layout principal (AppShell) | Vue + navegación responsive + rol visible | M | P1 | Sprint-1 |
+| T-22 | — | Tema de diseño y tokens Tailwind | Paleta, tipografía y componentes mobile/tablet-first | S | P2 | Sprint-1 |
+| T-23 | — | Página 404 Not Found | Adaptada a Vue Router | XS | P3 | Sprint-1 |
+| T-93 | — | Diseñar mapeo Supabase → Firestore | Equivalencias tablas/colecciones, seeds demo e impacto sobre IDs y auditoría | M | P1 | Sprint-1 |
 
 #### Sprint-2: Agenda diaria + actualización de tareas (2026-04-12 → 2026-04-18)
 
@@ -180,14 +204,14 @@ _Nada en progreso activo._
 
 | Sprint | Fechas | Objetivo Principal | Tareas | Tamaño total est. |
 |--------|--------|-------------------|--------|-------------------|
-| Sprint-0 | 2026-03-29 → 2026-04-04 | Infraestructura Vue/Firebase + hosting decision + emuladores | T-01..T-12 (sin T-08) + T-88..T-92 | ~5d |
-| Sprint-1 | 2026-04-05 → 2026-04-11 | Auth funcional + App Shell + deploy listo + mapeo migración | T-08, T-13..T-23, T-93 | ~6d |
-| Sprint-2 | 2026-04-12 → 2026-04-18 | Agenda diaria + actualización de tareas | T-24..T-35 | ~6d |
-| Sprint-3 | 2026-04-19 → 2026-04-25 | Residentes + Incidencias + administración básica | T-36..T-53 | ~8d |
-| Sprint-4 | 2026-04-26 → 2026-05-02 | Notificaciones + turnos + control de scope | T-54..T-64 | ~5d |
-| Sprint-5 | 2026-05-03 → 2026-05-09 | Tests + QA + documentación técnica | T-65..T-76 | ~6d |
-| Sprint-6 | 2026-05-10 → 2026-05-18 | Memoria académica + presentación + cierre | T-77..T-87 + T-94..T-95 | ~5d |
-| **TOTAL** | | | **95 tareas** | **~41d persona** |
+| Sprint-0 | 2026-04-01 → 2026-04-14 | Scaffold Vue 3 + TS + Firebase Auth básica + Emulators + deploy | T-S0-01..T-S0-08 | ~3d |
+| Sprint-1 | 2026-04-15 → 2026-04-25 | Auth completa + RBAC + App Shell + CI + ADR-04b + deploy producción | T-04,T-05,T-08,T-09,T-13..T-23,T-89,T-92,T-93 | ~8d |
+| Sprint-2 | 2026-04-26 → 2026-05-02 | Agenda diaria + actualización de tareas | T-24..T-35 | ~6d |
+| Sprint-3 | 2026-05-03 → 2026-05-09 | Residentes + Incidencias + administración básica | T-36..T-53 | ~8d |
+| Sprint-4 | 2026-05-10 → 2026-05-12 | Notificaciones + turnos + control de scope | T-54..T-64 | ~5d |
+| Sprint-5 | 2026-05-13 → 2026-05-15 | Tests + QA + documentación técnica | T-65..T-76 | ~6d |
+| Sprint-6 | 2026-05-16 → 2026-05-18 | Memoria académica + presentación + cierre | T-77..T-87 + T-94..T-95 | ~5d |
+| **TOTAL** | | | **~98 tareas** | **~41d persona** |
 
 ---
 
@@ -206,4 +230,4 @@ _Nada en progreso activo._
 
 ---
 
-*Última actualización: 2026-03-29 — Kanban regenerado para sdd/switch-stack-to-vue-firebase*
+*Última actualización: 2026-04-01 — Sprint-0 replanned; tareas originales movidas a estado "replanned"*

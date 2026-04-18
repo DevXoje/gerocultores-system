@@ -1,5 +1,7 @@
 # Fuente de diseño: Stitch ↔ exports ↔ SPEC
 
+> **Nota para agentes**: La generación de pantallas en Stitch puede tardar ~2 min y hacer timeout en la herramienta, pero la pantalla **sí se crea en segundo plano**. Antes de generar una pantalla nueva, consultar siempre `stitch_list_screens` para evitar duplicados. Ver protocolo completo en `AGENTS/stitch-workflow.md`.
+
 > Índice de trazabilidad entre proyectos/pantallas en **Google Stitch**, archivos en `OUTPUTS/design-exports/` y requisitos en **SPEC/**.
 > Normativa: [ADR-05](../../DECISIONS/ADR-05-stitch-design-source.md).
 
@@ -47,3 +49,15 @@ Cuando añadas o cambies un export, actualiza la fila correspondiente o crea una
 
 - Prioridad ante conflicto: **SPEC** define comportamiento y datos; el diseño en Stitch y estos exports son referencia visual.
 - ADR-05 en estado **ACCEPTED** tras este lote de exports (2026-03-28).
+
+## Vista ↔ Pantalla Stitch
+
+> Este mapeo es la referencia canónica para el agente DEVELOPER.
+> Antes de implementar cualquier vista, consulta esta tabla y abre el PNG correspondiente.
+> Si la vista no aparece aquí, créala en Stitch primero (proyecto: Dashboard - Care Home Mgmt, id: 16168255182252500555).
+
+| Vista Vue | Ruta componente | Pantalla Stitch | Export PNG |
+|-----------|----------------|-----------------|------------|
+| `LoginView.vue` | `src/views/LoginView.vue` | Login - Care & Serenity (`e5e3e7eea6e249929b0deef401bf083b`) | [preview](https://lh3.googleusercontent.com/aida/ADBb0ugiYoh_Ad7aV_MI_FWOSMnZLFnX4CpwuiO2juiNaLBw7UKGLuf01ouu4G2WCUl0OK3jiIkEEnVZ22NxIJCbl0LwHvuEplr5osSOt_huxaWEsLi2cMDdeFDuCI70yRLsBKxa15LgaVGLuQAzM9Djxmo-LYuo2kByRwztM0C6lxBBPN0Q1YP9Hl_NvOfIjxSuuh9BFqok51KdPNA3Zs4ur-oS53rcugUg07ApWpLFYYtFPNAqzGdYlusbAUQb) |
+| `DashboardView.vue` | `src/views/DashboardView.vue` | Caregiver Dashboard | `OUTPUTS/design-exports/US-03-agenda-home__caregiver-dashboard__20260328.png` |
+| `UsersView.vue` | `src/business/users/presentation/views/UsersView.vue` | Resident Records (`US-09-resident-records__resident-records__20260328.png`) | `OUTPUTS/design-exports/US-09-resident-records__resident-records__20260328.png` |
