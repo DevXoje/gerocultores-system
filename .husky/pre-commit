@@ -1,0 +1,3 @@
+#!/bin/sh
+# pre-commit: run lint-staged to lint and type-check staged files
+npx lint-staged
