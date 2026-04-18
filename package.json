@@ -1,0 +1,20 @@
+{
+  "name": "gerocultores-system",
+  "version": "1.0.0",
+  "description": "Root workspace scripts for gerocultores-system",
+  "private": true,
+  "scripts": {
+    "lint": "npm --prefix code/frontend run lint && npm --prefix code/api run type-check",
+    "test": "npm --prefix code/frontend run test && npm --prefix code/api run test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2"
+  },
+  "lint-staged": {
+    "code/frontend/**/*.{js,ts,tsx,vue}": "npm --prefix code/frontend run lint"
+  }
+}
