@@ -189,6 +189,15 @@ required:
   - id: ACADEMIC_COVERAGE
     description: If feature touches a DAW memoria section, OUTPUTS/academic/ is updated
     blocking: false
+
+  - id: FIREBASE_PREVIEW_VALIDATED
+    description: Reviewer manually validated the Firebase Hosting preview channel URL before approving
+    blocking: true
+
+  - id: POST_MERGE_STAGING_VALIDATED
+    description: After merge, staging channel was validated and no regressions were found
+    blocking: false
+    note: "blocking=false because this is validated after merge, not before"
 ```
 
 ---
