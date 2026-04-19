@@ -7,8 +7,10 @@ export const COLLECTIONS = {
   usuarios: 'users',
   residentes: 'residents',
   tareas: 'tasks',
-  incidencias: 'incidencias',
-  turnos: 'turnos',
+  /** @deprecated use `incidences` (English canonical key, DT-09) */
+  incidencias: 'incidences',
+  incidences: 'incidences',
+  turnos: 'shifts',
 } as const
 
 export type CollectionName = keyof typeof COLLECTIONS
