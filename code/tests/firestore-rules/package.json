@@ -1,0 +1,16 @@
+{
+  "name": "gerocultores-firestore-rules-tests",
+  "version": "1.0.0",
+  "description": "Unit tests for Firestore security rules using @firebase/rules-unit-testing",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --runInBand",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^2.0.0",
+    "firebase": "^9.0.0",
+    "jest": "^29.7.0"
+  }
+}
