@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { verifyAuth } from '../middleware/verifyAuth'
 import adminUsersRouter from './admin.users.routes'
 import tareasRouter from './tareas.routes'
+import residentesRouter from './residentes.routes'
 import incidenciasRouter from './incidencias.routes'
 
 const router = Router()
@@ -25,6 +26,7 @@ protectedRouter.get('/', (_req, res) => {
 router.use('/api/protected', protectedRouter)
 router.use('/api/admin/users', adminUsersRouter)
 router.use('/api/tareas', tareasRouter)
+router.use('/api/residentes', residentesRouter)
 router.use('/api/incidencias', incidenciasRouter)
 
 export default router
