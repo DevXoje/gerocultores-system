@@ -67,7 +67,7 @@ export interface AddTareaNotesDTO {
 
 export interface ApiResponse<T> {
   data: T;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 // Tareas Service
