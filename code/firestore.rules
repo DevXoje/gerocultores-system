@@ -29,7 +29,7 @@ service cloud.firestore {
     // --- Usuarios ---
     // Cada usuario sólo puede leer su propio documento;
     // sólo admins pueden escribir (crear/actualizar roles).
-    match /usuarios/{userId} {
+    match /users/{userId} {
       allow read: if isAccountOwner(userId);
       allow write: if isAdmin();
     }
@@ -38,7 +38,7 @@ service cloud.firestore {
     // Un gerocultor puede leer y actualizar sus propias tareas.
     // Admins tienen acceso completo de lectura/actualización.
     // Sólo roles permitidos pueden crear tareas nuevas.
-    match /tareas/{tareaId} {
+    match /tasks/{tareaId} {
       allow read: if isResourceOwner() || isAdmin();
       allow update: if isResourceOwner() || isAdmin();
       allow create: if hasAnyRole(['gerocultor', 'admin']);
@@ -46,7 +46,7 @@ service cloud.firestore {
 
     // --- Residentes ---
     // Datos sensibles: sólo admins.
-    match /residentes/{residenteId} {
+    match /residents/{residenteId} {
       allow read: if isAdmin();
       allow write: if isAdmin();
     }

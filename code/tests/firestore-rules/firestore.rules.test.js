@@ -48,52 +48,52 @@ function unauthDb() {
   return testEnv.unauthenticatedContext().firestore();
 }
 
-// ─── /usuarios/{userId} ──────────────────────────────────────────────────────
+// ─── /users/{userId} ──────────────────────────────────────────────────────
 
-describe('Colección /usuarios', () => {
+describe('Colección /users', () => {
   const UID = 'user-123';
 
   beforeEach(async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await ctx.firestore().doc(`usuarios/${UID}`).set({ nombre: 'Juan', rol: 'gerocultor' });
+      await ctx.firestore().doc(`users/${UID}`).set({ nombre: 'Juan', rol: 'gerocultor' });
     });
   });
 
   test('owner puede leer su propio documento', async () => {
     const db = authedDb(UID, 'gerocultor');
-    await assertSucceeds(db.doc(`usuarios/${UID}`).get());
+    await assertSucceeds(db.doc(`users/${UID}`).get());
   });
 
   test('otro usuario NO puede leer el documento de un tercero', async () => {
     const db = authedDb('other-user', 'gerocultor');
-    await assertFails(db.doc(`usuarios/${UID}`).get());
+    await assertFails(db.doc(`users/${UID}`).get());
   });
 
   test('usuario no autenticado NO puede leer', async () => {
     const db = unauthDb();
-    await assertFails(db.doc(`usuarios/${UID}`).get());
+    await assertFails(db.doc(`users/${UID}`).get());
   });
 
   test('admin puede escribir un documento de usuario', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`usuarios/${UID}`).set({ nombre: 'María', rol: 'gerocultor' }));
+    await assertSucceeds(db.doc(`users/${UID}`).set({ nombre: 'María', rol: 'gerocultor' }));
   });
 
   test('gerocultor NO puede escribir documentos de usuario', async () => {
     const db = authedDb(UID, 'gerocultor');
-    await assertFails(db.doc(`usuarios/${UID}`).set({ nombre: 'Hack' }));
+    await assertFails(db.doc(`users/${UID}`).set({ nombre: 'Hack' }));
   });
 });
 
-// ─── /tareas/{tareaId} ───────────────────────────────────────────────────────
+// ─── /tasks/{tareaId} ───────────────────────────────────────────────────────
 
-describe('Colección /tareas', () => {
+describe('Colección /tasks', () => {
   const TAREA_ID = 'tarea-001';
   const OWNER_UID = 'gero-uid';
 
   beforeEach(async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await ctx.firestore().doc(`tareas/${TAREA_ID}`).set({
+      await ctx.firestore().doc(`tasks/${TAREA_ID}`).set({
         titulo: 'Baño matutino',
         userId: OWNER_UID,
       });
@@ -102,79 +102,79 @@ describe('Colección /tareas', () => {
 
   test('gerocultor owner puede leer su tarea', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc(`tareas/${TAREA_ID}`).get());
+    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
   });
 
   test('admin puede leer cualquier tarea', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`tareas/${TAREA_ID}`).get());
+    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
   });
 
   test('admin puede leer cualquier tarea', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`tareas/${TAREA_ID}`).get());
+    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
   });
 
   test('otro gerocultor NO puede leer tarea ajena', async () => {
     const db = authedDb('other-gero', 'gerocultor');
-    await assertFails(db.doc(`tareas/${TAREA_ID}`).get());
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).get());
   });
 
   test('gerocultor puede crear una tarea', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc('tareas/nueva-tarea').set({ titulo: 'Nueva', userId: OWNER_UID }));
+    await assertSucceeds(db.doc('tasks/nueva-tarea').set({ titulo: 'Nueva', userId: OWNER_UID }));
   });
 
   test('usuario no autenticado NO puede crear tarea', async () => {
     const db = unauthDb();
-    await assertFails(db.doc('tareas/hack-tarea').set({ titulo: 'Hack' }));
+    await assertFails(db.doc('tasks/hack-tarea').set({ titulo: 'Hack' }));
   });
 
   test('gerocultor owner puede actualizar su tarea', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc(`tareas/${TAREA_ID}`).update({ completada: true }));
+    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).update({ completada: true }));
   });
 });
 
-// ─── /residentes/{residenteId} ───────────────────────────────────────────────
+// ─── /residents/{residenteId} ───────────────────────────────────────────────
 
-describe('Colección /residentes', () => {
+describe('Colección /residents', () => {
   const RES_ID = 'residente-001';
 
   beforeEach(async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await ctx.firestore().doc(`residentes/${RES_ID}`).set({ nombre: 'Ana López' });
+      await ctx.firestore().doc(`residents/${RES_ID}`).set({ nombre: 'Ana López' });
     });
   });
 
   test('admin puede leer residente', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`residentes/${RES_ID}`).get());
+    await assertSucceeds(db.doc(`residents/${RES_ID}`).get());
   });
 
   test('admin puede leer residente', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`residentes/${RES_ID}`).get());
+    await assertSucceeds(db.doc(`residents/${RES_ID}`).get());
   });
 
   test('gerocultor NO puede leer residente', async () => {
     const db = authedDb('gero-uid', 'gerocultor');
-    await assertFails(db.doc(`residentes/${RES_ID}`).get());
+    await assertFails(db.doc(`residents/${RES_ID}`).get());
   });
 
   test('usuario no autenticado NO puede leer residente', async () => {
     const db = unauthDb();
-    await assertFails(db.doc(`residentes/${RES_ID}`).get());
+    await assertFails(db.doc(`residents/${RES_ID}`).get());
   });
 
   test('admin puede escribir residente', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`residentes/${RES_ID}`).set({ nombre: 'Ana López Actualizada' }));
+    await assertSucceeds(db.doc(`residents/${RES_ID}`).set({ nombre: 'Ana López Actualizada' }));
   });
 
   test('gerocultor NO puede escribir residente', async () => {
     const db = authedDb('gero-uid', 'gerocultor');
-    await assertFails(db.doc(`residentes/${RES_ID}`).set({ nombre: 'Hack' }));
+    await assertFails(db.doc(`residents/${RES_ID}`).set({ nombre: 'Hack' }));
   });
 });
 

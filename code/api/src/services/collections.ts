@@ -4,9 +4,9 @@
  * Names match SPEC/entities.md exactly (G04, ADR-02b).
  */
 export const COLLECTIONS = {
-  usuarios: 'usuarios',
-  residentes: 'residentes',
-  tareas: 'tareas',
+  usuarios: 'users',
+  residentes: 'residents',
+  tareas: 'tasks',
   incidencias: 'incidencias',
   turnos: 'turnos',
 } as const
