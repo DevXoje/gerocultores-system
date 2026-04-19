@@ -45,6 +45,25 @@ Cuando añadas o cambies un export, actualiza la fila correspondiente o crea una
 | Dashboard - Care Home Mgmt | Critical Alerts - Serenity Care | `OUTPUTS/design-exports/US-08-alerts__critical-alerts-serenity-care__20260328.png` | [US-08](../../SPEC/user-stories.md) |
 | Dashboard - Care Home Mgmt | Dashboard - Refined v2 | `OUTPUTS/design-exports/SPEC-app-layout__dashboard-refined-v2__20260328.png` | SPEC / layout home refinado |
 
+## Sprint-3 Screens
+
+> Screens generated/referenced for Sprint-3 (US-04, US-05, US-06). Prompts are stored in `OUTPUTS/design/stitch-prompts/sprint-3/`.
+> These screens satisfy **G10** for the corresponding Vue views to be implemented in Sprint-3.
+
+| Proyecto Stitch | Pantalla / label en Stitch | Prompt source | US / referencia SPEC | Rationale |
+|-----------------|----------------------------|---------------|----------------------|-----------|
+| Dashboard - Care Home Mgmt (`16168255182252500555`) | TaskCard - Task State | `OUTPUTS/design/stitch-prompts/sprint-3/task-card-state-update.md` | [US-04](../../SPEC/user-stories.md) | Bottom-sheet / modal for status transitions (Pendiente → En curso → Completada → Con incidencia). Mobile-first, large touch targets (48px), optimistic UI with toast. Implements the task state selector for `AgendaView` / `TaskCard` component. |
+| Dashboard - Care Home Mgmt (`16168255182252500555`) | ResidenteView | `OUTPUTS/design/stitch-prompts/sprint-3/residente-view.md` | [US-05](../../SPEC/user-stories.md) | Full resident profile "ficha" screen: hero section, tabbed layout (Datos / Salud / Incidencias), role-aware rendering (read-only for gerocultor, edit button for admin). Implements `ResidenteView.vue`. |
+| Dashboard - Care Home Mgmt (`16168255182252500555`) | IncidenceForm | `OUTPUTS/design/stitch-prompts/sprint-3/incidence-form.md` | [US-06](../../SPEC/user-stories.md) | Incident reporting form: tipo grid (6 options), severidad pills (Leve / Moderada / Crítica), description textarea, optional photo upload. Completable in ≤5 taps on tablet. Implements `IncidenceForm.vue`. |
+
+## Vista ↔ Pantalla Stitch (Sprint-3 additions)
+
+| Vista Vue | Ruta componente | Pantalla Stitch | Prompt source |
+|-----------|----------------|-----------------|---------------|
+| `TaskCard.vue` (state modal) | `src/business/agenda/presentation/components/TaskCard.vue` | TaskCard - Task State | `OUTPUTS/design/stitch-prompts/sprint-3/task-card-state-update.md` |
+| `ResidenteView.vue` | `src/business/residents/presentation/views/ResidenteView.vue` | ResidenteView | `OUTPUTS/design/stitch-prompts/sprint-3/residente-view.md` |
+| `IncidenceForm.vue` | `src/business/incidences/presentation/components/IncidenceForm.vue` | IncidenceForm | `OUTPUTS/design/stitch-prompts/sprint-3/incidence-form.md` |
+
 ## Notas
 
 - Prioridad ante conflicto: **SPEC** define comportamiento y datos; el diseño en Stitch y estos exports son referencia visual.
