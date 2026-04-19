@@ -1,0 +1,16 @@
+{
+  "name": "firestore-rules-tests",
+  "version": "1.0.0",
+  "description": "Firestore security rules unit tests",
+  "private": true,
+  "scripts": {
+    "test": "jest --forceExit"
+  },
+  "dependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase": "^10.14.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
