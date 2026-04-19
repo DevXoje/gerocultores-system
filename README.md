@@ -172,6 +172,28 @@ La API Express escuchará en el puerto definido por `PORT` (por defecto `3000`).
 
 > En modo `development`, la API conecta al emulador de Firestore en `localhost:8080`. Asegúrate de que el emulador esté corriendo **antes** de arrancar la API.
 
+### 7. Poblar el emulador con datos de prueba (seeds)
+
+Los scripts de seed cargan datos de ejemplo en el emulador local de Firestore.
+**Nunca se ejecutan contra Firestore en producción** — el script aborta si la variable de entorno del emulador no está configurada.
+
+```bash
+# Asegúrate de que el emulador está corriendo y FIRESTORE_EMULATOR_HOST está definida
+# (se configura automáticamente si usas .env.local con el valor de .env.example)
+
+cd code/api
+npm run seed:tareas
+```
+
+> **Requisito**: `FIRESTORE_EMULATOR_HOST` debe estar definida (p. ej. `localhost:18080`).
+> El script abortará con un error si la variable no está presente o apunta a producción.
+
+Datos que carga `seed:tareas`:
+
+| Documento | Descripción |
+|-----------|-------------|
+| 5 tareas de ejemplo | Tareas de 3 residentes ficticios para el turno del 2026-04-18 |
+
 ---
 
 ## Comandos útiles
