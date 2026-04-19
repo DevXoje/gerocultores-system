@@ -1,20 +1,33 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
-
+name: Feature request / Nueva funcionalidad
+about: Proponer una nueva funcionalidad para GeroCare
+title: 'feat: '
+labels: feature
+assignees: DevXoje
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## Descripción
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+<!-- Describe la funcionalidad que propones. ¿Qué problema resuelve? -->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+## User Story relacionada
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+<!-- ¿Corresponde a una US existente en SPEC/user-stories.md? -->
+- [ ] US existente: `US-XX`
+- [ ] Requiere crear nueva US en SPEC/
+
+## Criterios de aceptación
+
+<!-- Lista los criterios mínimos para considerar esta feature completa -->
+- [ ] 
+- [ ] 
+
+## Contexto adicional
+
+<!-- Screenshots, mockups, referencias a Stitch screens, ADRs relevantes, etc. -->
+
+## Checklist antes de crear el issue
+
+- [ ] Revisé que no existe un issue duplicado
+- [ ] Si requiere nueva US, lo indico arriba
+- [ ] Si implica una decisión técnica relevante, se necesitará un ADR en `DECISIONS/`

@@ -42,6 +42,4 @@ npm-debug.log*
 # TypeScript build info
 *.tsbuildinfo
 
-# Firestore rules test dependencies (generated, not committed)
-code/tests/firestore-rules/package-lock.json
 
