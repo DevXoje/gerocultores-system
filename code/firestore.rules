@@ -24,9 +24,6 @@ service cloud.firestore {
     function isResourceOwner() {
       return isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-    function isAssignedGerocultor() {
-      return isAuthenticated() && resource.data.assignedTo == request.auth.uid;
-    }
 
 
     // --- Usuarios ---
@@ -38,21 +35,19 @@ service cloud.firestore {
     }
 
     // --- Tareas ---
-    // Un gerocultor puede leer y actualizar SÓLO sus propias tareas (userId == uid).
+    // Un gerocultor puede leer y actualizar sus propias tareas.
     // Admins tienen acceso completo de lectura/actualización.
-    // Gerocultores y admins pueden crear tareas nuevas.
-    match /tareas/{tareaId} {
+    // Sólo roles permitidos pueden crear tareas nuevas.
+    match /tasks/{tareaId} {
       allow read: if isResourceOwner() || isAdmin();
       allow update: if isResourceOwner() || isAdmin();
       allow create: if hasAnyRole(['gerocultor', 'admin']);
     }
 
     // --- Residentes ---
-    // Admins tienen acceso completo.
-    // Gerocultores pueden leer SÓLO los residentes que tienen asignados (assignedTo == uid).
-    // La escritura queda restringida a administradores.
-    match /residentes/{residenteId} {
-      allow read: if isAdmin() || isAssignedGerocultor();
+    // Datos sensibles: sólo admins.
+    match /residents/{residenteId} {
+      allow read: if isAdmin();
       allow write: if isAdmin();
     }
 

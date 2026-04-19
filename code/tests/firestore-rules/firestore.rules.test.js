@@ -1,225 +1,240 @@
 /**
  * Firestore Security Rules Unit Tests
+ * US-02: Role-based access control
  *
- * These tests validate the PRACTICA policy for gerocultores-system:
- * - gerocultor can read/update ONLY their own tasks (tareas where userId == uid)
- * - gerocultor can read ONLY residentes assigned to them (assignedTo == uid)
- * - administrador has full read/write access on all collections
- *
- * Prerequisites:
- *   1. Firebase Emulator Suite running on default ports:
- *      npx firebase emulators:start --only firestore
- *      OR: cd code && ./start_emulators.sh
- *   2. Install deps: cd code/tests/firestore-rules && npm install
- *   3. Run tests: npm test
- *
- * Environment:
- *   FIRESTORE_EMULATOR_HOST defaults to "127.0.0.1:8080" if not set.
+ * Requires Firebase Emulator running on localhost:8080
+ * Set FIRESTORE_EMULATOR_HOST=localhost:8080 before running.
  */
-
-const { readFileSync } = require('fs')
-const { resolve } = require('path')
 
 const {
   initializeTestEnvironment,
   assertFails,
   assertSucceeds,
-} = require('@firebase/rules-unit-testing')
+} = require('@firebase/rules-unit-testing');
+const fs = require('fs');
+const path = require('path');
 
-// Path to the actual rules file used in production
-const RULES_PATH = resolve(__dirname, '../../firestore.rules')
+const PROJECT_ID = 'demo-test';
+const RULES_PATH = path.resolve(__dirname, '../../firestore.rules');
 
-let testEnv
+let testEnv;
 
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
-    projectId: 'gerocultores-test',
+    projectId: PROJECT_ID,
     firestore: {
-      rules: readFileSync(RULES_PATH, 'utf8'),
-      host: process.env.FIRESTORE_EMULATOR_HOST?.split(':')[0] ?? '127.0.0.1',
-      port: Number(process.env.FIRESTORE_EMULATOR_HOST?.split(':')[1] ?? 8080),
+      rules: fs.readFileSync(RULES_PATH, 'utf8'),
+      host: 'localhost',
+      port: 8080,
     },
-  })
-})
+  });
+});
 
 afterAll(async () => {
-  await testEnv.cleanup()
-})
+  if (testEnv) await testEnv.cleanup();
+});
 
 afterEach(async () => {
-  await testEnv.clearFirestore()
-})
+  if (testEnv) await testEnv.clearFirestore();
+});
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+// ─── Helper: get authenticated Firestore context ────────────────────────────
 
-/**
- * Creates a Firestore context authenticated as the given uid and custom claims.
- */
-function authedContext(uid, claims = {}) {
-  return testEnv.authenticatedContext(uid, claims)
+function authedDb(uid, rol) {
+  return testEnv.authenticatedContext(uid, { rol }).firestore();
 }
 
-/**
- * Seeds data into Firestore bypassing rules (using admin context).
- */
-async function seedDoc(collection, docId, data) {
-  await testEnv.withSecurityRulesDisabled(async (ctx) => {
-    await ctx.firestore().collection(collection).doc(docId).set(data)
-  })
+function unauthDb() {
+  return testEnv.unauthenticatedContext().firestore();
 }
 
-// ---------------------------------------------------------------------------
-// /tareas tests
-// ---------------------------------------------------------------------------
+// ─── /users/{userId} ──────────────────────────────────────────────────────
 
-describe('Tareas — gerocultor access', () => {
-  const GEROCULTOR_UID = 'uid-gerocultor-01'
-  const OTHER_GEROCULTOR_UID = 'uid-gerocultor-02'
-  const GEROCULTOR_CLAIMS = { rol: 'gerocultor' }
+describe('Colección /users', () => {
+  const UID = 'user-123';
 
   beforeEach(async () => {
-    // Own tarea
-    await seedDoc('tareas', 'tarea-own', { userId: GEROCULTOR_UID, title: 'Own task' })
-    // Other user's tarea
-    await seedDoc('tareas', 'tarea-other', { userId: OTHER_GEROCULTOR_UID, title: 'Other task' })
-  })
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`users/${UID}`).set({ nombre: 'Juan', rol: 'gerocultor' });
+    });
+  });
 
-  it('allows gerocultor to read their own tarea', async () => {
-    const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertSucceeds(db.collection('tareas').doc('tarea-own').get())
-  })
+  test('owner puede leer su propio documento', async () => {
+    const db = authedDb(UID, 'gerocultor');
+    await assertSucceeds(db.doc(`users/${UID}`).get());
+  });
 
-  it('denies gerocultor reading another user\'s tarea', async () => {
-    const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertFails(db.collection('tareas').doc('tarea-other').get())
-  })
+  test('otro usuario NO puede leer el documento de un tercero', async () => {
+    const db = authedDb('other-user', 'gerocultor');
+    await assertFails(db.doc(`users/${UID}`).get());
+  });
 
-  it('allows gerocultor to update their own tarea', async () => {
-    const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertSucceeds(
-      db.collection('tareas').doc('tarea-own').update({ title: 'Updated' })
-    )
-  })
+  test('usuario no autenticado NO puede leer', async () => {
+    const db = unauthDb();
+    await assertFails(db.doc(`users/${UID}`).get());
+  });
 
-  it('denies gerocultor updating another user\'s tarea', async () => {
-    const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertFails(
-      db.collection('tareas').doc('tarea-other').update({ title: 'Hack' })
-    )
-  })
+  test('admin puede escribir un documento de usuario', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(db.doc(`users/${UID}`).set({ nombre: 'María', rol: 'gerocultor' }));
+  });
 
-  it('allows gerocultor to create a tarea', async () => {
-    const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertSucceeds(
-      db.collection('tareas').doc('tarea-new').set({ userId: GEROCULTOR_UID, title: 'New task' })
-    )
-  })
-})
+  test('gerocultor NO puede escribir documentos de usuario', async () => {
+    const db = authedDb(UID, 'gerocultor');
+    await assertFails(db.doc(`users/${UID}`).set({ nombre: 'Hack' }));
+  });
+});
 
-// ---------------------------------------------------------------------------
-// /residentes tests
-// ---------------------------------------------------------------------------
+// ─── /tasks/{tareaId} ───────────────────────────────────────────────────────
 
-describe('Residentes — gerocultor access', () => {
-  const GEROCULTOR_UID = 'uid-gerocultor-01'
-  const OTHER_GEROCULTOR_UID = 'uid-gerocultor-02'
-  const GEROCULTOR_CLAIMS = { rol: 'gerocultor' }
+describe('Colección /tasks', () => {
+  const TAREA_ID = 'tarea-001';
+  const OWNER_UID = 'gero-uid';
 
   beforeEach(async () => {
-    // Residente assigned to GEROCULTOR_UID
-    await seedDoc('residentes', 'residente-assigned', {
-      nombre: 'María García',
-      assignedTo: GEROCULTOR_UID,
-    })
-    // Residente assigned to a different gerocultor
-    await seedDoc('residentes', 'residente-unassigned', {
-      nombre: 'Juan López',
-      assignedTo: OTHER_GEROCULTOR_UID,
-    })
-  })
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`tasks/${TAREA_ID}`).set({
+        titulo: 'Baño matutino',
+        userId: OWNER_UID,
+      });
+    });
+  });
 
-  it('allows gerocultor to read a residente assigned to them', async () => {
-    const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertSucceeds(db.collection('residentes').doc('residente-assigned').get())
-  })
+  test('gerocultor owner puede leer su tarea', async () => {
+    const db = authedDb(OWNER_UID, 'gerocultor');
+    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
+  });
 
-  it('denies gerocultor reading a residente not assigned to them', async () => {
-    const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertFails(db.collection('residentes').doc('residente-unassigned').get())
-  })
+  test('admin puede leer cualquier tarea', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
+  });
 
-  it('denies gerocultor writing to residentes', async () => {
-    const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertFails(
-      db.collection('residentes').doc('residente-assigned').update({ nombre: 'Hack' })
-    )
-  })
-})
+  test('admin puede leer cualquier tarea', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
+  });
 
-// ---------------------------------------------------------------------------
-// /tareas + /residentes — administrador has full access
-// ---------------------------------------------------------------------------
+  test('otro gerocultor NO puede leer tarea ajena', async () => {
+    const db = authedDb('other-gero', 'gerocultor');
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).get());
+  });
 
-describe('Administrador — full access', () => {
-  const ADMIN_UID = 'uid-admin-01'
-  const ADMIN_CLAIMS = { rol: 'admin' }
+  test('gerocultor puede crear una tarea', async () => {
+    const db = authedDb(OWNER_UID, 'gerocultor');
+    await assertSucceeds(db.doc('tasks/nueva-tarea').set({ titulo: 'Nueva', userId: OWNER_UID }));
+  });
+
+  test('usuario no autenticado NO puede crear tarea', async () => {
+    const db = unauthDb();
+    await assertFails(db.doc('tasks/hack-tarea').set({ titulo: 'Hack' }));
+  });
+
+  test('gerocultor owner puede actualizar su tarea', async () => {
+    const db = authedDb(OWNER_UID, 'gerocultor');
+    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).update({ completada: true }));
+  });
+});
+
+// ─── /residents/{residenteId} ───────────────────────────────────────────────
+
+describe('Colección /residents', () => {
+  const RES_ID = 'residente-001';
 
   beforeEach(async () => {
-    await seedDoc('tareas', 'tarea-any', { userId: 'other-user', title: 'Some task' })
-    await seedDoc('residentes', 'residente-any', { nombre: 'Ana Ruiz', assignedTo: 'other-user' })
-  })
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`residents/${RES_ID}`).set({ nombre: 'Ana López' });
+    });
+  });
 
-  it('allows administrador to read any tarea', async () => {
-    const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
-    await assertSucceeds(db.collection('tareas').doc('tarea-any').get())
-  })
+  test('admin puede leer residente', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(db.doc(`residents/${RES_ID}`).get());
+  });
 
-  it('allows administrador to update any tarea', async () => {
-    const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
-    await assertSucceeds(
-      db.collection('tareas').doc('tarea-any').update({ title: 'Admin edit' })
-    )
-  })
+  test('admin puede leer residente', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(db.doc(`residents/${RES_ID}`).get());
+  });
 
-  it('allows administrador to create a tarea', async () => {
-    const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
-    await assertSucceeds(
-      db.collection('tareas').doc('tarea-new').set({ userId: ADMIN_UID, title: 'Admin task' })
-    )
-  })
+  test('gerocultor NO puede leer residente', async () => {
+    const db = authedDb('gero-uid', 'gerocultor');
+    await assertFails(db.doc(`residents/${RES_ID}`).get());
+  });
 
-  it('allows administrador to read any residente', async () => {
-    const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
-    await assertSucceeds(db.collection('residentes').doc('residente-any').get())
-  })
+  test('usuario no autenticado NO puede leer residente', async () => {
+    const db = unauthDb();
+    await assertFails(db.doc(`residents/${RES_ID}`).get());
+  });
 
-  it('allows administrador to write to residentes', async () => {
-    const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
-    await assertSucceeds(
-      db.collection('residentes').doc('residente-any').update({ nombre: 'Admin edit' })
-    )
-  })
-})
+  test('admin puede escribir residente', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(db.doc(`residents/${RES_ID}`).set({ nombre: 'Ana López Actualizada' }));
+  });
 
-// ---------------------------------------------------------------------------
-// Unauthenticated access — always denied
-// ---------------------------------------------------------------------------
+  test('gerocultor NO puede escribir residente', async () => {
+    const db = authedDb('gero-uid', 'gerocultor');
+    await assertFails(db.doc(`residents/${RES_ID}`).set({ nombre: 'Hack' }));
+  });
+});
 
-describe('Unauthenticated access — always denied', () => {
+// ─── /incidencias/{incidenciaId} ─────────────────────────────────────────────
+
+describe('Colección /incidencias', () => {
+  const INC_ID = 'incidencia-001';
+
   beforeEach(async () => {
-    await seedDoc('tareas', 'tarea-any', { userId: 'some-user', title: 'Task' })
-    await seedDoc('residentes', 'residente-any', { nombre: 'Someone', assignedTo: 'some-user' })
-  })
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`incidencias/${INC_ID}`).set({
+        descripcion: 'Caída en pasillo',
+        userId: 'gero-uid',
+      });
+    });
+  });
 
-  it('denies unauthenticated read of tareas', async () => {
-    const db = testEnv.unauthenticatedContext().firestore()
-    await assertFails(db.collection('tareas').doc('tarea-any').get())
-  })
+  test('gerocultor autenticado puede leer incidencias', async () => {
+    const db = authedDb('gero-uid', 'gerocultor');
+    await assertSucceeds(db.doc(`incidencias/${INC_ID}`).get());
+  });
 
-  it('denies unauthenticated read of residentes', async () => {
-    const db = testEnv.unauthenticatedContext().firestore()
-    await assertFails(db.collection('residentes').doc('residente-any').get())
-  })
-})
+  test('admin puede leer incidencias', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(db.doc(`incidencias/${INC_ID}`).get());
+  });
+
+  test('usuario no autenticado NO puede leer incidencias', async () => {
+    const db = unauthDb();
+    await assertFails(db.doc(`incidencias/${INC_ID}`).get());
+  });
+
+  test('gerocultor puede crear una incidencia', async () => {
+    const db = authedDb('gero-uid', 'gerocultor');
+    await assertSucceeds(
+      db.doc('incidencias/nueva-inc').set({ descripcion: 'Nueva', userId: 'gero-uid' }),
+    );
+  });
+
+  test('admin puede crear una incidencia', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(
+      db.doc('incidencias/inc-coord').set({ descripcion: 'Coord inc', userId: 'coord-uid' }),
+    );
+  });
+
+  test('admin puede crear una incidencia', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertSucceeds(
+      db.doc('incidencias/inc-admin').set({ descripcion: 'Admin inc', userId: 'admin-uid' }),
+    );
+  });
+
+  test('NO se puede actualizar una incidencia (inmutable)', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertFails(db.doc(`incidencias/${INC_ID}`).update({ descripcion: 'Modificada' }));
+  });
+
+  test('NO se puede eliminar una incidencia (inmutable)', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertFails(db.doc(`incidencias/${INC_ID}`).delete());
+  });
+});

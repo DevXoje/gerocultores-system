@@ -73,7 +73,6 @@ export interface AddTareaNotesDTO {
 
 export interface ApiResponse<T> {
   data: T
-  // `unknown` used instead of `any`: meta is an opaque server bag; callers must narrow before use.
   meta?: Record<string, unknown>
 }
 
