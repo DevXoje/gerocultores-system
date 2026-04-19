@@ -6,7 +6,10 @@
   "scripts": {
     "lint": "npm --prefix code/frontend run lint && npm --prefix code/api run type-check",
     "test": "npm --prefix code/frontend run test && npm --prefix code/api run test",
+
     "test:rules": "npm --prefix code/tests/firestore-rules test",
+
+
     "prepare": "husky"
   },
   "devDependencies": {

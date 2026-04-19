@@ -4,6 +4,11 @@ import { requireRole } from '../middleware/requireRole'
 import adminUsersRouter from './admin.users.routes'
 import tareasRouter from './tareas.routes'
 
+
+import residentesRouter from './residentes.routes'
+import incidenciasRouter from './incidencias.routes'
+
+
 const router = Router()
 
 // Health check — no auth required
@@ -29,5 +34,10 @@ protectedRouter.get('/admin-only', requireRole('admin'), (_req, res) => {
 router.use('/api/protected', protectedRouter)
 router.use('/api/admin/users', adminUsersRouter)
 router.use('/api/tareas', tareasRouter)
+
+
+router.use('/api/residentes', residentesRouter)
+router.use('/api/incidencias', incidenciasRouter)
+
 
 export default router

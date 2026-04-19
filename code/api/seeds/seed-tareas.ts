@@ -119,7 +119,7 @@ const TAREAS: Tarea[] = [
 // ── Seed function ─────────────────────────────────────────────────────────────
 
 async function seedTareas(): Promise<void> {
-  const collection = db.collection('tareas')
+  const collection = db.collection('tasks')
   const batch = db.batch()
 
   for (const tarea of TAREAS) {
@@ -128,7 +128,7 @@ async function seedTareas(): Promise<void> {
   }
 
   await batch.commit()
-  console.log(`✅  Seeded ${TAREAS.length} tareas into emulator Firestore (collection: tareas).`)
+  console.log(`✅  Seeded ${TAREAS.length} tareas into emulator Firestore (collection: tasks).`)
 }
 
 // ── Entry point ───────────────────────────────────────────────────────────────
