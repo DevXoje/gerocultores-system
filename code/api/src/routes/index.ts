@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { verifyAuth } from '../middleware/verifyAuth'
 import { requireRole } from '../middleware/requireRole'
 import adminUsersRouter from './admin.users.routes'
+import tareasRouter from './tareas.routes'
 
 const router = Router()
 
@@ -27,5 +28,6 @@ protectedRouter.get('/admin-only', requireRole('admin'), (_req, res) => {
 
 router.use('/api/protected', protectedRouter)
 router.use('/api/admin/users', adminUsersRouter)
+router.use('/api/tareas', tareasRouter)
 
 export default router

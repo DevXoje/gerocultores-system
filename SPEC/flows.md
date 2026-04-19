@@ -16,7 +16,7 @@
 
 ## FL-01 — Inicio de sesión
 
-**Actor**: Gerocultor / Coordinador / Administrador  
+**Actor**: Gerocultor / Administrador  
 **Trigger**: El usuario accede a la URL de la aplicación o es redirigido al login por sesión expirada.  
 **Precondición**: El usuario tiene una cuenta activa (`Usuario.activo = true`).
 
@@ -75,11 +75,11 @@
 7. `[Sistema]` Valida que los campos obligatorios están completos.
 8. `[Sistema]` Crea la entidad `Incidencia` con `registradaEn = NOW()` (servidor) y `usuarioId` del token.
 9. `[Sistema]` Vincula la incidencia al `Residente` indicado.
-10. `[Sistema]` Si `severidad = 'critica'`: crea una `Notificacion` de tipo `incidencia_critica` y la envía al coordinador de turno.
+10. `[Sistema]` Si `severidad = 'critica'`: crea una `Notificacion` de tipo `incidencia_critica` y la envía al administrador de turno.
 11. La app muestra confirmación: "Incidencia registrada correctamente".
 12. El gerocultor es redirigido al historial del residente o a la agenda (según desde dónde se inició).
 
-**Postcondición**: La `Incidencia` existe en base de datos, aparece en el historial del residente y, si es crítica, el coordinador ha recibido una notificación.
+**Postcondición**: La `Incidencia` existe en base de datos, aparece en el historial del residente y, si es crítica, el administrador ha recibido una notificación.
 
 **Flujos alternativos**:
 - **FA-03a**: Campos obligatorios vacíos → `[Sistema]` muestra validación inline sin enviar. El gerocultor corrige y reintenta.
@@ -90,9 +90,9 @@
 
 ## FL-04 — Consulta de historial de residente
 
-**Actor**: Gerocultor / Coordinador  
+**Actor**: Gerocultor / Administrador  
 **Trigger**: El usuario pulsa "Ver historial" desde la ficha del residente o desde el detalle de una incidencia.  
-**Precondición**: El usuario está autenticado. El residente está asignado al gerocultor (o el usuario es coordinador/administrador).
+**Precondición**: El usuario está autenticado. El residente está asignado al gerocultor (o el usuario es administrador).
 
 **Pasos**:
 1. `[Sistema]` Verifica que el usuario tiene permiso de acceso a ese residente.
@@ -150,7 +150,7 @@
 8. `[Sistema]` Guarda `Turno.resumenTraspaso` con el contenido generado + observaciones.
 9. La app muestra confirmación y redirige al gerocultor a la pantalla de inicio.
 
-**Postcondición**: El turno queda cerrado. El resumen de traspaso está disponible para el coordinador y el turno siguiente.
+**Postcondición**: El turno queda cerrado. El resumen de traspaso está disponible para el administrador y el turno siguiente.
 
 **Flujos alternativos**:
 - **FA-06a**: El gerocultor cancela en el paso 2 → No se realiza ningún cambio.

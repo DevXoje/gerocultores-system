@@ -1,0 +1,13 @@
+{
+  "error": {
+    "code": 400,
+    "message": "PASSWORD_LOGIN_DISABLED",
+    "errors": [
+      {
+        "message": "PASSWORD_LOGIN_DISABLED",
+        "domain": "global",
+        "reason": "invalid"
+      }
+    ]
+  }
+}

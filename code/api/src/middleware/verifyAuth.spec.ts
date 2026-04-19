@@ -7,7 +7,11 @@ vi.mock('../services/firebase', () => ({
   adminAuth: {
     verifyIdToken: vi.fn(),
   },
-  adminDb: {},
+  adminDb: {
+    collection: vi.fn().mockReturnValue({
+      get: vi.fn().mockResolvedValue({ docs: [] }),
+    }),
+  },
 }))
 
 import { adminAuth } from '../services/firebase'
@@ -70,7 +74,7 @@ describe('verifyAuth middleware', () => {
   })
 })
 
-describe('requireRole factory', () => {
+describe('requireRole factory (admin role)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -84,7 +88,7 @@ describe('requireRole factory', () => {
     mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
 
     const res = await request(app)
-      .get('/api/protected/admin-only')
+      .get('/api/admin/users')
       .set('Authorization', 'Bearer valid-token')
     expect(res.status).toBe(403)
     expect(res.body).toMatchObject({ error: expect.any(String) })
@@ -99,7 +103,7 @@ describe('requireRole factory', () => {
     mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
 
     const res = await request(app)
-      .get('/api/protected/admin-only')
+      .get('/api/admin/users')
       .set('Authorization', 'Bearer valid-token')
     expect(res.status).toBe(200)
   })

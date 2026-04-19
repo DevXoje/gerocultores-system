@@ -1,0 +1,9 @@
+# CODEOWNERS — gerocultores-system
+# These paths require review from @DevXoje before merge.
+# Referenced in PULL_REQUEST_TEMPLATE.md.
+
+DECISIONS/   @DevXoje
+SPEC/        @DevXoje
+OUTPUTS/     @DevXoje
+PLAN/        @DevXoje
+AGENTS/      @DevXoje

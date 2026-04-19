@@ -172,8 +172,6 @@ La API Express escuchará en el puerto definido por `PORT` (por defecto `3000`).
 
 > En modo `development`, la API conecta al emulador de Firestore en `localhost:8080`. Asegúrate de que el emulador esté corriendo **antes** de arrancar la API.
 
-<!-- RESOLUTION(merge/2026-04-18): seed section was in develop but missing in hooks branch.
-     Keeping it because it documents the seed:tareas npm script that is preserved in package.json. -->
 ### 7. Poblar el emulador con datos de prueba (seeds)
 
 Los scripts de seed cargan datos de ejemplo en el emulador local de Firestore.
@@ -195,6 +193,7 @@ Datos que carga `seed:tareas`:
 | Documento | Descripción |
 |-----------|-------------|
 | 5 tareas de ejemplo | Tareas de 3 residentes ficticios para el turno del 2026-04-18 |
+
 ---
 
 ## Comandos útiles

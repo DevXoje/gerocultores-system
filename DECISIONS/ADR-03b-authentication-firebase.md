@@ -46,8 +46,7 @@ Se elige **Opción B: Firebase Auth + Firestore Rules + Express middleware**.
 | Rol | Custom Claim | Permisos |
 |-----|-------------|----------|
 | `gerocultor` | `{ rol: 'gerocultor' }` | CRUD sus tareas, read sus residentes asignados, create incidencias |
-| `coordinador` | `{ rol: 'coordinador' }` | Read all, CRUD residentes, read todas las tareas/incidencias |
-| `administrador` | `{ rol: 'administrador' }` | Full access, gestión de usuarios |
+| `admin` | `{ rol: 'admin' }` | Full access, gestión de usuarios, CRUD residentes, read todas las tareas/incidencias |
 
 ### Flujo de autenticación
 
@@ -73,30 +72,30 @@ service cloud.firestore {
     // Usuarios: solo lectura propia, admin gestiona
     match /usuarios/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth.token.rol == 'administrador';
+      allow write: if request.auth.token.rol == 'admin';
     }
-    // Tareas: gerocultor ve las suyas, coordinador ve todas
+    // Tareas: gerocultor ve las suyas, admin ve todas
     match /tareas/{tareaId} {
       allow read: if request.auth != null && (
         resource.data.usuarioId == request.auth.uid ||
-        request.auth.token.rol in ['coordinador', 'administrador']
+        request.auth.token.rol == 'admin'
       );
       allow update: if request.auth != null && (
         resource.data.usuarioId == request.auth.uid ||
-        request.auth.token.rol in ['coordinador', 'administrador']
+        request.auth.token.rol == 'admin'
       );
     }
-    // Residentes: acceso por asignación (via API) o coordinador
+    // Residentes: acceso por asignación (via API) o admin
     match /residentes/{residenteId} {
       allow read: if request.auth != null && (
-        request.auth.token.rol in ['coordinador', 'administrador']
+        request.auth.token.rol == 'admin'
       );
       // Gerocultores acceden via Express API (verifica asignación)
     }
     // Incidencias: inmutables post-creación
     match /incidencias/{incidenciaId} {
       allow create: if request.auth != null &&
-        request.auth.token.rol in ['gerocultor', 'coordinador'];
+        request.auth.token.rol in ['gerocultor', 'admin'];
       allow read: if request.auth != null;
       allow update, delete: if false;
     }

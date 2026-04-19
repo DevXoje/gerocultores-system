@@ -1,0 +1,55 @@
+uid=1_0 RootWebArea "Care & Serenity — Staff Portal" url="https://gero-care--staging-o2g72gqa.web.app/login"
+  uid=1_1 ignored
+    uid=1_2 ignored
+      uid=1_3 generic
+        uid=1_4 ignored
+          uid=1_5 banner
+            uid=1_6 ignored
+            uid=1_7 heading "Care & Serenity" level="1"
+              uid=1_8 StaticText "Care & Serenity"
+                uid=1_9 InlineTextBox "Care & Serenity"
+            uid=1_10 paragraph
+              uid=1_11 StaticText "Accede a tu turno"
+                uid=1_9 InlineTextBox "Accede a tu turno"
+          uid=1_12 ignored
+            uid=1_13 heading "Iniciar sesión" level="2"
+              uid=1_14 StaticText "Iniciar sesión"
+                uid=1_9 InlineTextBox "Iniciar sesión"
+            uid=1_15 generic
+              uid=1_16 ignored
+                uid=1_17 LabelText
+                  uid=1_18 StaticText "Correo electrónico"
+                    uid=1_9 InlineTextBox "Correo electrónico"
+                uid=1_19 textbox "Correo electrónico" required
+                  uid=1_20 ignored
+                  uid=1_21 generic
+              uid=1_22 ignored
+                uid=1_23 LabelText
+                  uid=1_24 StaticText "Contraseña"
+                    uid=1_9 InlineTextBox "Contraseña"
+                uid=1_25 generic
+                  uid=1_26 textbox "Contraseña" required
+                    uid=1_27 generic
+                  uid=1_28 button "Mostrar clave"
+              uid=1_29 ignored
+                uid=1_30 ignored
+                  uid=1_31 StaticText "PORTAL INTERNO"
+                    uid=1_9 InlineTextBox "PORTAL INTERNO"
+              uid=1_32 button "Iniciar sesión"
+                uid=1_33 ignored
+                  uid=1_34 StaticText "Iniciar sesión"
+                    uid=1_9 InlineTextBox "Iniciar sesión"
+          uid=1_35 contentinfo
+            uid=1_36 ignored
+              uid=1_37 StaticText "Solo para personal autorizado"
+                uid=1_9 InlineTextBox "Solo para personal autorizado"
+            uid=1_38 navigation "Legal y soporte"
+              uid=1_39 link "Política de Privacidad" url="https://gero-care--staging-o2g72gqa.web.app/login#"
+                uid=1_40 StaticText "Política de Privacidad"
+                  uid=1_9 InlineTextBox "Política de Privacidad"
+              uid=1_41 link "Soporte Técnico" url="https://gero-care--staging-o2g72gqa.web.app/login#"
+                uid=1_42 StaticText "Soporte Técnico"
+                  uid=1_9 InlineTextBox "Soporte Técnico"
+            uid=1_43 paragraph
+              uid=1_44 StaticText "© 2026 Care & Serenity Editorial. Staff Portal."
+                uid=1_9 InlineTextBox "© 2026 Care & Serenity Editorial. Staff Portal."
