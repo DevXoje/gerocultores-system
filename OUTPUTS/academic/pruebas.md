@@ -1,10 +1,10 @@
 # 9. Pruebas
 
-> **Estado**: Borrador — basado en cobertura real medida con Vitest (v8) al cierre del Sprint-2.
+> **Estado**: En progreso — basado en cobertura real medida con Vitest (v8) durante el Sprint-3.
 > **Autor**: Jose Vilches Sánchez
 > **Proyecto**: GeroCare — Agenda digital para gerocultores
 > **Centro**: CIPFP Batoi d'Alcoi
-> **Última actualización**: 2026-04-18 — Sprint-2 completado
+> **Última actualización**: 2026-04-19 — Backend US-05 y US-06 completado
 
 ---
 
@@ -14,44 +14,38 @@ La estrategia de testing del proyecto GeroCare se define en **ADR-07** y cubre t
 
 | Nivel | Herramienta | Alcance |
 |-------|-------------|---------|
-| **Tests unitarios y de componentes** | Vitest + @vue/test-utils | Lógica de negocio, middlewares, servicios, componentes Vue |
-| **Tests de reglas Firestore** | @firebase/rules-unit-testing | Security Rules contra Firebase Emulator |
+| **Tests unitarios y de componentes** | Vitest + @vue/test-utils | Lógica de negocio, middlewares, componentes Vue |
+| **Tests de integración de API** | Supertest + Vitest | Controladores HTTP, middlewares de auth y rutas |
+| **Tests de servicios y reglas Firestore** | @firebase/rules-unit-testing + Firebase Emulator | Lógica de base de datos, transacciones y Security Rules |
 | **Tests E2E** | Playwright | Flujos de usuario completos en navegador |
 
-El objetivo de cobertura definido en ADR-07 es **≥ 80%** en las capas `domain/` y `application/` del frontend, y en los middlewares y controladores del backend. Los tests E2E cubren los flujos críticos de usuario: inicio de sesión, consulta de agenda y registro de incidencia.
+El objetivo de cobertura definido en ADR-07 es **≥ 80%**. Se ha priorizado que **ningún código de negocio interactúe con producción durante los tests**; todo el acceso a base de datos en integración se realiza contra la **Firebase Emulator Suite**.
 
 ---
 
-## 9.2 Tests unitarios — Backend
+## 9.2 Tests de Backend (API)
 
-### Middlewares
+Durante el Sprint-3 se ha saldado la deuda técnica de testing del backend, estableciendo una arquitectura de pruebas en dos capas:
 
-Los dos middlewares de autenticación y autorización son los componentes más críticos del backend y los primeros en recibir cobertura completa.
+### Capa 1: Tests de Controlador (HTTP) con Supertest
 
-**`verifyAuth.ts`** — Valida el ID Token de Firebase en cada petición. Los tests cubren: token válido con claims correctos, token ausente (401), token malformado (401), token de usuario deshabilitado (401), y el paso a `next()` cuando la verificación es exitosa.
+Se han implementado tests de nivel de controlador aislando la capa de servicio (mediante mocks `vi.mock`). Esto permite testear exclusivamente el enrutamiento, los códigos de estado HTTP, la validación de payloads con **Zod** y el cumplimiento de permisos sin levantar una base de datos.
 
-**`requireRole.ts`** — Verifica que el usuario autenticado tiene el rol requerido. Los tests cubren: rol correcto (pasa a `next()`), rol incorrecto (403), usuario sin campo `role` en los claims (403), y la composición de múltiples roles (`requireRole('admin', 'gerocultor')`).
+Endpoints cubiertos con Supertest:
+- **Tareas (`/api/tareas`)**: `GET /`, `GET /:id`, `PATCH /:id/estado`. Se validan 401 (sin token), 404 (no encontrado) y 403 (intento de un gerocultor de modificar una tarea ajena).
+- **Usuarios (`/api/admin/users`)**: `GET /`, `POST /`, `PATCH /:id/role`, `PATCH /:id/disable`. Se valida rigurosamente el middleware `requireRole` (403 si no es admin) y la validación Zod de emails y roles (400).
+- **Residentes e Incidencias**: `GET /api/residentes/:id` y `POST /api/incidencias`.
 
-### Controladores
+> *Mock Inteligente de Auth*: Para los tests HTTP, se diseñó un mock inteligente de `verifyAuth` que intercepta una cabecera inyectada (`x-test-role`) para simular peticiones de distintos roles sin necesidad de generar tokens JWT reales.
 
-**`users.controller.ts`** — Los tests del controlador de usuarios cubren los cuatro endpoints de administración:
-- `GET /api/admin/users`: lista de usuarios, respuesta paginada, manejo de error de Firestore.
-- `POST /api/admin/users`: creación exitosa, validación de email inválido, password corto, rol desconocido.
-- `PATCH /api/admin/users/:uid/role`: actualización exitosa, usuario no encontrado (404).
-- `PATCH /api/admin/users/:uid/disable`: desactivación y reactivación exitosas.
+### Capa 2: Tests de Integración con Firebase Emulator
 
-### Resultados de cobertura — Backend
+La capa de servicios (`.service.ts`) interactúa directamente con Firebase Admin SDK. En lugar de mockear Firestore (lo cual oculta errores de consultas o transacciones), se han implementado tests de integración que se conectan al **Firebase Emulator**.
 
-Medidos con `vitest --coverage` (proveedor v8) sobre `code/api/`:
-
-| Módulo | Statements | Branches | Functions | Lines |
-|--------|-----------|----------|-----------|-------|
-| `middleware/requireRole.ts` | 100% | 100% | 100% | 100% |
-| `middleware/verifyAuth.ts` | 100% | 87.5% | 100% | 100% |
-| `controllers/users.controller.ts` | 100% | 75% | 100% | 100% |
-| **Total API** | **67.88%** | **54.28%** | **55.55%** | **69.15%** |
-
-> El total global incluye ficheros auxiliares (`firebase.ts`, `collections.ts`, `server.ts`) que no tienen tests unitarios porque son puntos de entrada o configuración de infraestructura, no lógica de negocio. Los módulos de negocio propiamente dichos (middlewares + controlador) alcanzan el 100% de cobertura de statements.
+Características de estos tests (`*.integration.spec.ts`):
+- **Aislamiento de configuración**: Utilizan un archivo de configuración dedicado `vitest.integration.config.ts` y variables de entorno (`FIRESTORE_EMULATOR_HOST`) inyectadas en tiempo de inicialización.
+- **Transacciones y Concurrencia**: En `tareas.service.integration.spec.ts`, se testea explícitamente que dos llamadas simultáneas a `updateEstado` sobre el mismo documento se resuelven correctamente gracias a las transacciones de Firestore.
+- **Cobertura completa de servicios**: Cubren operaciones reales de lectura/escritura en `users`, `tasks`, `residents` e `incidences`.
 
 ---
 
@@ -60,90 +54,52 @@ Medidos con `vitest --coverage` (proveedor v8) sobre `code/api/`:
 ### Store de autenticación (`useAuthStore`)
 
 El store de Pinia para autenticación es el núcleo de la capa de estado del frontend. Los tests cubren:
-- `init()`: restauración de sesión con usuario autenticado, restauración con usuario nulo, propagación del campo `role` desde los custom claims de Firebase.
-- Patrón `holder` para evitar el error de TDZ con mocks síncronos de `onAuthStateChanged` (problema documentado en la sección 6.7).
+- `init()`: restauración de sesión con usuario autenticado, restauración con usuario nulo, propagación del campo `rol` desde los custom claims de Firebase.
+- Patrón `holder` para evitar el error de TDZ con mocks síncronos de `onAuthStateChanged`.
 - `logout()`: limpieza del estado de sesión tras llamar a `signOut`.
 
-### Vista de gestión de usuarios (`UsersView`)
+### Vistas y Composables
 
-Los tests de componente de `UsersView.vue` cubren:
-- Renderización de la tabla de usuarios con datos reactivos del composable `useUsers`.
-- Apertura y cierre del modal de creación de usuario.
-- Flujo completo de creación: validación del formulario, llamada al composable, mensaje de éxito.
-- Estado de carga (`isLoading: true`): la tabla muestra un spinner en lugar de datos.
-- Estado de error: se muestra el mensaje de error recibido de la API.
-
-### Composable `useUsers`
-
-Los tests del composable cubren:
-- `fetchUsers()`: llamada al endpoint correcto, actualización del estado `users`, manejo de error de red.
-- `createUser()`: petición POST con el DTO correcto, actualización optimista del estado local.
-- `updateUserRole()` y `toggleUserDisabled()`: peticiones PATCH, actualización del usuario correspondiente en el array local.
-
-### Componente `TaskCard`
-
-El componente `TaskCard` es el primer componente de presentación compartida del proyecto. Sus 16 tests cubren:
-- Renderización del título, nombre del residente y franja horaria para cada estado posible (`pendiente`, `en_curso`, `completada`, `con_incidencia`).
-- Clase CSS de estado correcta según el valor de `tarea.estado`.
-- Visibilidad del botón de acción y emisión del evento `@action` al pulsarlo.
-- Ausencia de errores de consola con la prop `tarea` completa e incompleta.
-
-### Resultados de cobertura — Frontend
-
-Medidos con `vitest --coverage` (proveedor v8) sobre `code/frontend/`:
-
-| Módulo | Statements | Branches | Functions | Lines |
-|--------|-----------|----------|-----------|-------|
-| `useAuthStore` | 100% | 100% | 100% | 100% |
-| `UsersView.vue` | 100% | 100% | 100% | 100% |
-| `useUsers` composable | 100% | 100% | 100% | 100% |
-| `TaskCard.vue` | 100% | 100% | 100% | 100% |
-| **Total Frontend** | **84.31%** | **73.14%** | **84.84%** | **85.41%** |
-
-> El total global incluye ficheros de configuración de Vue Router y el punto de entrada `main.ts` que no tienen tests. Los módulos de negocio (stores, composables, componentes) están en el 100%.
+Los tests cubren:
+- **`UsersView.vue`**: Renderización de tabla, modales, y manejo de estado de carga/error.
+- **`useUsers`**: Llamadas a endpoints de administración, actualización optimista local y manejo de error.
+- **`TaskCard.vue`**: Renderización condicionada al estado de la tarea (colores, botones visibles) y emisión del evento `@action`.
 
 ---
 
 ## 9.4 Resumen global de tests
 
-| Tipo | N.º tests | Pasados | Fallidos | Cobertura (stmts) |
-|------|-----------|---------|----------|-------------------|
-| Unitarios — API (Vitest) | ~25 | 25 | 0 | 67.88% global / 100% en módulos de negocio |
-| Componentes/Composables — Frontend (Vitest) | ~40 | 40 | 0 | 84.31% global / 100% en módulos de negocio |
-| E2E (Playwright) | Pendiente Sprint-3 | — | — | — |
-| Firestore Security Rules | Pendiente Sprint-3 | — | — | — |
-| **Total** | **~65** | **~65** | **0** | **— (ver por capa)** |
+Al cierre del backend de los Sprints 2 y 3, el estado de la suite de pruebas es el siguiente:
+
+| Tipo de Test | N.º tests | Pasados | Herramienta / Contexto |
+|--------------|-----------|---------|------------------------|
+| **Unitarios & HTTP (API)** | ~115 | 115 | Vitest + Supertest + Zod |
+| **Integración (Servicios API)** | 35 | 35 | Vitest + Firebase Emulator |
+| **Reglas de Seguridad (Firestore)** | 26 | 26 | `@firebase/rules-unit-testing` |
+| **Componentes (Frontend)** | ~60 | 60 | Vitest + Vue Test Utils |
+| **Total Automatizado** | **~236** | **236** | — |
+
+> **Nota de Deuda Técnica:** Todos los tests de integración y reglas de Firestore se ejecutan localmente contra el Emulador. El job de CI en GitHub Actions ha sido actualizado para soportar Node.js 24 y Java 21, permitiendo la ejecución automatizada del emulador en el pipeline.
 
 ---
 
 ## 9.5 Planes de prueba por historia de usuario
 
-Cada historia de usuario implementada tiene un plan de prueba documentado en `OUTPUTS/test-plans/`:
+Cada historia de usuario implementada tiene un plan de prueba formal documentado en la carpeta `OUTPUTS/test-plans/`, que define los criterios de aceptación y los escenarios manuales/automatizados.
 
-| US | Título | Plan de prueba |
-|----|--------|---------------|
+| US | Título | Test Plan |
+|----|--------|-----------|
 | US-01 | Inicio de sesión | `test-plan-US-01.md` |
 | US-02 | Control de acceso por rol | `test-plan-US-02.md` |
 | US-03 | Consulta de agenda diaria | `test-plan-US-03.md` |
 | US-04 | Actualizar estado de una tarea | `test-plan-US-04.md` |
+| US-05 | Consulta de ficha de residente | `test-plan-US-05.md` |
+| US-06 | Registro de incidencia | `test-plan-US-06.md` |
 | US-10 | Gestión de cuentas de usuarios | `test-plan-US-10.md` |
 | US-13 | Health Check de la API | `test-plan-US-13.md` |
 
-Los planes de prueba incluyen: escenarios positivos y negativos, criterios de aceptación medibles, pasos de reproducción manual, y referencia a los tests automatizados correspondientes.
+Los planes de prueba incluyen: escenarios de *happy path*, casos límite (*edge cases*), estados de error (ej. 403 Forbidden por permisos), e instrucciones de *seeding* en el Emulador.
 
 ---
 
-## 9.6 Calidad de código y cobertura de CI
-
-Además de los tests unitarios y de componentes, el proyecto aplica verificaciones de calidad de código en cada commit y pull request:
-
-- **ESLint**: configurado con las reglas de Vue 3 + TypeScript. Ejecutado en pre-commit (Husky) y en el pipeline de CI (GitHub Actions).
-- **Prettier**: formateado consistente de todos los ficheros `.ts`, `.vue` y `.json`. Verificado en CI con `prettier --check`.
-- **TypeScript strict**: el flag `strict: true` del compilador garantiza que no existan tipos implícitos `any` ni asignaciones inseguras. El build de producción falla si TypeScript reporta errores.
-- **commitlint**: cada mensaje de commit se valida contra la convención `feat(US-XX): descripción` definida en el guardrail G08 del proyecto.
-
-Esta combinación de herramientas crea un muro de calidad en cuatro niveles: editor (ESLint en tiempo real), commit (pre-commit hook), push (pre-push hook), y pull request (CI en GitHub Actions). Un error de calidad no puede llegar a `develop` ni a `master` sin ser detectado en al menos uno de estos puntos.
-
----
-
-*Última actualización: 2026-04-18 — Sprint-2 completado*
+*Última actualización: 2026-04-19 — Sprint-3: Backend US-05 y US-06 completado*
