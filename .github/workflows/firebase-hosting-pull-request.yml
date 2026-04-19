@@ -5,6 +5,9 @@ on:
     branches:
       - develop
       - master
+    paths:
+      - 'code/**'
+      - '.github/workflows/firebase-hosting-pull-request.yml'
 
 permissions:
   checks: write

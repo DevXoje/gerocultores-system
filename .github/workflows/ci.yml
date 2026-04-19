@@ -5,9 +5,15 @@ on:
     branches:
       - develop
       - master
+    paths:
+      - 'code/**'
+      - '.github/workflows/ci.yml'
   push:
     branches:
       - develop
+    paths:
+      - 'code/**'
+      - '.github/workflows/ci.yml'
 
 jobs:
   ci:

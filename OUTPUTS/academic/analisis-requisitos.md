@@ -1,9 +1,12 @@
 # 4. Análisis de requisitos
 
-> **Borrador** — sección 4 de la memoria académica DAW  
-> **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: GeroCare — Agenda digital para gerocultores  
-> **Centro**: CIPFP Batoi d'Alcoi  
+> **⚠️ PENDIENTE PARA SPRINT FINAL:**
+> Esta sección se considera final en cuanto a alcance, pero faltaría añadir el modelo entidad-relación (ER) renderizado con Mermaid y una tabla con los criterios de aceptación definitivos validados por las pruebas E2E que recogerá el agente auditor.
+
+> **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
+> **Autor**: Jose Vilches Sánchez
+> **Proyecto**: GeroCare — Agenda digital para gerocultores
+> **Centro**: CIPFP Batoi d'Alcoi
 > **Generado**: 2026-04-06 — WRITER agent  
 > **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
 > **Longitud**: ~1.050 palabras + tablas
