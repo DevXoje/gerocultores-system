@@ -1,7 +1,9 @@
 # 6. Fases de implementación técnica
 
+> **⚠️ PENDIENTE PARA SPRINT FINAL:** 
+> Esta sección debe actualizarse con capturas de pantalla de la aplicación final corriendo en producción, métricas de rendimiento reales y la conclusión de la migración de datos. El agente `academic-auditor` se encargará de mantener esta sección viva insertando capturas automáticamente.
+
 > **Sprint-1 — Fundamentos: autenticación, gestión de usuarios y arquitectura base**
->
 > Periodo: semanas 1–4 del desarrollo (abril 2026).
 > Fuentes: `PLAN/current-sprint.md`, `DECISIONS/ADR-03b-authentication-firebase.md`, `DECISIONS/ADR-07-testing-strategy.md`.
 
@@ -46,7 +48,10 @@ La implementación de la autenticación en el Sprint-1 fue el bloque más críti
 
 ### Capa 1 — Firebase Auth (cliente)
 
-El usuario se autentica mediante `signInWithEmailAndPassword` desde el SDK Web de Firebase. Tras el inicio de sesión, el SDK emite un ID Token JWT firmado que incluye los *custom claims* del usuario (en particular, el campo `role`).
+El usuario se autentica mediante `signInWithEmailAndPassword` desde el SDK Web de Firebase. Tras el inicio de sesión, el SDK emite un ID Token JWT firmado que incluye los *custom claims* del usuario (en particular, el campo `rol`).
+
+![Login Screen](./assets/login-screen.png)
+*Figura 1: Pantalla de inicio de sesión implementada en el Sprint-1. (Captura automatizada por Playwright).*
 
 ### Capa 2 — Express middleware (API)
 
@@ -56,7 +61,7 @@ Todos los endpoints protegidos pasan por dos middlewares encadenados: `verifyAut
 // src/middleware/requireRole.ts
 export function requireRole(...roles: UserRole[]): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const userRole = req.user?.['role'] as UserRole | undefined
+    const userRole = req.user?.['rol'] as UserRole | undefined
 
     if (!userRole || !roles.includes(userRole)) {
       res.status(403).json({ error: 'Forbidden', code: 'FORBIDDEN' })
@@ -108,11 +113,11 @@ La gestión de usuarios fue la primera funcionalidad implementada sobre la arqui
 
 ### API REST de administración de usuarios
 
-El backend expone un conjunto de endpoints bajo `/api/users` que permiten listar, crear, editar y eliminar usuarios. Estos endpoints están protegidos con `verifyAuth + requireRole('admin')`, garantizando que solo administradores puedan acceder a ellos. Las operaciones sobre usuarios combinan Firebase Auth (para credenciales) con Firestore (para metadatos de perfil y rol).
+El backend expone un conjunto de endpoints bajo `/api/admin/users` que permiten listar, crear, editar y eliminar usuarios. Estos endpoints están protegidos con `verifyAuth + requireRole('admin')`, garantizando que solo administradores puedan acceder a ellos. Las operaciones sobre usuarios combinan Firebase Auth (para credenciales) con Firestore (para metadatos de perfil y rol).
 
 ### Composable `useUsers`
 
-En el frontend, el composable `useUsers` (capa `application/`) encapsula las llamadas a la API a través del cliente Axios definido en `infrastructure/`. Expone un estado reactivo (`users`, `isLoading`, `error`) y las acciones necesarias (`fetchUsers`, `createUser`, `updateUser`, `deleteUser`). Los componentes Vue nunca llaman directamente a Axios; siempre pasan por este composable.
+En el frontend, el composable `useUsers` (capa `application/`) encapsula las llamadas a la API a través del cliente Axios definido en `infrastructure/`. Expone un estado reactivo (`users`, `isLoading`, `error`) y las acciones necesarias (`fetchUsers`, `createUser`, `updateUserRole`, `toggleUserDisabled`). Los componentes Vue nunca llaman directamente a Axios; siempre pasan por este composable.
 
 ### Vista `UsersView`
 
@@ -122,11 +127,11 @@ La vista de administración de usuarios (`src/business/users/presentation/UsersV
 
 ## 6.4 Decisiones técnicas relevantes
 
-Durante el Sprint-1 se formalizaron tres decisiones de arquitectura que condicionan el resto del desarrollo:
+Durante los Sprints 1 a 3 se formalizaron decisiones de arquitectura que condicionan el resto del desarrollo:
 
 **ADR-03b — Firebase Auth + Custom Claims + Express middleware**: La elección de Firebase Auth como sistema de autenticación simplifica la gestión de identidades al concentrar todo el ecosistema en un solo proveedor (Firebase). La alternativa de JWT autogestionado se descartó por el riesgo de bugs de seguridad y el coste de implementación en un proyecto con deadline ajustado.
 
-**ADR-07 — Estrategia de testing (Vitest + Playwright + @firebase/rules-unit-testing)**: Se definió una estrategia de testing en tres niveles: tests unitarios con Vitest para la lógica de dominio y aplicación, tests de componentes con `@vue/test-utils`, y tests E2E con Playwright para los flujos completos. Adicionalmente, las Firestore Security Rules se validan con `@firebase/rules-unit-testing` ejecutado contra el emulador local. El objetivo de cobertura es ≥ 80% en las capas `domain/` y `application/`.
+**ADR-07 — Estrategia de testing (Vitest + Playwright + @firebase/rules-unit-testing)**: Se definió una estrategia de testing en tres niveles: tests unitarios con Vitest para la lógica de dominio y aplicación, tests de integración y controladores (Supertest) contra el Firebase Emulator, y tests E2E con Playwright para los flujos completos. El objetivo de cobertura es ≥ 80% en las capas `domain/` y `application/`.
 
 **Arquitectura DDD frontend**: Aunque no existe un ADR independiente para esta decisión, la estructura de carpetas DDD se derivó de ADR-01b (Vue 3 + TypeScript) y es la convención central del módulo frontend. La separación en cuatro capas (domain, application, infrastructure, presentation) es la regla más importante para mantener el código mantenible a medida que el proyecto crece.
 
@@ -147,7 +152,7 @@ async function init(): Promise<void> {
     holder.unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const idTokenResult = await firebaseUser.getIdTokenResult()
-        const claimedRole = idTokenResult.claims['role']
+        const claimedRole = idTokenResult.claims['rol']
         role.value = typeof claimedRole === 'string' ? claimedRole : null
         user.value = firebaseUser
       } else {
@@ -167,12 +172,12 @@ El uso de un objeto `holder` para la función `unsubscribe` resuelve un problema
 
 ## Problemas encontrados y soluciones
 
-**Problema 1 — TDZ en tests del AuthStore**: Durante el desarrollo de los tests unitarios del store de autenticación, se detectó que los mocks síncronos de `onAuthStateChanged` provocaban un error de TDZ al intentar llamar a `unsubscribe()`. La solución fue introducir el patrón `holder` descrito anteriormente, que encapsula la referencia a la función en un objeto asignable antes de que el callback se ejecute.
+**Problema 1 — Bug en `requireRole.ts`**: Durante el Sprint-2, se detectó que el middleware de autorización comprobaba `req.user['role']` en lugar de `req.user['rol']` (el claim real emitido por Firebase). Esto provocaba que incluso los administradores recibieran un error 403. Se corrigió en el Sprint-3 alineando el código con la especificación `SPEC/entities.md`.
 
-**Problema 2 — Propagación del rol entre recargas**: El campo `role` de los custom claims no se incluye automáticamente en el estado inicial de `onAuthStateChanged`; es necesario llamar a `getIdTokenResult()` para recuperarlo. Esto implica una llamada asíncrona adicional en cada restauración de sesión, lo que se resuelve esperando a que `init()` resuelva antes de llamar a `app.mount()` en `main.ts`.
+**Problema 2 — TDZ en tests del AuthStore**: Durante el desarrollo de los tests unitarios del store de autenticación, se detectó que los mocks síncronos de `onAuthStateChanged` provocaban un error de TDZ al intentar llamar a `unsubscribe()`. La solución fue introducir el patrón `holder` descrito anteriormente, que encapsula la referencia a la función en un objeto asignable antes de que el callback se ejecute.
 
-**Problema 3 — Colisión de nombres de colecciones**: Las colecciones de Firestore se nombraron inicialmente en español (`usuarios`, `tareas`, `residentes`) siguiendo la convención del dominio. En el Sprint-1 se decidió adoptar nombres en inglés (`users`, `tasks`, `residents`) como colecciones canónicas, manteniendo las colecciones en español como alias durante la migración de datos. Las Firestore Security Rules incluyen ambas colecciones con las mismas reglas de acceso hasta que se complete la migración en el Sprint-3.
+**Problema 3 — Colisión de nombres de colecciones**: Las colecciones de Firestore se nombraron inicialmente en español (`usuarios`, `tareas`, `residentes`) siguiendo la convención del dominio. En el Sprint-3 se decidió adoptar nombres en inglés (`users`, `tasks`, `residents`, `incidences`) como colecciones canónicas. Se centralizó el nombramiento en una constante `COLLECTIONS` en el backend para evitar discrepancias, y se actualizaron las Firestore Security Rules en consecuencia.
 
 ---
 
-*Última actualización: 2026-04-18 — Sprint-1 completado*
+*Última actualización: 2026-04-19 — Backend de Sprint-3 completado*
