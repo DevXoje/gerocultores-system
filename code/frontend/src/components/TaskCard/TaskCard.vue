@@ -10,7 +10,11 @@
  * US-03: Consulta de agenda diaria
  * Stitch reference: Caregiver Dashboard (design-source.md)
  */
-import type { TareaResponse, TareaEstado, TareaTipo } from '@/business/agenda/domain/entities/tarea.types'
+import type {
+  TareaResponse,
+  TareaEstado,
+  TareaTipo,
+} from '@/business/agenda/domain/entities/tarea.types'
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 
@@ -119,10 +123,7 @@ function isCompleted(estado: TareaEstado): boolean {
 
       <!-- Notes (truncated) -->
       <template v-if="tarea.notas">
-        <p
-          class="task-card__notes"
-          :data-testid="`task-card-notes-${tarea.id}`"
-        >
+        <p class="task-card__notes" :data-testid="`task-card-notes-${tarea.id}`">
           {{ tarea.notas }}
         </p>
       </template>
@@ -135,7 +136,9 @@ function isCompleted(estado: TareaEstado): boolean {
             :data-testid="`task-card-assignee-${tarea.id}`"
             :aria-label="`Asignado a: ${props.assignedToDisplayName}`"
           >
-            <span class="material-symbols-outlined task-card__assignee-icon" aria-hidden="true">person</span>
+            <span class="material-symbols-outlined task-card__assignee-icon" aria-hidden="true"
+              >person</span
+            >
             {{ props.assignedToDisplayName }}
           </span>
         </template>
@@ -144,9 +147,15 @@ function isCompleted(estado: TareaEstado): boolean {
           <!-- Toggle complete -->
           <button
             class="task-card__action-btn"
-            :class="isCompleted(tarea.estado) ? 'task-card__action-btn--undo' : 'task-card__action-btn--complete'"
+            :class="
+              isCompleted(tarea.estado)
+                ? 'task-card__action-btn--undo'
+                : 'task-card__action-btn--complete'
+            "
             type="button"
-            :aria-label="isCompleted(tarea.estado) ? 'Marcar como pendiente' : 'Marcar como completada'"
+            :aria-label="
+              isCompleted(tarea.estado) ? 'Marcar como pendiente' : 'Marcar como completada'
+            "
             :data-testid="`task-card-toggle-${tarea.id}`"
             @click.stop="emit('toggleComplete', tarea.id)"
           >
@@ -179,7 +188,9 @@ function isCompleted(estado: TareaEstado): boolean {
   @apply flex flex-row overflow-hidden rounded-xl cursor-pointer select-none;
   background-color: var(--color-surface-container-lowest);
   box-shadow: 0 1px 3px color-mix(in srgb, var(--color-on-surface) 10%, transparent);
-  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
   min-height: 44px;
 
   &:hover {
@@ -295,7 +306,9 @@ function isCompleted(estado: TareaEstado): boolean {
   @apply flex items-center justify-center w-11 h-11 rounded-full border-none cursor-pointer;
   background-color: transparent;
   color: var(--color-on-surface-variant);
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 
   &:hover {
     background-color: var(--color-surface-container-high);
