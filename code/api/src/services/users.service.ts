@@ -6,6 +6,7 @@ import type {
   UserResponse,
   UpdateRoleResponse,
   DisableUserResponse,
+  EnableUserResponse,
 } from '../types/user.types'
 
 export class UsersService {
@@ -54,6 +55,12 @@ export class UsersService {
     await adminAuth.updateUser(uid, { disabled: true })
     await this.collection.doc(uid).update({ active: false })
     return { uid, active: false }
+  }
+
+  async enableUser(uid: string): Promise<EnableUserResponse> {
+    await adminAuth.updateUser(uid, { disabled: false })
+    await this.collection.doc(uid).update({ active: true })
+    return { uid, active: true }
   }
 
   private toResponse(id: string, data: FirebaseFirestore.DocumentData): UserResponse {
