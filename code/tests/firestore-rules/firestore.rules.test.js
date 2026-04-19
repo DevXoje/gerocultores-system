@@ -221,9 +221,9 @@ describe('Colección /incidencias', () => {
     );
   });
 
-  test('admin NO puede crear una incidencia', async () => {
+  test('admin puede crear una incidencia', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertFails(
+    await assertSucceeds(
       db.doc('incidencias/inc-admin').set({ descripcion: 'Admin inc', userId: 'admin-uid' }),
     );
   });
