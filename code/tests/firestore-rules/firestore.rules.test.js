@@ -164,7 +164,7 @@ describe('Residentes — gerocultor access', () => {
 
 describe('Administrador — full access', () => {
   const ADMIN_UID = 'uid-admin-01'
-  const ADMIN_CLAIMS = { rol: 'administrador' }
+  const ADMIN_CLAIMS = { rol: 'admin' }
 
   beforeEach(async () => {
     await seedDoc('tareas', 'tarea-any', { userId: 'other-user', title: 'Some task' })
