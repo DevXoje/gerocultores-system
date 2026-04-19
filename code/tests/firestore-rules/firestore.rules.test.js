@@ -74,8 +74,8 @@ describe('Colección /usuarios', () => {
     await assertFails(db.doc(`usuarios/${UID}`).get());
   });
 
-  test('administrador puede escribir un documento de usuario', async () => {
-    const db = authedDb('admin-uid', 'administrador');
+  test('admin puede escribir un documento de usuario', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(db.doc(`usuarios/${UID}`).set({ nombre: 'María', rol: 'gerocultor' }));
   });
 
@@ -105,13 +105,13 @@ describe('Colección /tareas', () => {
     await assertSucceeds(db.doc(`tareas/${TAREA_ID}`).get());
   });
 
-  test('coordinador puede leer cualquier tarea', async () => {
-    const db = authedDb('coord-uid', 'coordinador');
+  test('admin puede leer cualquier tarea', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(db.doc(`tareas/${TAREA_ID}`).get());
   });
 
-  test('administrador puede leer cualquier tarea', async () => {
-    const db = authedDb('admin-uid', 'administrador');
+  test('admin puede leer cualquier tarea', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(db.doc(`tareas/${TAREA_ID}`).get());
   });
 
@@ -147,13 +147,13 @@ describe('Colección /residentes', () => {
     });
   });
 
-  test('coordinador puede leer residente', async () => {
-    const db = authedDb('coord-uid', 'coordinador');
+  test('admin puede leer residente', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(db.doc(`residentes/${RES_ID}`).get());
   });
 
-  test('administrador puede leer residente', async () => {
-    const db = authedDb('admin-uid', 'administrador');
+  test('admin puede leer residente', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(db.doc(`residentes/${RES_ID}`).get());
   });
 
@@ -167,8 +167,8 @@ describe('Colección /residentes', () => {
     await assertFails(db.doc(`residentes/${RES_ID}`).get());
   });
 
-  test('coordinador puede escribir residente', async () => {
-    const db = authedDb('coord-uid', 'coordinador');
+  test('admin puede escribir residente', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(db.doc(`residentes/${RES_ID}`).set({ nombre: 'Ana López Actualizada' }));
   });
 
@@ -197,8 +197,8 @@ describe('Colección /incidencias', () => {
     await assertSucceeds(db.doc(`incidencias/${INC_ID}`).get());
   });
 
-  test('coordinador puede leer incidencias', async () => {
-    const db = authedDb('coord-uid', 'coordinador');
+  test('admin puede leer incidencias', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(db.doc(`incidencias/${INC_ID}`).get());
   });
 
@@ -214,27 +214,27 @@ describe('Colección /incidencias', () => {
     );
   });
 
-  test('coordinador puede crear una incidencia', async () => {
-    const db = authedDb('coord-uid', 'coordinador');
+  test('admin puede crear una incidencia', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(
       db.doc('incidencias/inc-coord').set({ descripcion: 'Coord inc', userId: 'coord-uid' }),
     );
   });
 
-  test('administrador NO puede crear una incidencia', async () => {
-    const db = authedDb('admin-uid', 'administrador');
+  test('admin NO puede crear una incidencia', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertFails(
       db.doc('incidencias/inc-admin').set({ descripcion: 'Admin inc', userId: 'admin-uid' }),
     );
   });
 
   test('NO se puede actualizar una incidencia (inmutable)', async () => {
-    const db = authedDb('coord-uid', 'coordinador');
+    const db = authedDb('admin-uid', 'admin');
     await assertFails(db.doc(`incidencias/${INC_ID}`).update({ descripcion: 'Modificada' }));
   });
 
   test('NO se puede eliminar una incidencia (inmutable)', async () => {
-    const db = authedDb('admin-uid', 'administrador');
+    const db = authedDb('admin-uid', 'admin');
     await assertFails(db.doc(`incidencias/${INC_ID}`).delete());
   });
 });
