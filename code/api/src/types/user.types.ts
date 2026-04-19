@@ -34,3 +34,8 @@ export interface DisableUserResponse {
   uid: string
   active: false
 }
+
+export interface EnableUserResponse {
+  uid: string
+  active: true
+}

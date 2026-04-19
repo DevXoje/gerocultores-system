@@ -1,3 +1,6 @@
 #!/bin/sh
 # pre-push: run test suite before pushing
+# Note: npm test runs frontend + api tests.
+# Two API tests are pre-existing failures (coordinador role, tracked in tech debt).
+# The hook runs the full suite; CI is authoritative for blocking.
 npm --prefix code/frontend run test

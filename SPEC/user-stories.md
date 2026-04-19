@@ -15,7 +15,7 @@
 ---
 
 ### US-01 — Inicio de sesión
-**Como** gerocultor o coordinador, **quiero** iniciar sesión con mis credenciales, **para** acceder a mi agenda y los datos de los residentes de forma segura.
+**Como** gerocultor o administrador, **quiero** iniciar sesión con mis credenciales, **para** acceder a mi agenda y los datos de los residentes de forma segura.
 
 **Criterios de aceptación**:
 - [ ] CA-1: El formulario de login muestra campos de usuario y contraseña.
@@ -38,7 +38,7 @@ Design (Stitch): projects/16168255182252500555/screens/51613e717e324fd2947120c78
 **Criterios de aceptación**:
 - [ ] CA-1: Un gerocultor no puede acceder al panel de administración de usuarios.
 - [ ] CA-2: Un gerocultor solo ve los residentes que tiene asignados.
-- [ ] CA-3: Un coordinador puede ver todos los residentes y agendas.
+- [ ] CA-3: Un administrador puede ver todos los residentes y agendas.
 - [ ] CA-4: Intentar acceder a una ruta no autorizada retorna HTTP 403.
 
 **Requisitos relacionados**: RF-02  
@@ -91,7 +91,7 @@ Design (Stitch): projects/16168255182252500555/screens/fd70b595b29344339f770edc7
 **Criterios de aceptación**:
 - [ ] CA-1: La ficha muestra: nombre completo, fecha de nacimiento, foto (opcional), diagnósticos principales, alergias, medicación activa y preferencias de cuidado.
 - [ ] CA-2: La ficha es de solo lectura para el gerocultor (no puede editarla).
-- [ ] CA-3: El coordinador puede editar la ficha.
+- [ ] CA-3: El administrador puede editar la ficha.
 - [ ] CA-4: Los campos de salud (diagnósticos, medicación, alergias) no son accesibles sin autenticación.
 - [ ] CA-5: La ficha incluye un enlace rápido al historial de incidencias del residente.
 
@@ -111,7 +111,7 @@ Design (Stitch): projects/16168255182252500555/screens/97b3ca0415b44f2eb58f515c1
 - [ ] CA-2: La fecha y hora se registran automáticamente (servidor, no cliente).
 - [ ] CA-3: El usuario que registra la incidencia queda identificado automáticamente.
 - [ ] CA-4: Al guardar, la incidencia aparece inmediatamente en el historial del residente.
-- [ ] CA-5: Si la severidad es "crítica", se dispara una notificación al coordinador.
+- [ ] CA-5: Si la severidad es "crítica", se dispara una notificación al administrador.
 - [ ] CA-6: El formulario se puede completar con 5 taps o menos en tablet.
 
 **Requisitos relacionados**: RF-06  
@@ -123,7 +123,7 @@ Design (Stitch): projects/16168255182252500555/screens/64976b271900435fbe1c86076
 ---
 
 ### US-07 — Historial de incidencias de un residente
-**Como** gerocultor o coordinador, **quiero** consultar el historial de incidencias de un residente filtrado por fecha y tipo, **para** evaluar su evolución y detectar patrones.
+**Como** gerocultor o administrador, **quiero** consultar el historial de incidencias de un residente filtrado por fecha y tipo, **para** evaluar su evolución y detectar patrones.
 
 **Criterios de aceptación**:
 - [ ] CA-1: El historial muestra todas las incidencias del residente, ordenadas de más reciente a más antigua.
@@ -158,10 +158,10 @@ Design (Stitch): projects/16168255182252500555/screens/6e70d605ff3c4b20acd4b3b40
 ---
 
 ### US-09 — Alta y gestión de residentes
-**Como** coordinador, **quiero** dar de alta nuevos residentes y editar sus fichas, **para** mantener actualizado el registro de personas atendidas.
+**Como** administrador, **quiero** dar de alta nuevos residentes y editar sus fichas, **para** mantener actualizado el registro de personas atendidas.
 
 **Criterios de aceptación**:
-- [ ] CA-1: El coordinador puede crear un nuevo residente con los campos obligatorios: nombre, apellidos, fecha de nacimiento, habitación.
+- [ ] CA-1: El administrador puede crear un nuevo residente con los campos obligatorios: nombre, apellidos, fecha de nacimiento, habitación.
 - [ ] CA-2: Puede editar todos los campos de la ficha (diagnósticos, alergias, medicación, preferencias).
 - [ ] CA-3: Puede dar de baja (archivar) un residente sin eliminar su historial.
 - [ ] CA-4: Un residente archivado no aparece en las agendas activas pero su historial es consultable.
@@ -175,7 +175,7 @@ Design (Stitch): projects/16168255182252500555/screens/b21c6314296342708a666893b
 ---
 
 ### US-10 — Gestión de cuentas de usuarios
-**Como** administrador, **quiero** crear y desactivar cuentas de gerocultores y coordinadores, **para** controlar quién tiene acceso al sistema.
+**Como** administrador, **quiero** crear y desactivar cuentas de gerocultores, **para** controlar quién tiene acceso al sistema.
 
 **Criterios de aceptación**:
 - [ ] CA-1: El administrador puede crear una cuenta indicando nombre, rol y credenciales iniciales.
@@ -197,7 +197,7 @@ Design (Stitch): projects/16168255182252500555/screens/4fc0ca8a7f1b44a6a6f628be6
 **Criterios de aceptación**:
 - [ ] CA-1: El resumen incluye: tareas completadas, tareas pendientes, incidencias registradas durante el turno.
 - [ ] CA-2: El resumen se puede ver en pantalla y exportar o compartir (PDF o enlace).
-- [ ] CA-3: El resumen queda guardado y es visible para el coordinador y el turno siguiente.
+- [ ] CA-3: El resumen queda guardado y es visible para el administrador y el turno siguiente.
 
 **Requisitos relacionados**: RF-11  
 **Prioridad**: Should  
@@ -208,12 +208,12 @@ Design (Stitch): projects/16168255182252500555/screens/4fc0ca8a7f1b44a6a6f628be6
 ---
 
 ### US-12 — Vista de agenda semanal
-**Como** gerocultor o coordinador, **quiero** ver la agenda de la semana en una vista de calendario, **para** planificar y revisar la distribución de tareas.
+**Como** gerocultor o administrador, **quiero** ver la agenda de la semana en una vista de calendario, **para** planificar y revisar la distribución de tareas.
 
 **Criterios de aceptación**:
 - [ ] CA-1: La vista semanal muestra los 7 días de la semana con las tareas de cada día.
 - [ ] CA-2: Al pulsar un día, se muestra el detalle de ese día (agenda diaria).
-- [ ] CA-3: El coordinador puede añadir o modificar tareas desde la vista semanal.
+- [ ] CA-3: El administrador puede añadir o modificar tareas desde la vista semanal.
 
 **Requisitos relacionados**: RF-12  
 **Prioridad**: Could  

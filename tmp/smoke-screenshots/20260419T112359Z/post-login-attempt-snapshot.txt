@@ -1,0 +1,64 @@
+uid=1_0 RootWebArea "Care & Serenity — Staff Portal" url="https://gero-care--staging-o2g72gqa.web.app/login"
+  uid=5_0 ignored
+    uid=5_1 ignored
+      uid=5_2 generic
+        uid=5_3 ignored
+          uid=1_5 banner
+            uid=5_4 ignored
+            uid=1_7 heading "Care & Serenity" level="1"
+              uid=5_5 StaticText "Care & Serenity"
+                uid=5_6 InlineTextBox "Care & Serenity"
+            uid=5_7 paragraph
+              uid=1_11 StaticText "Accede a tu turno"
+                uid=5_6 InlineTextBox "Accede a tu turno"
+          uid=5_8 ignored
+            uid=1_13 heading "Iniciar sesión" level="2"
+              uid=5_9 StaticText "Iniciar sesión"
+                uid=5_6 InlineTextBox "Iniciar sesión"
+            uid=5_10 generic
+              uid=5_11 ignored
+                uid=5_12 LabelText
+                  uid=1_18 StaticText "Correo electrónico"
+                    uid=5_6 InlineTextBox "Correo electrónico"
+                uid=1_19 textbox "Correo electrónico" autocomplete="list" haspopup="menu" required value="test.gerocultor@example.com"
+                  uid=5_13 ignored
+                  uid=5_14 generic
+                    uid=5_15 StaticText "test.gerocultor@example.com"
+                      uid=5_6 InlineTextBox "test.gerocultor@example.com"
+              uid=5_16 ignored
+                uid=5_17 LabelText
+                  uid=1_24 StaticText "Contraseña"
+                    uid=5_6 InlineTextBox "Contraseña"
+                uid=5_18 generic
+                  uid=1_26 textbox "Contraseña" required value="•••••••••"
+                    uid=5_19 generic
+                      uid=5_20 StaticText "•••••••••"
+                        uid=5_6 InlineTextBox "•••••••••"
+                  uid=1_28 button "Mostrar clave"
+              uid=5_21 alert atomic live="assertive" relevant="additions text"
+                uid=5_22 ignored
+                  uid=5_23 StaticText "Credenciales incorrectas. Por favor intente de nuevo."
+                    uid=5_6 InlineTextBox "Credenciales incorrectas. Por favor intente de "
+                    uid=5_6 InlineTextBox "nuevo."
+              uid=5_24 ignored
+                uid=5_25 ignored
+                  uid=1_31 StaticText "PORTAL INTERNO"
+                    uid=5_6 InlineTextBox "PORTAL INTERNO"
+              uid=1_32 button "Iniciar sesión"
+                uid=5_26 ignored
+                  uid=5_27 StaticText "Iniciar sesión"
+                    uid=5_6 InlineTextBox "Iniciar sesión"
+          uid=1_35 contentinfo
+            uid=5_28 ignored
+              uid=1_37 StaticText "Solo para personal autorizado"
+                uid=5_6 InlineTextBox "Solo para personal autorizado"
+            uid=1_38 navigation "Legal y soporte"
+              uid=1_39 link "Política de Privacidad" url="https://gero-care--staging-o2g72gqa.web.app/login#"
+                uid=1_40 StaticText "Política de Privacidad"
+                  uid=5_6 InlineTextBox "Política de Privacidad"
+              uid=1_41 link "Soporte Técnico" url="https://gero-care--staging-o2g72gqa.web.app/login#"
+                uid=1_42 StaticText "Soporte Técnico"
+                  uid=5_6 InlineTextBox "Soporte Técnico"
+            uid=5_29 paragraph
+              uid=1_44 StaticText "© 2026 Care & Serenity Editorial. Staff Portal."
+                uid=5_6 InlineTextBox "© 2026 Care & Serenity Editorial. Staff Portal."
