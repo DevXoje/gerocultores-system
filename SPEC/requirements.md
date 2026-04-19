@@ -14,14 +14,14 @@
 ## Requisitos Funcionales
 
 ### RF-01 — Autenticación de usuarios
-- **Descripción**: El sistema debe permitir a los gerocultores y coordinadores iniciar y cerrar sesión con credenciales seguras (usuario/contraseña o sistema equivalente).
-- **Actor**: Gerocultor, Coordinador, Administrador
+- **Descripción**: El sistema debe permitir a los gerocultores y administradores iniciar y cerrar sesión con credenciales seguras (usuario/contraseña o sistema equivalente).
+- **Actor**: Gerocultor, Administrador
 - **Prioridad**: Alta
 - **User Stories relacionadas**: US-01
 - **Nota**: [INFERRED] — necesario para cualquier sistema con datos sensibles RGPD.
 
 ### RF-02 — Gestión de roles y permisos
-- **Descripción**: El sistema debe soportar al menos dos roles: Gerocultor (acceso a su agenda y residentes asignados) y Coordinador/Administrador (acceso completo). Los permisos se aplican a nivel de acción y de datos.
+- **Descripción**: El sistema debe soportar exactamente dos roles: Gerocultor (acceso a su agenda y residentes asignados) y Administrador (acceso completo). Los permisos se aplican a nivel de acción y de datos.
 - **Actor**: Sistema, Administrador
 - **Prioridad**: Alta
 - **User Stories relacionadas**: US-02
@@ -41,7 +41,7 @@
 
 ### RF-05 — Consulta de ficha de residente
 - **Descripción**: El gerocultor debe poder acceder a la ficha de cada residente asignado: datos identificativos, condiciones de salud relevantes, medicación, alergias y preferencias de cuidado.
-- **Actor**: Gerocultor, Coordinador
+- **Actor**: Gerocultor, Administrador
 - **Prioridad**: Alta
 - **User Stories relacionadas**: US-05
 - **Nota**: Campos con datos de salud son RGPD categoría especial.
@@ -53,8 +53,8 @@
 - **User Stories relacionadas**: US-06
 
 ### RF-07 — Consulta de historial de incidencias por residente
-- **Descripción**: El gerocultor y el coordinador deben poder consultar el listado de incidencias pasadas de un residente, filtradas por fecha y tipo.
-- **Actor**: Gerocultor, Coordinador
+- **Descripción**: El gerocultor y el administrador deben poder consultar el listado de incidencias pasadas de un residente, filtradas por fecha y tipo.
+- **Actor**: Gerocultor, Administrador
 - **Prioridad**: Alta
 - **User Stories relacionadas**: US-07
 
@@ -66,13 +66,13 @@
 - **Nota**: Implementación vía notificaciones push (PWA) o in-app.
 
 ### RF-09 — Gestión de residentes [INFERRED]
-- **Descripción**: El coordinador/administrador debe poder crear, editar y dar de baja residentes del sistema. El alta de un nuevo residente activa su ficha y la posibilidad de asignarle tareas.
-- **Actor**: Coordinador, Administrador
+- **Descripción**: El administrador debe poder crear, editar y dar de baja residentes del sistema. El alta de un nuevo residente activa su ficha y la posibilidad de asignarle tareas.
+- **Actor**: Administrador
 - **Prioridad**: Media
 - **User Stories relacionadas**: US-09
 
 ### RF-10 — Gestión de usuarios/gerocultores [INFERRED]
-- **Descripción**: El administrador debe poder crear y desactivar cuentas de gerocultores y coordinadores, y asignar residentes a cada gerocultor.
+- **Descripción**: El administrador debe poder crear y desactivar cuentas de gerocultores, y asignar residentes a cada gerocultor.
 - **Actor**: Administrador
 - **Prioridad**: Media
 - **User Stories relacionadas**: US-10
@@ -84,8 +84,8 @@
 - **User Stories relacionadas**: US-11
 
 ### RF-12 — Visualización de agenda semanal [INFERRED]
-- **Descripción**: El gerocultor y el coordinador deben poder consultar una vista de la agenda de la semana en curso para planificar o revisar la distribución de tareas.
-- **Actor**: Gerocultor, Coordinador
+- **Descripción**: El gerocultor y el administrador deben poder consultar una vista de la agenda de la semana en curso para planificar o revisar la distribución de tareas.
+- **Actor**: Gerocultor, Administrador
 - **Prioridad**: Baja
 - **User Stories relacionadas**: US-12
 
