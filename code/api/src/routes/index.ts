@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import { verifyAuth } from '../middleware/verifyAuth'
-import { requireRole } from '../middleware/requireRole'
 import adminUsersRouter from './admin.users.routes'
 import tareasRouter from './tareas.routes'
 import residentesRouter from './residentes.routes'

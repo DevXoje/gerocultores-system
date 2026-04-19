@@ -8,7 +8,7 @@ const controller = new ResidentesController()
 // All residentes routes require authentication
 router.use(verifyAuth)
 
-// Both roles can access resident details; business rules enforced in controller/service
+// GET /api/residentes/:id — US-05
 router.get('/:id', controller.getResidente)
 
 export default router

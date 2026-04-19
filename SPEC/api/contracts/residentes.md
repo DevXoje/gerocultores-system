@@ -47,6 +47,7 @@ Accessible to roles: `admin`, `gerocultor`.
 | Status | Code        | When                              |
 |--------|-------------|-----------------------------------|
 | 401    | UNAUTHORIZED | Missing or invalid Bearer token   |
+| 403    | FORBIDDEN    | Gerocultor is not in `gerocultoresAsignados` for this resident |
 | 404    | NOT_FOUND    | No Residente with the given id    |
 | 500    | (none)       | Unexpected server error           |
 
@@ -54,4 +55,5 @@ Accessible to roles: `admin`, `gerocultor`.
 
 - The fields `diagnosticos`, `alergias`, `medicacion`, `preferencias`, and `fechaNacimiento` are RGPD category-special data (art. 9). Only accessible to authenticated users with role `admin` or `gerocultor`.
 - `foto` is a URL to the resident photo. Photo uploads are NOT implemented in this sprint (design-only until SPEC update).
-- Future enhancement: filter resident visibility for `gerocultor` to only show assigned residents via `ResidenteAsignacion`.
+- **Access control**: `admin` can access any resident. `gerocultor` can only access residents where their `uid` is present in the `gerocultoresAsignados` array stored in the Firestore document.
+- `gerocultoresAsignados` is an internal field and is **never** returned in the API response.

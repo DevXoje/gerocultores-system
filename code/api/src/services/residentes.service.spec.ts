@@ -1,117 +1,179 @@
 /**
  * residentes.service.spec.ts — Unit tests for ResidentesService.
  *
- * Firestore is fully mocked — no emulator needed.
+ * Firestore is fully mocked — no real Firebase calls happen.
+ *
  * US-05: Consulta de ficha de residente
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
-// Mock firebase before any service imports
-vi.mock('./firebase', () => ({
-  adminDb: {
-    collection: vi.fn(),
-  },
-}))
+// ─── Mock Firebase before any imports ────────────────────────────────────────
+vi.mock('../services/firebase', () => {
+  const mockDocRef = {
+    get: vi.fn(),
+  }
 
+  const mockCollectionRef = {
+    doc: vi.fn(() => mockDocRef),
+  }
+
+  return {
+    adminAuth: {},
+    adminDb: {
+      collection: vi.fn(() => mockCollectionRef),
+      _mockDocRef: mockDocRef,
+      _mockCollectionRef: mockCollectionRef,
+    },
+  }
+})
+
+import { ResidentesService, NotFoundError, ForbiddenError } from './residentes.service'
 import { adminDb } from './firebase'
-import { ResidentesService, NotFoundError } from './residentes.service'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
-const sampleData = {
-  nombre: 'María',
-  apellidos: 'García López',
-  fechaNacimiento: '1940-05-15',
-  habitacion: '101A',
+const geroUid = 'gero-uid-001'
+const adminUid = 'admin-uid-001'
+const residenteId = 'res-uuid-001'
+
+const sampleResidenteData = {
+  nombre: 'Eleanor',
+  apellidos: 'Vance',
+  fechaNacimiento: '1940-05-12',
+  habitacion: '204',
   foto: null,
-  diagnosticos: 'Alzheimer leve',
+  diagnosticos: 'Demencia leve',
   alergias: 'Penicilina',
-  medicacion: 'Donepezilo 5mg',
-  preferencias: 'Prefiere ducharse por la mañana',
+  medicacion: 'Donepezilo 10mg',
+  preferencias: 'Prefiere desayuno temprano',
   archivado: false,
-  creadoEn: '2026-01-01T00:00:00.000Z',
-  actualizadoEn: '2026-04-01T00:00:00.000Z',
+  gerocultoresAsignados: [geroUid],
+  creadoEn: '2026-01-01T10:00:00Z',
+  actualizadoEn: '2026-04-01T10:00:00Z',
 }
 
-describe('ResidentesService', () => {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getMocks() {
+  const db = adminDb as unknown as {
+    _mockDocRef: { get: ReturnType<typeof vi.fn> }
+    _mockCollectionRef: { doc: ReturnType<typeof vi.fn> }
+  }
+  return {
+    docRef: db._mockDocRef,
+    collectionRef: db._mockCollectionRef,
+  }
+}
+
+// ─── Tests ────────────────────────────────────────────────────────────────────
+
+describe('ResidentesService.getResidenteById', () => {
   let service: ResidentesService
-  let mockDocGet: ReturnType<typeof vi.fn>
-  let mockDoc: ReturnType<typeof vi.fn>
-  let mockCollection: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     vi.clearAllMocks()
     service = new ResidentesService()
-
-    mockDocGet = vi.fn()
-    mockDoc = vi.fn().mockReturnValue({ get: mockDocGet })
-    mockCollection = vi.fn().mockReturnValue({ doc: mockDoc })
-    vi.mocked(adminDb.collection).mockImplementation(mockCollection)
+    const { collectionRef, docRef } = getMocks()
+    collectionRef.doc.mockReturnValue(docRef)
   })
 
-  describe('getResidenteById', () => {
-    it('returns ResidenteResponse when document exists', async () => {
-      mockDocGet.mockResolvedValueOnce({
-        exists: true,
-        id: 'res-001',
-        data: () => sampleData,
-      })
-
-      const result = await service.getResidenteById('res-001')
-
-      expect(result.id).toBe('res-001')
-      expect(result.nombre).toBe(sampleData.nombre)
-      expect(result.apellidos).toBe(sampleData.apellidos)
-      expect(result.habitacion).toBe(sampleData.habitacion)
-      expect(result.archivado).toBe(false)
-      expect(result.foto).toBeNull()
-      expect(result.diagnosticos).toBe(sampleData.diagnosticos)
-      expect(mockDoc).toHaveBeenCalledWith('res-001')
+  it('returns residente when admin requests any resident', async () => {
+    const { docRef } = getMocks()
+    docRef.get.mockResolvedValueOnce({
+      exists: true,
+      id: residenteId,
+      data: () => sampleResidenteData,
     })
 
-    it('throws NotFoundError when document does not exist', async () => {
-      mockDocGet.mockResolvedValueOnce({ exists: false })
+    const result = await service.getResidenteById(residenteId, adminUid, 'admin')
 
-      await expect(service.getResidenteById('non-existent')).rejects.toThrow(NotFoundError)
+    expect(result.id).toBe(residenteId)
+    expect(result.nombre).toBe('Eleanor')
+    expect(result.apellidos).toBe('Vance')
+    expect(result.diagnosticos).toBe('Demencia leve')
+    // gerocultoresAsignados must NOT be in the response (stripped)
+    expect((result as Record<string, unknown>)['gerocultoresAsignados']).toBeUndefined()
+  })
+
+  it('returns residente when gerocultor is in gerocultoresAsignados', async () => {
+    const { docRef } = getMocks()
+    docRef.get.mockResolvedValueOnce({
+      exists: true,
+      id: residenteId,
+      data: () => sampleResidenteData,
     })
 
-    it('uses COLLECTIONS.residentes collection name', async () => {
-      mockDocGet.mockResolvedValueOnce({
-        exists: true,
-        id: 'res-001',
-        data: () => sampleData,
-      })
+    const result = await service.getResidenteById(residenteId, geroUid, 'gerocultor')
 
-      await service.getResidenteById('res-001')
+    expect(result.id).toBe(residenteId)
+    expect(result.nombre).toBe('Eleanor')
+  })
 
-      expect(mockCollection).toHaveBeenCalledWith('residents')
+  it('throws ForbiddenError when gerocultor is NOT in gerocultoresAsignados', async () => {
+    const { docRef } = getMocks()
+    docRef.get.mockResolvedValueOnce({
+      exists: true,
+      id: residenteId,
+      data: () => sampleResidenteData,
     })
 
-    it('maps nullable fields to null when absent from Firestore doc', async () => {
-      const minimalData = {
-        nombre: 'Juan',
-        apellidos: 'Perez',
-        fechaNacimiento: '1945-01-01',
-        habitacion: '202',
-        archivado: false,
-        creadoEn: '2026-01-01T00:00:00.000Z',
-        actualizadoEn: '2026-01-01T00:00:00.000Z',
-        // foto, diagnosticos, alergias, medicacion, preferencias absent
-      }
+    await expect(
+      service.getResidenteById(residenteId, 'other-gero-uid', 'gerocultor'),
+    ).rejects.toThrow(ForbiddenError)
+  })
 
-      mockDocGet.mockResolvedValueOnce({
-        exists: true,
-        id: 'res-002',
-        data: () => minimalData,
-      })
+  it('throws NotFoundError when resident does not exist', async () => {
+    const { docRef } = getMocks()
+    docRef.get.mockResolvedValueOnce({ exists: false, data: () => null })
 
-      const result = await service.getResidenteById('res-002')
+    await expect(
+      service.getResidenteById('non-existent-id', adminUid, 'admin'),
+    ).rejects.toThrow(NotFoundError)
+  })
 
-      expect(result.foto).toBeNull()
-      expect(result.diagnosticos).toBeNull()
-      expect(result.alergias).toBeNull()
-      expect(result.medicacion).toBeNull()
-      expect(result.preferencias).toBeNull()
+  it('returns null for optional fields when not present in Firestore doc', async () => {
+    const { docRef } = getMocks()
+    const minimalData = {
+      nombre: 'Ana',
+      apellidos: 'García',
+      fechaNacimiento: '1945-03-20',
+      habitacion: '101',
+      foto: null,
+      diagnosticos: null,
+      alergias: null,
+      medicacion: null,
+      preferencias: null,
+      archivado: false,
+      gerocultoresAsignados: [geroUid],
+      creadoEn: '2026-01-01T10:00:00Z',
+      actualizadoEn: '2026-04-01T10:00:00Z',
+    }
+
+    docRef.get.mockResolvedValueOnce({
+      exists: true,
+      id: 'res-minimal',
+      data: () => minimalData,
     })
+
+    const result = await service.getResidenteById('res-minimal', geroUid, 'gerocultor')
+
+    expect(result.foto).toBeNull()
+    expect(result.diagnosticos).toBeNull()
+    expect(result.alergias).toBeNull()
+    expect(result.medicacion).toBeNull()
+    expect(result.preferencias).toBeNull()
+  })
+
+  it('gerocultor with empty gerocultoresAsignados array gets ForbiddenError', async () => {
+    const { docRef } = getMocks()
+    docRef.get.mockResolvedValueOnce({
+      exists: true,
+      id: residenteId,
+      data: () => ({ ...sampleResidenteData, gerocultoresAsignados: [] }),
+    })
+
+    await expect(
+      service.getResidenteById(residenteId, geroUid, 'gerocultor'),
+    ).rejects.toThrow(ForbiddenError)
   })
 })

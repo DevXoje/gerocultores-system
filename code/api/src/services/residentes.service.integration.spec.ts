@@ -12,7 +12,7 @@
  *   FIREBASE_PROJECT_ID=gerocultores-test
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import * as admin from 'firebase-admin'
 import type { ResidenteDoc } from '../types/residente.types'
 import { COLLECTIONS } from './collections'
@@ -20,7 +20,6 @@ import { COLLECTIONS } from './collections'
 // ─── Emulator setup ──────────────────────────────────────────────────────────
 
 const PROJECT_ID = process.env['FIREBASE_PROJECT_ID'] ?? 'gerocultores-test'
-
 const TEST_APP_NAME = 'integration-residentes-test'
 
 let testApp: admin.app.App
@@ -43,29 +42,29 @@ afterAll(async () => {
 })
 
 // ─── Import service ───────────────────────────────────────────────────────────
+import { ResidentesService, NotFoundError, ForbiddenError } from './residentes.service'
 
-import { ResidentesService, NotFoundError } from './residentes.service'
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function now(): string {
-  return new Date().toISOString()
-}
+const GERO_UID = 'gero-uid-integration-test'
+const ADMIN_UID = 'admin-uid-integration-test'
+const OTHER_GERO_UID = 'other-gero-uid-integration-test'
 
 function buildResidenteDoc(overrides: Partial<ResidenteDoc> = {}): ResidenteDoc {
   return {
-    nombre: 'María',
-    apellidos: 'García López',
-    fechaNacimiento: '1940-05-15',
-    habitacion: '101A',
+    nombre: 'Eleanor',
+    apellidos: 'Vance',
+    fechaNacimiento: '1940-05-12',
+    habitacion: '204',
     foto: null,
-    diagnosticos: 'Alzheimer leve',
+    diagnosticos: 'Demencia leve',
     alergias: 'Penicilina',
-    medicacion: 'Donepezilo 5mg',
-    preferencias: 'Prefiere ducharse por la mañana',
+    medicacion: 'Donepezilo 10mg',
+    preferencias: 'Prefiere desayuno temprano',
     archivado: false,
-    creadoEn: now(),
-    actualizadoEn: now(),
+    gerocultoresAsignados: [GERO_UID],
+    creadoEn: new Date().toISOString(),
+    actualizadoEn: new Date().toISOString(),
     ...overrides,
   }
 }
@@ -84,36 +83,102 @@ async function deleteResidente(id: string): Promise<void> {
 describe('ResidentesService integration (Firestore Emulator)', () => {
   let service: ResidentesService
 
-  beforeAll(() => {
+  beforeEach(() => {
     service = new ResidentesService()
   })
 
-  describe('getResidenteById', () => {
-    it('returns the residente when it exists', async () => {
+  // ──────────────────────────────────────────────────────────────────────────
+  // getResidenteById — Happy paths
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('getResidenteById — happy paths', () => {
+    it('admin can access any resident', async () => {
       const doc = buildResidenteDoc()
       const id = await seedResidente(doc)
 
       try {
-        const result = await service.getResidenteById(id)
+        const result = await service.getResidenteById(id, ADMIN_UID, 'admin')
 
         expect(result.id).toBe(id)
-        expect(result.nombre).toBe(doc.nombre)
-        expect(result.apellidos).toBe(doc.apellidos)
-        expect(result.habitacion).toBe(doc.habitacion)
+        expect(result.nombre).toBe('Eleanor')
+        expect(result.apellidos).toBe('Vance')
+        expect(result.diagnosticos).toBe('Demencia leve')
+        expect(result.alergias).toBe('Penicilina')
+        expect(result.medicacion).toBe('Donepezilo 10mg')
+        expect(result.preferencias).toBe('Prefiere desayuno temprano')
         expect(result.archivado).toBe(false)
-        expect(result.foto).toBeNull()
-        expect(result.diagnosticos).toBe(doc.diagnosticos)
-        expect(result.alergias).toBe(doc.alergias)
+        // gerocultoresAsignados must NOT be in the response
+        expect((result as Record<string, unknown>)['gerocultoresAsignados']).toBeUndefined()
       } finally {
         await deleteResidente(id)
       }
     })
 
-    it('throws NotFoundError when the id does not exist', async () => {
-      await expect(service.getResidenteById('non-existent-id-xyz')).rejects.toThrow(NotFoundError)
+    it('gerocultor assigned to resident can access their data', async () => {
+      const doc = buildResidenteDoc({ gerocultoresAsignados: [GERO_UID] })
+      const id = await seedResidente(doc)
+
+      try {
+        const result = await service.getResidenteById(id, GERO_UID, 'gerocultor')
+
+        expect(result.id).toBe(id)
+        expect(result.nombre).toBe('Eleanor')
+      } finally {
+        await deleteResidente(id)
+      }
+    })
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // getResidenteById — Access control (403)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('getResidenteById — access control', () => {
+    it('throws ForbiddenError when gerocultor is not assigned to the resident', async () => {
+      const doc = buildResidenteDoc({ gerocultoresAsignados: [GERO_UID] })
+      const id = await seedResidente(doc)
+
+      try {
+        await expect(
+          service.getResidenteById(id, OTHER_GERO_UID, 'gerocultor'),
+        ).rejects.toThrow(ForbiddenError)
+      } finally {
+        await deleteResidente(id)
+      }
     })
 
-    it('correctly maps a residente with all nullable fields set to null', async () => {
+    it('throws ForbiddenError when gerocultoresAsignados is empty', async () => {
+      const doc = buildResidenteDoc({ gerocultoresAsignados: [] })
+      const id = await seedResidente(doc)
+
+      try {
+        await expect(
+          service.getResidenteById(id, GERO_UID, 'gerocultor'),
+        ).rejects.toThrow(ForbiddenError)
+      } finally {
+        await deleteResidente(id)
+      }
+    })
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // getResidenteById — Not found (404)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('getResidenteById — not found', () => {
+    it('throws NotFoundError when resident id does not exist', async () => {
+      await expect(
+        service.getResidenteById('nonexistent-resident-id-xyz', ADMIN_UID, 'admin'),
+      ).rejects.toThrow(NotFoundError)
+    })
+  })
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // getResidenteById — Null/optional fields
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('getResidenteById — optional fields', () => {
+    it('returns null for optional fields when absent from Firestore', async () => {
       const doc = buildResidenteDoc({
         foto: null,
         diagnosticos: null,
@@ -124,7 +189,7 @@ describe('ResidentesService integration (Firestore Emulator)', () => {
       const id = await seedResidente(doc)
 
       try {
-        const result = await service.getResidenteById(id)
+        const result = await service.getResidenteById(id, ADMIN_UID, 'admin')
 
         expect(result.foto).toBeNull()
         expect(result.diagnosticos).toBeNull()

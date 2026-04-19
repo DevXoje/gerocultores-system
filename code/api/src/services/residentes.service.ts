@@ -1,12 +1,28 @@
+/**
+ * residentes.service.ts — Business logic + Firestore operations for Residente.
+ *
+ * US-05: Consulta de ficha de residente
+ * - Admin: can access any resident
+ * - Gerocultor: can only access residents in their gerocultoresAsignados array
+ */
 import { adminDb } from './firebase'
 import { COLLECTIONS } from './collections'
 import type { ResidenteDoc, ResidenteResponse } from '../types/residente.types'
+import type { UserRole } from '../types/user.types'
 
 export class NotFoundError extends Error {
   readonly statusCode = 404
   constructor(message: string) {
     super(message)
     this.name = 'NotFoundError'
+  }
+}
+
+export class ForbiddenError extends Error {
+  readonly statusCode = 403
+  constructor(message: string) {
+    super(message)
+    this.name = 'ForbiddenError'
   }
 }
 
@@ -33,14 +49,27 @@ export class ResidentesService {
     return adminDb.collection(COLLECTIONS.residentes)
   }
 
-  /**
-   * Returns the Residente with the given id.
-   * Throws NotFoundError if the document does not exist.
-   * US-05: Consulta de ficha de residente.
-   */
-  async getResidenteById(id: string): Promise<ResidenteResponse> {
+  async getResidenteById(
+    id: string,
+    requestingUid: string,
+    requestingRole: UserRole,
+  ): Promise<ResidenteResponse> {
     const snap = await this.collection.doc(id).get()
-    if (!snap.exists) throw new NotFoundError('Residente not found')
-    return docToResponse(snap.id, snap.data()!)
+
+    if (!snap.exists) {
+      throw new NotFoundError('Residente not found')
+    }
+
+    const data = snap.data()!
+
+    // Gerocultor access control: must be in gerocultoresAsignados array
+    if (requestingRole === 'gerocultor') {
+      const assigned = (data['gerocultoresAsignados'] as string[] | undefined) ?? []
+      if (!assigned.includes(requestingUid)) {
+        throw new ForbiddenError('No tienes acceso a este residente')
+      }
+    }
+
+    return docToResponse(snap.id, data)
   }
 }
