@@ -87,7 +87,7 @@ function buildTareaDoc(overrides: Partial<TareaDoc> = {}): TareaDoc {
  * Seeds a tarea document in the emulator and returns its auto-generated id.
  */
 async function seedTarea(data: TareaDoc): Promise<string> {
-  const ref = await testDb.collection(COLLECTIONS.tareas).add(data)
+  const ref = await testDb.collection(COLLECTIONS.tasks).add(data)
   return ref.id
 }
 
@@ -95,14 +95,14 @@ async function seedTarea(data: TareaDoc): Promise<string> {
  * Deletes a tarea by id from the emulator.
  */
 async function deleteTarea(id: string): Promise<void> {
-  await testDb.collection(COLLECTIONS.tareas).doc(id).delete()
+  await testDb.collection(COLLECTIONS.tasks).doc(id).delete()
 }
 
 /**
  * Reads a raw tarea document directly from Firestore (bypasses the service layer).
  */
 async function readTareaRaw(id: string): Promise<admin.firestore.DocumentData | undefined> {
-  const snap = await testDb.collection(COLLECTIONS.tareas).doc(id).get()
+  const snap = await testDb.collection(COLLECTIONS.tasks).doc(id).get()
   return snap.data()
 }
 

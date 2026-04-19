@@ -37,7 +37,7 @@ function docToResponse(id: string, data: FirebaseFirestore.DocumentData): TareaR
 
 export class TareasService {
   private get collection() {
-    return adminDb.collection(COLLECTIONS.tareas)
+    return adminDb.collection(COLLECTIONS.tasks)
   }
 
   async getTareas(filters: ListTareasQuery): Promise<TareaResponse[]> {
@@ -73,7 +73,7 @@ export class TareasService {
     requestingRole: UserRole,
   ): Promise<TareaResponse> {
     await adminDb.runTransaction(async (tx) => {
-      const ref = adminDb.collection(COLLECTIONS.tareas).doc(id)
+      const ref = adminDb.collection(COLLECTIONS.tasks).doc(id)
       const snap = await tx.get(ref)
 
       if (!snap.exists) throw new NotFoundError('Tarea not found')

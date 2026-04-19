@@ -71,95 +71,95 @@ async function seedDoc(collection, docId, data) {
 }
 
 // ---------------------------------------------------------------------------
-// /tareas tests
+// /tasks tests
 // ---------------------------------------------------------------------------
 
-describe('Tareas — gerocultor access', () => {
+describe('Tasks — gerocultor access', () => {
   const GEROCULTOR_UID = 'uid-gerocultor-01'
   const OTHER_GEROCULTOR_UID = 'uid-gerocultor-02'
   const GEROCULTOR_CLAIMS = { rol: 'gerocultor' }
 
   beforeEach(async () => {
-    // Own tarea
-    await seedDoc('tareas', 'tarea-own', { userId: GEROCULTOR_UID, title: 'Own task' })
-    // Other user's tarea
-    await seedDoc('tareas', 'tarea-other', { userId: OTHER_GEROCULTOR_UID, title: 'Other task' })
+    // Own task
+    await seedDoc('tasks', 'task-own', { userId: GEROCULTOR_UID, title: 'Own task' })
+    // Other user's task
+    await seedDoc('tasks', 'task-other', { userId: OTHER_GEROCULTOR_UID, title: 'Other task' })
   })
 
-  it('allows gerocultor to read their own tarea', async () => {
+  it('allows gerocultor to read their own task', async () => {
     const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertSucceeds(db.collection('tareas').doc('tarea-own').get())
+    await assertSucceeds(db.collection('tasks').doc('task-own').get())
   })
 
-  it('denies gerocultor reading another user\'s tarea', async () => {
+  it('denies gerocultor reading another user\'s task', async () => {
     const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertFails(db.collection('tareas').doc('tarea-other').get())
+    await assertFails(db.collection('tasks').doc('task-other').get())
   })
 
-  it('allows gerocultor to update their own tarea', async () => {
+  it('allows gerocultor to update their own task', async () => {
     const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
     await assertSucceeds(
-      db.collection('tareas').doc('tarea-own').update({ title: 'Updated' })
+      db.collection('tasks').doc('task-own').update({ title: 'Updated' })
     )
   })
 
-  it('denies gerocultor updating another user\'s tarea', async () => {
+  it('denies gerocultor updating another user\'s task', async () => {
     const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
     await assertFails(
-      db.collection('tareas').doc('tarea-other').update({ title: 'Hack' })
+      db.collection('tasks').doc('task-other').update({ title: 'Hack' })
     )
   })
 
-  it('allows gerocultor to create a tarea', async () => {
+  it('allows gerocultor to create a task', async () => {
     const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
     await assertSucceeds(
-      db.collection('tareas').doc('tarea-new').set({ userId: GEROCULTOR_UID, title: 'New task' })
+      db.collection('tasks').doc('task-new').set({ userId: GEROCULTOR_UID, title: 'New task' })
     )
   })
 })
 
 // ---------------------------------------------------------------------------
-// /residentes tests
+// /residents tests
 // ---------------------------------------------------------------------------
 
-describe('Residentes — gerocultor access', () => {
+describe('Residents — gerocultor access', () => {
   const GEROCULTOR_UID = 'uid-gerocultor-01'
   const OTHER_GEROCULTOR_UID = 'uid-gerocultor-02'
   const GEROCULTOR_CLAIMS = { rol: 'gerocultor' }
 
   beforeEach(async () => {
-    // Residente assigned to GEROCULTOR_UID
-    await seedDoc('residentes', 'residente-assigned', {
+    // Resident assigned to GEROCULTOR_UID
+    await seedDoc('residents', 'resident-assigned', {
       nombre: 'María García',
       assignedTo: GEROCULTOR_UID,
     })
-    // Residente assigned to a different gerocultor
-    await seedDoc('residentes', 'residente-unassigned', {
+    // Resident assigned to a different gerocultor
+    await seedDoc('residents', 'resident-unassigned', {
       nombre: 'Juan López',
       assignedTo: OTHER_GEROCULTOR_UID,
     })
   })
 
-  it('allows gerocultor to read a residente assigned to them', async () => {
+  it('allows gerocultor to read a resident assigned to them', async () => {
     const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertSucceeds(db.collection('residentes').doc('residente-assigned').get())
+    await assertSucceeds(db.collection('residents').doc('resident-assigned').get())
   })
 
-  it('denies gerocultor reading a residente not assigned to them', async () => {
+  it('denies gerocultor reading a resident not assigned to them', async () => {
     const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
-    await assertFails(db.collection('residentes').doc('residente-unassigned').get())
+    await assertFails(db.collection('residents').doc('resident-unassigned').get())
   })
 
-  it('denies gerocultor writing to residentes', async () => {
+  it('denies gerocultor writing to residents', async () => {
     const db = authedContext(GEROCULTOR_UID, GEROCULTOR_CLAIMS).firestore()
     await assertFails(
-      db.collection('residentes').doc('residente-assigned').update({ nombre: 'Hack' })
+      db.collection('residents').doc('resident-assigned').update({ nombre: 'Hack' })
     )
   })
 })
 
 // ---------------------------------------------------------------------------
-// /tareas + /residentes — administrador has full access
+// /tasks + /residents — administrador has full access
 // ---------------------------------------------------------------------------
 
 describe('Administrador — full access', () => {
@@ -167,38 +167,38 @@ describe('Administrador — full access', () => {
   const ADMIN_CLAIMS = { rol: 'admin' }
 
   beforeEach(async () => {
-    await seedDoc('tareas', 'tarea-any', { userId: 'other-user', title: 'Some task' })
-    await seedDoc('residentes', 'residente-any', { nombre: 'Ana Ruiz', assignedTo: 'other-user' })
+    await seedDoc('tasks', 'task-any', { userId: 'other-user', title: 'Some task' })
+    await seedDoc('residents', 'resident-any', { nombre: 'Ana Ruiz', assignedTo: 'other-user' })
   })
 
-  it('allows administrador to read any tarea', async () => {
+  it('allows administrador to read any task', async () => {
     const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
-    await assertSucceeds(db.collection('tareas').doc('tarea-any').get())
+    await assertSucceeds(db.collection('tasks').doc('task-any').get())
   })
 
-  it('allows administrador to update any tarea', async () => {
+  it('allows administrador to update any task', async () => {
     const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
     await assertSucceeds(
-      db.collection('tareas').doc('tarea-any').update({ title: 'Admin edit' })
+      db.collection('tasks').doc('task-any').update({ title: 'Admin edit' })
     )
   })
 
-  it('allows administrador to create a tarea', async () => {
+  it('allows administrador to create a task', async () => {
     const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
     await assertSucceeds(
-      db.collection('tareas').doc('tarea-new').set({ userId: ADMIN_UID, title: 'Admin task' })
+      db.collection('tasks').doc('task-new').set({ userId: ADMIN_UID, title: 'Admin task' })
     )
   })
 
-  it('allows administrador to read any residente', async () => {
+  it('allows administrador to read any resident', async () => {
     const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
-    await assertSucceeds(db.collection('residentes').doc('residente-any').get())
+    await assertSucceeds(db.collection('residents').doc('resident-any').get())
   })
 
-  it('allows administrador to write to residentes', async () => {
+  it('allows administrador to write to residents', async () => {
     const db = authedContext(ADMIN_UID, ADMIN_CLAIMS).firestore()
     await assertSucceeds(
-      db.collection('residentes').doc('residente-any').update({ nombre: 'Admin edit' })
+      db.collection('residents').doc('resident-any').update({ nombre: 'Admin edit' })
     )
   })
 })
@@ -209,17 +209,18 @@ describe('Administrador — full access', () => {
 
 describe('Unauthenticated access — always denied', () => {
   beforeEach(async () => {
-    await seedDoc('tareas', 'tarea-any', { userId: 'some-user', title: 'Task' })
-    await seedDoc('residentes', 'residente-any', { nombre: 'Someone', assignedTo: 'some-user' })
+    await seedDoc('tasks', 'task-any', { userId: 'some-user', title: 'Task' })
+    await seedDoc('residents', 'resident-any', { nombre: 'Someone', assignedTo: 'some-user' })
   })
 
-  it('denies unauthenticated read of tareas', async () => {
+  it('denies unauthenticated read of tasks', async () => {
     const db = testEnv.unauthenticatedContext().firestore()
-    await assertFails(db.collection('tareas').doc('tarea-any').get())
+    await assertFails(db.collection('tasks').doc('task-any').get())
   })
 
-  it('denies unauthenticated read of residentes', async () => {
+  it('denies unauthenticated read of residents', async () => {
     const db = testEnv.unauthenticatedContext().firestore()
-    await assertFails(db.collection('residentes').doc('residente-any').get())
+    await assertFails(db.collection('residents').doc('resident-any').get())
+  }
   })
 })
