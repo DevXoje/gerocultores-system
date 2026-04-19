@@ -15,7 +15,7 @@ function makeReq(userRole?: string | undefined): Partial<Request> {
     return {}
   }
   return {
-    user: { role: userRole } as unknown as Request['user'],
+    user: { rol: userRole } as unknown as Request['user'],
   }
 }
 
