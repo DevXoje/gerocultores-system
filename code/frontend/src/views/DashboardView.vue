@@ -33,7 +33,7 @@ function signOut() {
 }
 
 // ─── Agenda ────────────────────────────────────────────────────────────────
-const { tareas, isLoading, error, cargarTareas, actualizarEstado } = useAgendaHoy()
+const { tareas, isLoading, isServerReachable, error, cargarTareas, retry, actualizarEstado } = useAgendaHoy()
 
 const toastMsg = ref<string | null>(null)
 let toastTimer: ReturnType<typeof setTimeout> | null = null
@@ -125,10 +125,13 @@ onMounted(() => {
         <!-- Error state -->
         <div v-else-if="error" class="dashboard-page__error" role="alert">
           <span class="material-symbols-outlined dashboard-page__error-icon" aria-hidden="true">
-            error
+            cloud_off
           </span>
           <p class="dashboard-page__error-msg">{{ error }}</p>
-          <button class="dashboard-page__retry" type="button" @click="cargarTareas()">
+          <p v-if="!isServerReachable" class="dashboard-page__error-hint">
+            El servidor no responde. Comprueba tu conexión o intenta más tarde.
+          </p>
+          <button class="dashboard-page__retry" type="button" @click="retry">
             Reintentar
           </button>
         </div>
@@ -283,6 +286,11 @@ onMounted(() => {
 .dashboard-page__error-msg {
   @apply text-sm;
   color: var(--color-on-surface-variant);
+}
+
+.dashboard-page__error-hint {
+  @apply text-xs mt-1;
+  color: var(--color-outline);
 }
 
 .dashboard-page__retry {

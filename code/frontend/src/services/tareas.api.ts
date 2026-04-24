@@ -69,9 +69,11 @@ export const tareasApi = {
   /**
    * Retrieves a list of tasks, optionally filtered.
    */
-  async getTareas(params?: ListTareasParams): Promise<ApiResponse<TareaDTO[]>> {
+  async getTareas(params?: ListTareasParams): Promise<TareaDTO[]> {
     const response = await apiClient.get<ApiResponse<TareaDTO[]>>('/tareas', { params })
-    return response.data
+    // apiClient.get returns Axios response; response.data is ApiResponse wrapper
+    // Unwrap to get the actual array for caller convenience
+    return (response.data as ApiResponse<TareaDTO[]>).data
   },
 
   /**
@@ -93,9 +95,9 @@ export const tareasApi = {
   /**
    * Updates only the status of a specific task.
    */
-  async updateTareaStatus(id: string, data: UpdateTareaStatusDTO): Promise<ApiResponse<TareaDTO>> {
+  async updateTareaStatus(id: string, data: UpdateTareaStatusDTO): Promise<TareaDTO> {
     const response = await apiClient.patch<ApiResponse<TareaDTO>>(`/tareas/${id}/estado`, data)
-    return response.data
+    return (response.data as ApiResponse<TareaDTO>).data
   },
 
   /**
