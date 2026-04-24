@@ -12,6 +12,7 @@
 import { onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useResidente } from '../composables/useResidente'
+import { RESIDENTS_ROUTES } from '../../route-names'
 
 const route = useRoute()
 const router = useRouter()
@@ -186,6 +187,23 @@ function formatFecha(iso: string): string {
               {{ residente.preferencias ?? 'Sin preferencias registradas.' }}
             </p>
           </div>
+        </div>
+      </section>
+
+      <!-- Quick links — US-05 CA-5 -->
+      <section class="residente-view__section" aria-labelledby="residente-acciones-titulo">
+        <h2 id="residente-acciones-titulo" class="residente-view__section-title">
+          Acciones rápidas
+        </h2>
+        <div class="residente-view__quick-links">
+          <RouterLink
+            :to="{ name: RESIDENTS_ROUTES.RESIDENTE_INCIDENCIAS.name, params: { id: residenteId } }"
+            class="residente-view__quick-link"
+          >
+            <span class="residente-view__quick-link-icon" aria-hidden="true">📋</span>
+            <span class="residente-view__quick-link-label">Ver historial de incidencias</span>
+            <span class="residente-view__quick-link-arrow" aria-hidden="true">→</span>
+          </RouterLink>
         </div>
       </section>
 
@@ -370,6 +388,29 @@ function formatFecha(iso: string): string {
 
 .residente-view__card-value {
   @apply text-sm text-gray-800 leading-relaxed whitespace-pre-wrap;
+}
+
+/* ── Quick Links ────────────────────────────────────────────────────────── */
+.residente-view__quick-links {
+  @apply flex flex-col gap-2;
+}
+
+.residente-view__quick-link {
+  @apply inline-flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-100
+    shadow-sm text-sm font-medium text-indigo-700 hover:bg-indigo-50 hover:border-indigo-200
+    transition-colors no-underline w-full sm:w-auto;
+}
+
+.residente-view__quick-link-icon {
+  @apply text-base flex-shrink-0;
+}
+
+.residente-view__quick-link-label {
+  @apply flex-1;
+}
+
+.residente-view__quick-link-arrow {
+  @apply text-indigo-400 text-base flex-shrink-0;
 }
 
 /* ── Footer ─────────────────────────────────────────────────────────────── */
