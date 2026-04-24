@@ -38,9 +38,7 @@ function goBack(): void {
       <p class="incidencias-residente-view__subtitle">
         Residente ID: <code class="incidencias-residente-view__code">{{ residenteId }}</code>
       </p>
-      <p class="incidencias-residente-view__note">
-        Funcionalidad en desarrollo — US-07
-      </p>
+      <p class="incidencias-residente-view__note">Funcionalidad en desarrollo — US-07</p>
     </div>
   </div>
 </template>

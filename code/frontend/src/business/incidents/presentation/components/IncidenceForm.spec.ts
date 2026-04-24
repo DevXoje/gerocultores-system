@@ -233,7 +233,9 @@ describe('IncidenceForm', () => {
       await flushPromises()
 
       expect(wrapper.find('#incidence-descripcion-err').exists()).toBe(true)
-      expect(wrapper.find('#incidence-descripcion-err').text()).toBe('La descripción es obligatoria')
+      expect(wrapper.find('#incidence-descripcion-err').text()).toBe(
+        'La descripción es obligatoria'
+      )
     })
 
     it('shows global submitError when set', async () => {

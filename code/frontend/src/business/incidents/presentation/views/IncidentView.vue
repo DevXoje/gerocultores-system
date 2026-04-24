@@ -90,12 +90,7 @@ function onCancelled(): void {
     </header>
 
     <!-- Loading residents -->
-    <div
-      v-if="loadingResidents"
-      class="incident-view__loading"
-      aria-live="polite"
-      aria-busy="true"
-    >
+    <div v-if="loadingResidents" class="incident-view__loading" aria-live="polite" aria-busy="true">
       <span class="incident-view__spinner" aria-hidden="true" />
       <span>Cargando residentes…</span>
     </div>

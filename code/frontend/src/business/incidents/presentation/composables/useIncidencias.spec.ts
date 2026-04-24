@@ -28,9 +28,7 @@ import { useIncidencias } from './useIncidencias'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
-function makeIncidenciaResponse(
-  overrides: Partial<IncidenciaResponse> = {},
-): IncidenciaResponse {
+function makeIncidenciaResponse(overrides: Partial<IncidenciaResponse> = {}): IncidenciaResponse {
   return {
     id: 'inc-1',
     tipo: 'caida',
@@ -47,7 +45,7 @@ function makeIncidenciaResponse(
 /** Fill a form with valid data */
 function fillValidForm(
   form: ReturnType<typeof useIncidencias>['form'],
-  overrides: Partial<typeof form> = {},
+  overrides: Partial<typeof form> = {}
 ): void {
   form.tipo = 'caida'
   form.severidad = 'moderada'

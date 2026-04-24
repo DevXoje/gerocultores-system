@@ -23,13 +23,8 @@ export interface ApiResponse<T> {
  * Submits a new incident report and returns the created Incidencia.
  * Response is validated with Zod at runtime.
  */
-export async function createIncidencia(
-  dto: CreateIncidenciaDTO,
-): Promise<IncidenciaResponse> {
-  const response = await apiClient.post<ApiResponse<IncidenciaResponse>>(
-    '/incidencias',
-    dto,
-  )
+export async function createIncidencia(dto: CreateIncidenciaDTO): Promise<IncidenciaResponse> {
+  const response = await apiClient.post<ApiResponse<IncidenciaResponse>>('/incidencias', dto)
   // Runtime validation — guards against schema drift between frontend and API
   return IncidenciaResponseSchema.parse(response.data.data)
 }

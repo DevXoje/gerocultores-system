@@ -17,7 +17,11 @@
  */
 import { computed, onMounted, watch } from 'vue'
 import { useIncidencias } from '../composables/useIncidencias'
-import type { IncidenciaResponse, IncidenciaTipo, IncidenciaSeveridad } from '../../domain/entities/incidencia.types'
+import type {
+  IncidenciaResponse,
+  IncidenciaTipo,
+  IncidenciaSeveridad,
+} from '../../domain/entities/incidencia.types'
 
 // ── Prop / Emit types ─────────────────────────────────────────────────────────
 
@@ -57,7 +61,7 @@ watch(
   () => props.preselectedResidenteId,
   (val) => {
     if (val) form.residenteId = val
-  },
+  }
 )
 
 // ── Options ───────────────────────────────────────────────────────────────────
@@ -84,7 +88,7 @@ const formIsValid = computed(
     form.tipo !== '' &&
     form.severidad !== '' &&
     form.residenteId !== '' &&
-    form.descripcion.trim().length > 0,
+    form.descripcion.trim().length > 0
 )
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
@@ -103,7 +107,12 @@ function handleCancel(): void {
 </script>
 
 <template>
-  <div class="incidence-form" role="dialog" aria-modal="true" aria-labelledby="incidence-form-title">
+  <div
+    class="incidence-form"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="incidence-form-title"
+  >
     <!-- Header -->
     <header class="incidence-form__header">
       <p class="incidence-form__section-label">DOCUMENTACIÓN CLÍNICA</p>
@@ -196,11 +205,7 @@ function handleCancel(): void {
             </button>
           </template>
         </div>
-        <p
-          v-if="fieldErrors.severidad"
-          class="incidence-form__field-error"
-          role="alert"
-        >
+        <p v-if="fieldErrors.severidad" class="incidence-form__field-error" role="alert">
           {{ fieldErrors.severidad }}
         </p>
       </div>
@@ -241,8 +246,8 @@ function handleCancel(): void {
       <div class="incidence-form__compliance" aria-live="polite">
         <span class="incidence-form__compliance-icon" aria-hidden="true">🔒</span>
         <p class="incidence-form__compliance-text">
-          Este informe será registrado automáticamente en el historial médico del residente.
-          En caso de gravedad crítica, se notificará al administrador.
+          Este informe será registrado automáticamente en el historial médico del residente. En caso
+          de gravedad crítica, se notificará al administrador.
         </p>
       </div>
 
@@ -350,7 +355,9 @@ function handleCancel(): void {
   font-size: 0.875rem;
   color: #111827;
   background-color: #f9fafb;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
   outline: none;
 }
 
@@ -385,7 +392,9 @@ function handleCancel(): void {
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s, border-color 0.15s;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
   background-color: #f3f4f6;
   color: #374151;
 }
@@ -491,7 +500,9 @@ function handleCancel(): void {
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s, opacity 0.15s;
+  transition:
+    background-color 0.15s,
+    opacity 0.15s;
   min-height: 44px;
 }
 
