@@ -13,32 +13,53 @@
 
 import { ref, readonly } from 'vue'
 import { tareasApi } from '@/services/tareas.api'
+import { isServerHealthy } from '@/services/apiClient'
 import type { TareaResponse, TareaEstado } from '@/business/agenda/domain/entities/tarea.types'
 
 export function useAgendaHoy() {
   const tareas = ref<TareaResponse[]>([])
   const isLoading = ref(false)
+  const isServerReachable = ref(true)
   const error = ref<string | null>(null)
 
   /**
    * Load tasks for a given date (defaults to today YYYY-MM-DD).
+   * First validates server health — if unreachable, shows a friendly message
+   * instead of a raw 502/connection error.
    */
   async function cargarTareas(fecha?: string): Promise<void> {
     isLoading.value = true
     error.value = null
 
+    // Health check before attempting the real API call (US-13)
+    const healthy = await isServerHealthy()
+    if (!healthy) {
+      isServerReachable.value = false
+      error.value = 'Servidor no disponible. Inténtalo más tarde.'
+      isLoading.value = false
+      return
+    }
+    isServerReachable.value = true
+
     const fechaTarget =
       fecha ?? new Date().toISOString().slice(0, 10) // YYYY-MM-DD
 
     try {
-      const response = await tareasApi.getTareas({ date: fechaTarget })
-      // Map TareaDTO → TareaResponse (same fields, domain type is the canonical shape)
-      tareas.value = response.data as TareaResponse[]
+      const tareasData = await tareasApi.getTareas({ date: fechaTarget })
+      tareas.value = tareasData as TareaResponse[]
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Error al cargar las tareas'
     } finally {
       isLoading.value = false
     }
+  }
+
+  /**
+   * Retries: re-checks server health then loads tasks.
+   * Useful for the "Reintentar" button in the error UI.
+   */
+  async function retry(): Promise<void> {
+    await cargarTareas()
   }
 
   /**
@@ -62,9 +83,8 @@ export function useAgendaHoy() {
     tareas.value[index] = { ...tareas.value[index], estado: nuevoEstado }
 
     try {
-      const response = await tareasApi.updateTareaStatus(id, { estado: nuevoEstado })
-      // Sync with server response to ensure timestamps (CA-4) are accurate
-      tareas.value[index] = response.data as TareaResponse
+      const updatedTarea = await tareasApi.updateTareaStatus(id, { estado: nuevoEstado })
+      tareas.value[index] = updatedTarea as TareaResponse
       return { success: true }
     } catch (err) {
       // Rollback to previous state on error
@@ -86,11 +106,13 @@ export function useAgendaHoy() {
     return actualizarEstado(id, nuevoEstado)
   }
 
-  return {
+return {
     tareas: readonly(tareas),
     isLoading: readonly(isLoading),
+    isServerReachable: readonly(isServerReachable),
     error: readonly(error),
     cargarTareas,
+    retry,
     actualizarEstado,
     toggleComplete,
   }
