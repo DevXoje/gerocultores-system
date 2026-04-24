@@ -4,6 +4,7 @@ import { getAuth, getIdToken } from 'firebase/auth'
 // US-03: Consulta de agenda diaria
 // US-04: Actualizar estado de una tarea
 // US-10: Gestión de cuentas de usuarios
+// US-13: Health check
 
 /**
  * Centralized Axios instance used by all API modules.
@@ -27,3 +28,17 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
   }
   return config
 })
+
+/**
+ * Lightweight health-check function for connectivity validation.
+ * Returns true if the server responds with 2xx, false otherwise.
+ * Does NOT throw — returns boolean to allow clean branching in callers.
+ */
+export async function isServerHealthy(): Promise<boolean> {
+  try {
+    const response = await axios.get('/api/health', { timeout: 3000 })
+    return response.status >= 200 && response.status < 300
+  } catch {
+    return false
+  }
+}
