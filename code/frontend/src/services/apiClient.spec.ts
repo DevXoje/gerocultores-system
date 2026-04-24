@@ -32,9 +32,7 @@ import { apiClient } from './apiClient'
  * (post-interceptors) and resolves immediately with a 200 response.
  * Returns the captured config.
  */
-function withMockAdapter(
-  run: () => Promise<unknown>,
-): Promise<InternalAxiosRequestConfig> {
+function withMockAdapter(run: () => Promise<unknown>): Promise<InternalAxiosRequestConfig> {
   return new Promise((resolve, reject) => {
     const originalAdapter = apiClient.defaults.adapter
 

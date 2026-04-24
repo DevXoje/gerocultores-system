@@ -109,7 +109,7 @@ describe('useResidente', () => {
       mockGetResidente.mockReturnValueOnce(
         new Promise<ResidenteDTO>((res) => {
           resolveSecond = res
-        }),
+        })
       )
 
       const { residente, fetchResidente } = useResidente()

@@ -122,9 +122,7 @@ function formatFecha(iso: string): string {
         </div>
 
         <div class="residente-view__identity">
-          <h1 class="residente-view__name">
-            {{ residente.nombre }} {{ residente.apellidos }}
-          </h1>
+          <h1 class="residente-view__name">{{ residente.nombre }} {{ residente.apellidos }}</h1>
           <div class="residente-view__meta">
             <span class="residente-view__meta-item">
               <span class="residente-view__meta-icon" aria-hidden="true">🏠</span>
@@ -132,8 +130,9 @@ function formatFecha(iso: string): string {
             </span>
             <span class="residente-view__meta-item">
               <span class="residente-view__meta-icon" aria-hidden="true">🎂</span>
-              {{ calcularEdad(residente.fechaNacimiento) }} años
-              ({{ formatFecha(residente.fechaNacimiento) }})
+              {{ calcularEdad(residente.fechaNacimiento) }} años ({{
+                formatFecha(residente.fechaNacimiento)
+              }})
             </span>
           </div>
           <span
@@ -219,9 +218,7 @@ function formatFecha(iso: string): string {
     </div>
 
     <!-- Empty state (should not happen normally) -->
-    <div v-else class="residente-view__empty">
-      No se encontró información para este residente.
-    </div>
+    <div v-else class="residente-view__empty">No se encontró información para este residente.</div>
   </div>
 </template>
 

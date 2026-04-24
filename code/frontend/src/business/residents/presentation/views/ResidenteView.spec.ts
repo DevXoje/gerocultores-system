@@ -72,7 +72,11 @@ function makeRouter(id = 'res-1') {
     routes: [
       { path: '/residentes/:id', name: 'residente', component: ResidenteView },
       // Stub route referenced by RouterLink inside ResidenteView
-      { path: '/residentes/:id/incidencias', name: 'residente-incidencias', component: { template: '<div />' } },
+      {
+        path: '/residentes/:id/incidencias',
+        name: 'residente-incidencias',
+        component: { template: '<div />' },
+      },
     ],
   })
   // Navigate to the route before mounting so params are available

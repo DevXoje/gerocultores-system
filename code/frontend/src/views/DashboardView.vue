@@ -33,7 +33,8 @@ function signOut() {
 }
 
 // ─── Agenda ────────────────────────────────────────────────────────────────
-const { tareas, isLoading, isServerReachable, error, cargarTareas, retry, actualizarEstado } = useAgendaHoy()
+const { tareas, isLoading, isServerReachable, error, cargarTareas, retry, actualizarEstado } =
+  useAgendaHoy()
 
 const toastMsg = ref<string | null>(null)
 let toastTimer: ReturnType<typeof setTimeout> | null = null
@@ -52,7 +53,7 @@ function showToast(msg: string): void {
  */
 function makeActualizarEstado(
   id: string,
-  estado: EstadoTarea,
+  estado: EstadoTarea
 ): Promise<{ success: boolean; errorMsg?: string }> {
   return actualizarEstado(id, estado)
 }
@@ -131,9 +132,7 @@ onMounted(() => {
           <p v-if="!isServerReachable" class="dashboard-page__error-hint">
             El servidor no responde. Comprueba tu conexión o intenta más tarde.
           </p>
-          <button class="dashboard-page__retry" type="button" @click="retry">
-            Reintentar
-          </button>
+          <button class="dashboard-page__retry" type="button" @click="retry">Reintentar</button>
         </div>
 
         <!-- Empty state -->
