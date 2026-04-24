@@ -12,8 +12,9 @@
 import { AUTH_ROUTES } from '@/business/auth/route-names'
 import { DASHBOARD_ROUTES } from '@/views/route-names'
 import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
+import { INCIDENTS_ROUTES } from '@/business/incidents/route-names'
 
-export { AUTH_ROUTES, DASHBOARD_ROUTES, RESIDENTS_ROUTES }
+export { AUTH_ROUTES, DASHBOARD_ROUTES, RESIDENTS_ROUTES, INCIDENTS_ROUTES }
 
 // Assembled shape for cross-module navigation — use sparingly.
 // Prefer importing the specific module's route-names directly.
@@ -25,4 +26,5 @@ export const ROUTES = {
   AUTH: AUTH_ROUTES,
   DASHBOARD: DASHBOARD_ROUTES,
   RESIDENTS: RESIDENTS_ROUTES,
+  INCIDENTS: INCIDENTS_ROUTES,
 } as const

@@ -14,10 +14,15 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../business/auth/useAuthStore'
 import { useAgendaHoy } from '../business/agenda/application/useAgendaHoy'
 import TaskCard from '../business/agenda/presentation/components/TaskCard.vue'
 import type { EstadoTarea } from '@/services/tareas.api'
+import { INCIDENTS_ROUTES } from '../business/incidents/route-names'
+
+// ─── Router ─────────────────────────────────────────────────────────────────
+const router = useRouter()
 
 // ─── Auth ───────────────────────────────────────────────────────────────────
 const auth = useAuthStore()
@@ -59,6 +64,14 @@ function onTaskError(msg: string): void {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function onEstadoActualizado(_id: string, _estado: EstadoTarea): void {
   // Future: e.g. analytics, audit log hook (US-04 extension point)
+}
+
+// ─── Incidents ───────────────────────────────────────────────────────────────
+function onReportIncident(tareaId: string): void {
+  router.push({
+    name: INCIDENTS_ROUTES.NUEVA_INCIDENCIA.name,
+    query: { tareaId },
+  })
 }
 
 // Today label
@@ -136,6 +149,7 @@ onMounted(() => {
               :actualizar-estado="makeActualizarEstado"
               @error="onTaskError"
               @estado-actualizado="onEstadoActualizado"
+              @report-incident="onReportIncident"
             />
           </li>
         </ul>

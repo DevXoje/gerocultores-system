@@ -29,6 +29,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'error', msg: string): void
   (e: 'estado-actualizado', id: string, estado: EstadoTarea): void
+  (e: 'report-incident', id: string): void
 }>()
 
 // ─── Composable ─────────────────────────────────────────────────────────────
@@ -91,6 +92,10 @@ const tipoIconos: Record<string, string> = {
 const tipoIcono = computed(() => tipoIconos[props.tarea.tipo] ?? 'task_alt')
 
 async function onCambiarEstado(estado: EstadoTarea): Promise<void> {
+  if (estado === 'con_incidencia') {
+    emit('report-incident', props.tarea.id)
+    return
+  }
   await cambiarEstado(estado)
   emit('estado-actualizado', props.tarea.id, estado)
 }

@@ -24,3 +24,13 @@ export async function getResidente(id: string): Promise<ResidenteDTO> {
   const response = await apiClient.get<ApiResponse<ResidenteDTO>>(`/residentes/${id}`)
   return response.data.data
 }
+
+/**
+ * Fetches all active residents.
+ * Used to populate the resident selector in IncidenceForm.
+ * US-06: Registro de incidencia
+ */
+export async function getResidentes(): Promise<ResidenteDTO[]> {
+  const response = await apiClient.get<ApiResponse<ResidenteDTO[]>>('/residentes')
+  return response.data.data
+}
