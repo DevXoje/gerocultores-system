@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import { AUTH_ROUTES } from '@/business/auth/route-names'
 import { DASHBOARD_ROUTES } from '@/views/route-names'
 import { authRoutes } from '@/business/auth/routes'
+import { residentsRoutes } from '@/business/residents/routes'
 import DashboardView from '@/views/DashboardView.vue'
 
 /**
@@ -20,6 +21,7 @@ export const routes: RouteRecordRaw[] = [
     redirect: { name: AUTH_ROUTES.LOGIN.name },
   },
   ...authRoutes,
+  ...residentsRoutes,
   {
     path: DASHBOARD_ROUTES.path,
     name: DASHBOARD_ROUTES.name,
