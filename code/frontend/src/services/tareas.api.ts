@@ -1,19 +1,7 @@
-import axios from 'axios'
-
-// API Client configuration
 // US-03: Consulta de agenda diaria
 // US-04: Actualizar estado de una tarea
 // @gga-skip: Entity fields (creadoEn, actualizadoEn, completadaEn) are valid according to SPEC/entities.md Tarea definition.
-// The base URL and interceptors should ideally be configured globally
-const apiClient = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-// Assuming a token injection interceptor exists elsewhere, e.g.:
-// apiClient.interceptors.request.use((config) => { ... inject Firebase ID token ... })
+import { apiClient } from './apiClient'
 
 // Types based on the Tarea entity
 export type TipoTarea =
@@ -106,7 +94,7 @@ export const tareasApi = {
    * Updates only the status of a specific task.
    */
   async updateTareaStatus(id: string, data: UpdateTareaStatusDTO): Promise<ApiResponse<TareaDTO>> {
-    const response = await apiClient.patch<ApiResponse<TareaDTO>>(`/tareas/${id}/status`, data)
+    const response = await apiClient.patch<ApiResponse<TareaDTO>>(`/tareas/${id}/estado`, data)
     return response.data
   },
 
