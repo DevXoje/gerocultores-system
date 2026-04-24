@@ -2,6 +2,16 @@ import type { Request, Response, NextFunction } from 'express'
 import { TareasService, NotFoundError, ForbiddenError } from '../services/tareas.service'
 import { UpdateEstadoSchema, ListTareasQuerySchema } from '../types/tarea.types'
 import type { UserRole } from '../types/user.types'
+import { UserRoleEnum } from '../types/user.types'
+
+function getAuthUser(req: Request): { uid: string; role: UserRole } {
+  const rawRole = req.user?.['role']
+  const role = UserRoleEnum.safeParse(rawRole)
+  if (!role.success || !req.user?.uid) {
+    throw new Error('Autorización inválida')
+  }
+  return { uid: req.user.uid, role: role.data }
+}
 
 export class TareasController {
   private service = new TareasService()
@@ -19,8 +29,7 @@ export class TareasController {
       }
 
       const filters = parsed.data
-      const userRole = req.user?.['role'] as UserRole
-      const userUid = req.user?.uid as string
+      const { uid: userUid, role: userRole } = getAuthUser(req)
 
       // gerocultor can only see their own tasks
       if (userRole === 'gerocultor') {
@@ -36,11 +45,15 @@ export class TareasController {
 
   getTarea = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = req.params['id'] as string
+      const rawId = req.params['id']
+      if (!rawId || Array.isArray(rawId)) {
+        res.status(400).json({ error: 'ID requerido', code: 'VALIDATION_ERROR' })
+        return
+      }
+      const id = rawId
       const tarea = await this.service.getTareaById(id)
 
-      const userRole = req.user?.['role'] as UserRole
-      const userUid = req.user?.uid as string
+      const { uid: userUid, role: userRole } = getAuthUser(req)
 
       if (userRole === 'gerocultor' && tarea.usuarioId !== userUid) {
         res.status(403).json({ error: 'Acceso no autorizado', code: 'FORBIDDEN' })
@@ -59,7 +72,12 @@ export class TareasController {
 
   patchEstado = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = req.params['id'] as string
+      const rawId = req.params['id']
+      if (!rawId || Array.isArray(rawId)) {
+        res.status(400).json({ error: 'ID requerido', code: 'VALIDATION_ERROR' })
+        return
+      }
+      const id = rawId
       const parsed = UpdateEstadoSchema.safeParse(req.body)
       if (!parsed.success) {
         res.status(400).json({
@@ -70,8 +88,7 @@ export class TareasController {
         return
       }
 
-      const userRole = req.user?.['role'] as UserRole
-      const userUid = req.user?.uid as string
+      const { uid: userUid, role: userRole } = getAuthUser(req)
 
       const updated = await this.service.updateEstado(id, parsed.data.estado, userUid, userRole)
       res.json({ data: updated })
