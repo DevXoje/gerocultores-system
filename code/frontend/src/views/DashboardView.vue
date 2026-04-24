@@ -16,7 +16,8 @@
 import { onMounted, ref } from 'vue'
 import { useAuthStore } from '../business/auth/useAuthStore'
 import { useAgendaHoy } from '../business/agenda/application/useAgendaHoy'
-import { TaskCard } from '../components/TaskCard'
+import TaskCard from '../business/agenda/presentation/components/TaskCard.vue'
+import type { EstadoTarea } from '@/services/tareas.api'
 
 // ─── Auth ───────────────────────────────────────────────────────────────────
 const auth = useAuthStore()
@@ -27,7 +28,7 @@ function signOut() {
 }
 
 // ─── Agenda ────────────────────────────────────────────────────────────────
-const { tareas, isLoading, error, cargarTareas, toggleComplete } = useAgendaHoy()
+const { tareas, isLoading, error, cargarTareas, actualizarEstado } = useAgendaHoy()
 
 const toastMsg = ref<string | null>(null)
 let toastTimer: ReturnType<typeof setTimeout> | null = null
@@ -40,15 +41,24 @@ function showToast(msg: string): void {
   }, 4000)
 }
 
-async function onToggleComplete(id: string): Promise<void> {
-  const result = await toggleComplete(id)
-  if (!result.success && result.errorMsg) {
-    showToast(result.errorMsg)
-  }
+/**
+ * Adapter: bridges useAgendaHoy's TareaEstado to the new TaskCard's
+ * actualizarEstado prop signature (EstadoTarea — structurally identical).
+ */
+function makeActualizarEstado(
+  id: string,
+  estado: EstadoTarea,
+): Promise<{ success: boolean; errorMsg?: string }> {
+  return actualizarEstado(id, estado)
 }
 
-function onOpenDetail(/* id: string */): void {
-  // Future: navigate to task detail route (US-04 full detail view)
+function onTaskError(msg: string): void {
+  showToast(msg)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function onEstadoActualizado(_id: string, _estado: EstadoTarea): void {
+  // Future: e.g. analytics, audit log hook (US-04 extension point)
 }
 
 // Today label
@@ -123,8 +133,9 @@ onMounted(() => {
           <li v-for="tarea in tareas" :key="tarea.id" class="dashboard-page__task-item">
             <TaskCard
               :tarea="tarea"
-              @toggle-complete="onToggleComplete"
-              @open-detail="onOpenDetail"
+              :actualizar-estado="makeActualizarEstado"
+              @error="onTaskError"
+              @estado-actualizado="onEstadoActualizado"
             />
           </li>
         </ul>
