@@ -22,7 +22,7 @@ const props = defineProps<{
   tarea: TareaDTO
   actualizarEstado: (
     id: string,
-    estado: EstadoTarea,
+    estado: EstadoTarea
   ) => Promise<{ success: boolean; errorMsg?: string }>
 }>()
 
@@ -66,19 +66,27 @@ const estadoInfo = computed<EstadoInfo>(() => {
     completada: { label: 'Completada', modifier: 'completada', icon: 'check_circle' },
     con_incidencia: { label: 'Con incidencia', modifier: 'con-incidencia', icon: 'warning' },
   }
-  return map[props.tarea.estado] ?? { label: props.tarea.estado, modifier: 'pendiente', icon: 'schedule' }
+  return (
+    map[props.tarea.estado] ?? {
+      label: props.tarea.estado,
+      modifier: 'pendiente',
+      icon: 'schedule',
+    }
+  )
 })
 
 /** Next status transitions available from current status (CA-1) */
-const accionesDisponibles = computed<Array<{ estado: EstadoTarea; label: string; icon: string }>>(() => {
-  const all: Array<{ estado: EstadoTarea; label: string; icon: string }> = [
-    { estado: 'en_curso', label: 'Marcar en curso', icon: 'autorenew' },
-    { estado: 'completada', label: 'Completar', icon: 'check_circle' },
-    { estado: 'con_incidencia', label: 'Con incidencia', icon: 'warning' },
-    { estado: 'pendiente', label: 'Volver a pendiente', icon: 'undo' },
-  ]
-  return all.filter((a) => a.estado !== props.tarea.estado)
-})
+const accionesDisponibles = computed<Array<{ estado: EstadoTarea; label: string; icon: string }>>(
+  () => {
+    const all: Array<{ estado: EstadoTarea; label: string; icon: string }> = [
+      { estado: 'en_curso', label: 'Marcar en curso', icon: 'autorenew' },
+      { estado: 'completada', label: 'Completar', icon: 'check_circle' },
+      { estado: 'con_incidencia', label: 'Con incidencia', icon: 'warning' },
+      { estado: 'pendiente', label: 'Volver a pendiente', icon: 'undo' },
+    ]
+    return all.filter((a) => a.estado !== props.tarea.estado)
+  }
+)
 
 const tipoIconos: Record<string, string> = {
   higiene: 'soap',

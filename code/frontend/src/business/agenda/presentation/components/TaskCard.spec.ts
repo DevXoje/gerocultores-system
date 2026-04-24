@@ -43,7 +43,10 @@ function makeActualizarEstado(result: { success: boolean; errorMsg?: string } = 
   return vi.fn().mockResolvedValue(result)
 }
 
-function mountCard(tareaOverrides: Partial<TareaDTO> = {}, actualizarEstado = makeActualizarEstado()) {
+function mountCard(
+  tareaOverrides: Partial<TareaDTO> = {},
+  actualizarEstado = makeActualizarEstado()
+) {
   return mount(TaskCard, {
     props: {
       tarea: makeTarea(tareaOverrides),
@@ -193,7 +196,10 @@ describe('TaskCard — isUpdating state', () => {
   it('shows spinner while update is in progress', async () => {
     let resolveUpdate!: (v: { success: boolean }) => void
     const pendingFn = vi.fn(
-      () => new Promise<{ success: boolean }>((res) => { resolveUpdate = res }),
+      () =>
+        new Promise<{ success: boolean }>((res) => {
+          resolveUpdate = res
+        })
     )
 
     const wrapper = mountCard({ estado: 'pendiente' }, pendingFn)

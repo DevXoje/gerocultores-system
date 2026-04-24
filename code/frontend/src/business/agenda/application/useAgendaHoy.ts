@@ -41,8 +41,7 @@ export function useAgendaHoy() {
     }
     isServerReachable.value = true
 
-    const fechaTarget =
-      fecha ?? new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+    const fechaTarget = fecha ?? new Date().toISOString().slice(0, 10) // YYYY-MM-DD
 
     try {
       const tareasData = await tareasApi.getTareas({ date: fechaTarget })
@@ -70,7 +69,7 @@ export function useAgendaHoy() {
    */
   async function actualizarEstado(
     id: string,
-    nuevoEstado: TareaEstado,
+    nuevoEstado: TareaEstado
   ): Promise<{ success: boolean; errorMsg?: string }> {
     const index = tareas.value.findIndex((t) => t.id === id)
     if (index === -1) {
@@ -106,7 +105,7 @@ export function useAgendaHoy() {
     return actualizarEstado(id, nuevoEstado)
   }
 
-return {
+  return {
     tareas: readonly(tareas),
     isLoading: readonly(isLoading),
     isServerReachable: readonly(isServerReachable),

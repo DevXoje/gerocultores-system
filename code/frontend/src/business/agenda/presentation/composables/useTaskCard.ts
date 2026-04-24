@@ -14,7 +14,7 @@ export interface UseTaskCardOptions {
   tareaId: string
   actualizarEstado: (
     id: string,
-    estado: EstadoTarea,
+    estado: EstadoTarea
   ) => Promise<{ success: boolean; errorMsg?: string }>
   onError?: (msg: string) => void
 }

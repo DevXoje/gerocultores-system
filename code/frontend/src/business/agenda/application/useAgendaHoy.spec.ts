@@ -132,7 +132,7 @@ describe('useAgendaHoy', () => {
       mockUpdateTareaStatus.mockReturnValue(
         new Promise<TareaResponse>((res) => {
           resolveUpdate = res
-        }),
+        })
       )
 
       const { tareas, cargarTareas, actualizarEstado } = useAgendaHoy()
@@ -203,7 +203,8 @@ describe('useAgendaHoy', () => {
       const tarea = makeTarea({ id: 'tarea-1', estado: 'pendiente' })
       mockGetTareas.mockResolvedValue([tarea])
       mockUpdateTareaStatus.mockResolvedValue({
-        ...tarea, estado: 'completada' as const,
+        ...tarea,
+        estado: 'completada' as const,
       })
 
       const { cargarTareas, toggleComplete } = useAgendaHoy()
@@ -218,7 +219,8 @@ describe('useAgendaHoy', () => {
       const tarea = makeTarea({ id: 'tarea-1', estado: 'en_curso' })
       mockGetTareas.mockResolvedValue([tarea])
       mockUpdateTareaStatus.mockResolvedValue({
-        ...tarea, estado: 'completada' as const,
+        ...tarea,
+        estado: 'completada' as const,
       })
 
       const { cargarTareas, toggleComplete } = useAgendaHoy()
@@ -232,7 +234,8 @@ describe('useAgendaHoy', () => {
       const tarea = makeTarea({ id: 'tarea-1', estado: 'completada' })
       mockGetTareas.mockResolvedValue([tarea])
       mockUpdateTareaStatus.mockResolvedValue({
-        ...tarea, estado: 'pendiente' as const,
+        ...tarea,
+        estado: 'pendiente' as const,
       })
 
       const { cargarTareas, toggleComplete } = useAgendaHoy()
