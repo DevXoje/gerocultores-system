@@ -46,7 +46,7 @@ export function useAgendaHoy() {
 
     try {
       const tareasData = await tareasApi.getTareas({ date: fechaTarget })
-      tareas.value = tareasData as TareaResponse[]
+      tareas.value = tareasData
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Error al cargar las tareas'
     } finally {
@@ -84,7 +84,7 @@ export function useAgendaHoy() {
 
     try {
       const updatedTarea = await tareasApi.updateTareaStatus(id, { estado: nuevoEstado })
-      tareas.value[index] = updatedTarea as TareaResponse
+      tareas.value[index] = updatedTarea
       return { success: true }
     } catch (err) {
       // Rollback to previous state on error

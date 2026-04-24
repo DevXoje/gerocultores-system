@@ -73,7 +73,7 @@ export const tareasApi = {
     const response = await apiClient.get<ApiResponse<TareaDTO[]>>('/tareas', { params })
     // apiClient.get returns Axios response; response.data is ApiResponse wrapper
     // Unwrap to get the actual array for caller convenience
-    return (response.data as ApiResponse<TareaDTO[]>).data
+    return response.data.data
   },
 
   /**
@@ -97,7 +97,7 @@ export const tareasApi = {
    */
   async updateTareaStatus(id: string, data: UpdateTareaStatusDTO): Promise<TareaDTO> {
     const response = await apiClient.patch<ApiResponse<TareaDTO>>(`/tareas/${id}/estado`, data)
-    return (response.data as ApiResponse<TareaDTO>).data
+    return response.data.data
   },
 
   /**
