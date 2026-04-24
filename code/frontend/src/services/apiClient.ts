@@ -36,7 +36,9 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
  */
 export async function isServerHealthy(): Promise<boolean> {
   try {
-    const response = await axios.get('/api/health', { timeout: 3000 })
+    // Backend health endpoint is at /health (mounted at root level, not under /api).
+    // The proxy forwards /health → localhost:3000/health correctly.
+    const response = await axios.get('/health', { timeout: 3000 })
     return response.status >= 200 && response.status < 300
   } catch {
     return false

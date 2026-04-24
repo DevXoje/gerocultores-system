@@ -19,6 +19,21 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        // Note: backend mounts routes at root level (see code/api/src/routes/index.ts).
+        // /api/* routes are mounted by the Express router — no rewrite needed.
+      },
+      '/health': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path, // keep /health as-is
+      },
+    },
+  },
   // Vitest configuration
   // environment: 'jsdom' — required for Vue component tests (window, document, etc.)
   // Unit tests (stores, use cases) also run fine in jsdom.
