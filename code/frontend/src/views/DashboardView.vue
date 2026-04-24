@@ -9,15 +9,14 @@
  * Export: OUTPUTS/design-exports/US-03-agenda-home__caregiver-dashboard__20260328.png
  *
  * Architecture (frontend-specialist.md §3):
- *   - Views/pages import ONLY from composables — not stores or repos directly.
+ *   - Views import ONLY from composables — not stores or repos directly.
  *   - Async logic lives in useAgendaHoy (application/).
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
 import { onMounted, ref } from 'vue'
 import { useAuthStore } from '../business/auth/useAuthStore'
 import { useAgendaHoy } from '../business/agenda/application/useAgendaHoy'
-import TaskCard from '../business/agenda/presentation/components/TaskCard.vue'
-import type { EstadoTarea } from '@/services/tareas.api'
+import { TaskCard } from '../components/TaskCard'
 
 // ─── Auth ───────────────────────────────────────────────────────────────────
 const auth = useAuthStore()
@@ -28,7 +27,7 @@ function signOut() {
 }
 
 // ─── Agenda ────────────────────────────────────────────────────────────────
-const { tareas, isLoading, error, cargarTareas, actualizarEstado } = useAgendaHoy()
+const { tareas, isLoading, error, cargarTareas, toggleComplete } = useAgendaHoy()
 
 const toastMsg = ref<string | null>(null)
 let toastTimer: ReturnType<typeof setTimeout> | null = null
@@ -41,14 +40,15 @@ function showToast(msg: string): void {
   }, 4000)
 }
 
-function onError(msg: string): void {
-  showToast(msg)
+async function onToggleComplete(id: string): Promise<void> {
+  const result = await toggleComplete(id)
+  if (!result.success && result.errorMsg) {
+    showToast(result.errorMsg)
+  }
 }
 
-function onEstadoActualizado(id: string, estado: EstadoTarea): void {
-  // Future: could update a counter or show a confirmation toast
-  void id
-  void estado
+function onOpenDetail(/* id: string */): void {
+  // Future: navigate to task detail route (US-04 full detail view)
 }
 
 // Today label
@@ -83,7 +83,7 @@ onMounted(() => {
 
     <!-- ─── Main content ────────────────────────────────────────────────── -->
     <main class="dashboard-page__content">
-      <!-- Page title -->
+      <!-- Page greeting -->
       <section class="dashboard-page__greeting">
         <h1 class="dashboard-page__title">Buenos días</h1>
         <p class="dashboard-page__fecha">{{ fechaHoy }}</p>
@@ -118,14 +118,13 @@ onMounted(() => {
           <p class="dashboard-page__empty-msg">No hay tareas programadas para hoy.</p>
         </div>
 
-        <!-- Task list (CA-2: list renders updated state immediately via optimistic update) -->
+        <!-- Task list — CA-2: updated state reflects immediately via optimistic update -->
         <ul v-else class="dashboard-page__task-list" aria-label="Lista de tareas">
           <li v-for="tarea in tareas" :key="tarea.id" class="dashboard-page__task-item">
             <TaskCard
               :tarea="tarea"
-              :actualizar-estado="actualizarEstado"
-              @error="onError"
-              @estado-actualizado="onEstadoActualizado"
+              @toggle-complete="onToggleComplete"
+              @open-detail="onOpenDetail"
             />
           </li>
         </ul>
