@@ -43,7 +43,7 @@ vi.mock('../middleware/verifyAuth', () => ({
     const roleHeader = (req as { headers: { 'x-test-role'?: string } }).headers['x-test-role']
     const uid = (req as { headers: { 'x-test-uid'?: string } }).headers['x-test-uid'] ?? 'test-admin-uid'
     const role = roleHeader ?? 'admin'
-    req.user = { uid, rol: role, role }
+    req.user = { uid, role }
     next()
   },
 }))

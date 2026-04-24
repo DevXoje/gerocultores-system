@@ -26,6 +26,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   toggleComplete: [id: string]
   openDetail: [id: string]
+  reportIncident: [id: string]
 }>()
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -162,6 +163,17 @@ function isCompleted(estado: TareaEstado): boolean {
             <span class="material-symbols-outlined" aria-hidden="true">
               {{ isCompleted(tarea.estado) ? 'undo' : 'check_circle' }}
             </span>
+          </button>
+
+          <!-- Report incident (con_incidencia CTA — US-06) -->
+          <button
+            class="task-card__action-btn task-card__action-btn--incident"
+            type="button"
+            aria-label="Registrar incidencia"
+            :data-testid="`task-card-incident-${tarea.id}`"
+            @click.stop="emit('reportIncident', tarea.id)"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">warning</span>
           </button>
 
           <!-- Open detail -->
@@ -330,6 +342,10 @@ function isCompleted(estado: TareaEstado): boolean {
 
 .task-card__action-btn--undo {
   color: var(--color-outline);
+}
+
+.task-card__action-btn--incident {
+  color: var(--color-error);
 }
 
 .task-card__action-btn--detail {

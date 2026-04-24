@@ -14,9 +14,9 @@ function makeReq(userRole?: string | undefined): Partial<Request> {
   if (userRole === undefined) {
     return {}
   }
-  return {
-    user: { rol: userRole } as unknown as Request['user'],
-  }
+    return {
+      user: { role: userRole } as unknown as Request['user'],
+    }
 }
 
 function makeRes(): { status: ReturnType<typeof vi.fn>; json: ReturnType<typeof vi.fn> } {
@@ -36,7 +36,7 @@ describe('requireRole middleware factory', () => {
 
   // ── Passing cases ──────────────────────────────────────────────────────────
 
-  it('calls next() when requireRole("admin") and user.rol === "admin"', () => {
+  it('calls next() when requireRole("admin") and user.role === "admin"', () => {
     const req = makeReq('admin')
     const { status } = makeRes()
 
@@ -46,7 +46,7 @@ describe('requireRole middleware factory', () => {
     expect(status).not.toHaveBeenCalled()
   })
 
-  it('calls next() when requireRole("gerocultor") and user.rol === "gerocultor"', () => {
+  it('calls next() when requireRole("gerocultor") and user.role === "gerocultor"', () => {
     const req = makeReq('gerocultor')
     const { status } = makeRes()
 
@@ -76,7 +76,7 @@ describe('requireRole middleware factory', () => {
 
   // ── Failing cases — 403 ────────────────────────────────────────────────────
 
-  it('returns 403 when requireRole("admin") and user.rol === "gerocultor"', () => {
+  it('returns 403 when requireRole("admin") and user.role === "gerocultor"', () => {
     const req = makeReq('gerocultor')
     const { status, json } = makeRes()
 
@@ -102,7 +102,7 @@ describe('requireRole middleware factory', () => {
     )
   })
 
-  it('returns 403 when requireRole("admin") and user.rol is an unknown value', () => {
+  it('returns 403 when requireRole("admin") and user.role is an unknown value', () => {
     const req = makeReq('superuser') // not a valid UserRole
     const { status, json } = makeRes()
 

@@ -7,22 +7,25 @@ import { z } from 'zod'
  * US-05: Consulta de ficha de residente
  */
 
+/** Zod schema for validating raw Firestore ResidenteDoc at runtime. */
+export const ResidenteDocSchema = z.object({
+  nombre: z.string(),
+  apellidos: z.string(),
+  fechaNacimiento: z.string(),
+  habitacion: z.string(),
+  foto: z.string().nullable(),
+  diagnosticos: z.string().nullable(),
+  alergias: z.string().nullable(),
+  medicacion: z.string().nullable(),
+  preferencias: z.string().nullable(),
+  archivado: z.boolean(),
+  gerocultoresAsignados: z.array(z.string()).optional(),
+  creadoEn: z.string(),
+  actualizadoEn: z.string(),
+})
+
 /** Shape of a Residente document in Firestore. Field names match SPEC/entities.md exactly (G04). */
-export interface ResidenteDoc {
-  nombre: string
-  apellidos: string
-  fechaNacimiento: string // ISO 8601 date string
-  habitacion: string
-  foto: string | null
-  diagnosticos: string | null
-  alergias: string | null
-  medicacion: string | null
-  preferencias: string | null
-  archivado: boolean
-  gerocultoresAsignados: string[] // array of Usuario UIDs
-  creadoEn: string
-  actualizadoEn: string
-}
+export interface ResidenteDoc extends z.infer<typeof ResidenteDocSchema> {}
 
 /** API response shape — includes the document id. */
 export interface ResidenteResponse extends Omit<ResidenteDoc, 'gerocultoresAsignados'> {

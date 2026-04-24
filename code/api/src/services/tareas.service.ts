@@ -1,6 +1,7 @@
 import { adminDb } from './firebase'
 import { COLLECTIONS } from './collections'
 import type { TareaDoc, TareaEstado, TareaResponse, ListTareasQuery } from '../types/tarea.types'
+import { TareaDocSchema } from '../types/tarea.types'
 import type { UserRole } from '../types/user.types'
 
 export class NotFoundError extends Error {
@@ -19,19 +20,29 @@ export class ForbiddenError extends Error {
   }
 }
 
+/**
+ * Converts a Firestore document to TareaResponse after validating the raw data.
+ * Uses Zod safeParse to ensure runtime type safety — no silent failures on bad data.
+ */
 function docToResponse(id: string, data: FirebaseFirestore.DocumentData): TareaResponse {
+  const parsed = TareaDocSchema.safeParse(data)
+  if (!parsed.success) {
+    console.error('[TareasService] Firestore doc failed schema validation:', parsed.error.flatten())
+    throw new Error('Datos de la tarea en formato inesperado')
+  }
+  const d = parsed.data
   return {
     id,
-    titulo: data['titulo'] as string,
-    tipo: data['tipo'],
-    fechaHora: data['fechaHora'] as string,
-    estado: data['estado'],
-    notas: (data['notas'] as string | null) ?? null,
-    residenteId: data['residenteId'] as string,
-    usuarioId: data['usuarioId'] as string,
-    creadoEn: data['creadoEn'] as string,
-    actualizadoEn: data['actualizadoEn'] as string,
-    completadaEn: (data['completadaEn'] as string | null) ?? null,
+    titulo: d.titulo,
+    tipo: d.tipo,
+    fechaHora: d.fechaHora,
+    estado: d.estado,
+    notas: d.notas,
+    residenteId: d.residenteId,
+    usuarioId: d.usuarioId,
+    creadoEn: d.creadoEn,
+    actualizadoEn: d.actualizadoEn,
+    completadaEn: d.completadaEn,
   }
 }
 

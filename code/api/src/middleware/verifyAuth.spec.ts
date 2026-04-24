@@ -61,7 +61,7 @@ describe('verifyAuth middleware', () => {
     const fakeDecoded = {
       uid: 'uid-test-01',
       email: 'test@example.com',
-      rol: 'gerocultor',
+      role: 'gerocultor',
     }
     mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
 
@@ -83,7 +83,7 @@ describe('requireRole factory (admin role)', () => {
     const fakeDecoded = {
       uid: 'uid-gerocultor-01',
       email: 'gerocultor@example.com',
-      rol: 'gerocultor',
+      role: 'gerocultor',
     }
     mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
 
@@ -98,7 +98,7 @@ describe('requireRole factory (admin role)', () => {
     const fakeDecoded = {
       uid: 'uid-admin-01',
       email: 'admin@example.com',
-      rol: 'admin',
+      role: 'admin',
     }
     mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
 
