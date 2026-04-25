@@ -6,6 +6,10 @@
   "scripts": {
     "lint": "npm --prefix code/frontend run lint && npm --prefix code/api run type-check",
     "test": "npm --prefix code/frontend run test && npm --prefix code/api run test",
+
+    "test:rules": "npm --prefix code/tests/firestore-rules test",
+
+
     "prepare": "husky"
   },
   "devDependencies": {
@@ -15,6 +19,7 @@
     "lint-staged": "^15.5.2"
   },
   "lint-staged": {
-    "code/frontend/**/*.{js,ts,tsx,vue}": "npm --prefix code/frontend run lint"
+    "code/frontend/**/*.{js,ts,tsx,vue}": "npm --prefix code/frontend run lint",
+    "code/frontend/**/*.{vue,ts,css}": "npm --prefix code/frontend run format"
   }
 }

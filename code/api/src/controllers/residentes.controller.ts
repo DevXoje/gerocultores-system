@@ -7,6 +7,16 @@ import type { Request, Response, NextFunction } from 'express'
 import { ResidentesService, NotFoundError, ForbiddenError } from '../services/residentes.service'
 import { ResidenteIdParamSchema } from '../types/residente.types'
 import type { UserRole } from '../types/user.types'
+import { UserRoleEnum } from '../types/user.types'
+
+function getAuthUser(req: Request): { uid: string; role: UserRole } {
+  const rawRole = req.user?.['role']
+  const role = UserRoleEnum.safeParse(rawRole)
+  if (!role.success || !req.user?.uid) {
+    throw new Error('Autorización inválida')
+  }
+  return { uid: req.user.uid, role: role.data }
+}
 
 export class ResidentesController {
   private service = new ResidentesService()
@@ -24,8 +34,7 @@ export class ResidentesController {
       }
 
       const { id } = parsed.data
-      const userRole = req.user?.['role'] as UserRole
-      const userUid = req.user?.uid as string
+      const { uid: userUid, role: userRole } = getAuthUser(req)
 
       const residente = await this.service.getResidenteById(id, userUid, userRole)
       res.json({ data: residente })

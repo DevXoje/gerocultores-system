@@ -18,19 +18,22 @@ export const TareaEstadoEnum = z.enum([
 ])
 export type TareaEstado = z.infer<typeof TareaEstadoEnum>
 
+/** Zod schema for validating raw Firestore TareaDoc at runtime. */
+export const TareaDocSchema = z.object({
+  titulo: z.string(),
+  tipo: TareaTipoEnum,
+  fechaHora: z.string(),
+  estado: TareaEstadoEnum,
+  notas: z.string().nullable(),
+  residenteId: z.string(),
+  usuarioId: z.string(),
+  creadoEn: z.string(),
+  actualizadoEn: z.string(),
+  completadaEn: z.string().nullable(),
+})
+
 /** Shape of a Tarea document in Firestore. Field names match SPEC/entities.md exactly (G04). */
-export interface TareaDoc {
-  titulo: string
-  tipo: TareaTipo
-  fechaHora: string
-  estado: TareaEstado
-  notas: string | null
-  residenteId: string
-  usuarioId: string
-  creadoEn: string
-  actualizadoEn: string
-  completadaEn: string | null
-}
+export interface TareaDoc extends z.infer<typeof TareaDocSchema> {}
 
 /** API response shape — includes the document id. */
 export interface TareaResponse extends TareaDoc {

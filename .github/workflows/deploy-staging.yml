@@ -5,6 +5,10 @@ on:
     branches:
       - develop
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     name: Lint, Type-check, Unit Tests
@@ -20,7 +24,7 @@ jobs:
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
           cache-dependency-path: code/frontend/package-lock.json
 
@@ -47,7 +51,7 @@ jobs:
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
           cache-dependency-path: code/tests/firestore-rules/package-lock.json
 
@@ -57,11 +61,8 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Cache Firebase Emulator binaries
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/firebase/emulators
-          key: firebase-emulators-${{ runner.os }}-v2
+      # No cache — firebase emulators downloaded fresh each run to avoid
+      # stale emulator issues causing null-value rule errors in CI.
 
       - name: Install firebase-tools
         run: npm install -g firebase-tools
@@ -95,7 +96,7 @@ jobs:
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: code/frontend/package-lock.json
 
@@ -113,6 +114,7 @@ jobs:
         run: npm run build
 
       - name: Deploy to Firebase Hosting — preview channel (staging)
+        id: deploy
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

@@ -14,9 +14,9 @@ function makeReq(userRole?: string | undefined): Partial<Request> {
   if (userRole === undefined) {
     return {}
   }
-  return {
-    user: { rol: userRole } as unknown as Request['user'],
-  }
+    return {
+      user: { role: userRole } as unknown as Request['user'],
+    }
 }
 
 function makeRes(): { status: ReturnType<typeof vi.fn>; json: ReturnType<typeof vi.fn> } {

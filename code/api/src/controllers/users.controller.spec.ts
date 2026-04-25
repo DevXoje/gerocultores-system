@@ -57,7 +57,7 @@ vi.mock('../middleware/verifyAuth', () => ({
     }
     const role = req.headers['x-test-role'] ?? 'admin'
     const uid = req.headers['x-test-uid'] ?? 'test-admin-uid'
-    req.user = { uid, rol: role, role }
+    req.user = { uid, role }
     next()
   },
 }))
@@ -71,11 +71,11 @@ vi.mock('../middleware/requireRole', () => ({
   requireRole:
     (...roles: string[]) =>
     (
-      req: { user?: { rol?: string } },
+      req: { user?: { role?: string } },
       res: { status: (code: number) => { json: (body: unknown) => void } },
       next: () => void,
     ) => {
-      const userRole = req.user?.['rol'] as string | undefined
+      const userRole = req.user?.['role'] as string | undefined
       if (!userRole || !roles.includes(userRole)) {
         res.status(403).json({ error: 'Acceso no autorizado', code: 'FORBIDDEN' })
         return

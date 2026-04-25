@@ -6,6 +6,20 @@
 import type { Request, Response, NextFunction } from 'express'
 import { IncidenciasService } from '../services/incidencias.service'
 import { CreateIncidenciaSchema } from '../types/incidencia.types'
+import { UserRoleEnum } from '../types/user.types'
+
+function getAuthUser(req: Request): { uid: string; role: string } {
+  if (!req.user?.uid) {
+    throw new Error('Autorización inválida')
+  }
+  const rawRole = req.user?.['role']
+  const role = UserRoleEnum.safeParse(rawRole)
+  // Incidencias: both admin and gerocultor can create, but we still validate the role claim
+  if (!role.success) {
+    throw new Error('Autorización inválida')
+  }
+  return { uid: req.user.uid, role: role.data }
+}
 
 export class IncidenciasController {
   private service = new IncidenciasService()
@@ -28,7 +42,7 @@ export class IncidenciasController {
         return
       }
 
-      const creatingUserId = req.user?.uid as string
+      const { uid: creatingUserId } = getAuthUser(req)
       const incidencia = await this.service.createIncidencia(parsed.data, creatingUserId)
       res.status(201).json({ data: incidencia })
     } catch (e) {

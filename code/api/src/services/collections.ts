@@ -11,6 +11,7 @@ export const COLLECTIONS = {
   incidencias: 'incidences',
   incidences: 'incidences',
   turnos: 'shifts',
+  notificaciones: 'notificaciones',
 } as const
 
 export type CollectionName = keyof typeof COLLECTIONS
