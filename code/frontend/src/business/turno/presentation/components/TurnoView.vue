@@ -119,7 +119,7 @@ function formatDate(date: Date): string {
           type="button"
           class="turno-view__btn turno-view__btn--primary"
           :disabled="isLoading"
-          @click="handleIniciar"
+          @click="handleIniciar()"
         >
           <span v-if="isLoading" class="turno-view__spinner" aria-hidden="true" />
           <span v-else>Iniciar turno</span>

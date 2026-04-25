@@ -34,6 +34,7 @@ function makeNotification(overrides = {}) {
     mensaje: 'Test mensaje',
     leida: false,
     referenciaId: null,
+    referenciaModelo: null,
     creadaEn: new Date('2026-04-25T08:00:00Z'),
     ...overrides,
   }

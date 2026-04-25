@@ -19,7 +19,7 @@ vi.mock('@/services/apiClient', () => ({
 
 import { setActivePinia, createPinia } from 'pinia'
 import { useTurnoStore } from './turno.store'
-import type { Turno } from '../domain/entities/Turno'
+import type { Turno } from '@/business/turno/domain/entities/Turno'
 
 function makeTurno(overrides: Partial<Turno> = {}): Turno {
   return {

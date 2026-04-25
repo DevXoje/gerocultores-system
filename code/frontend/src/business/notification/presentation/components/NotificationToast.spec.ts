@@ -16,6 +16,7 @@ function makeNotif(overrides = {}) {
     mensaje: 'Mensaje de alerta',
     leida: false,
     referenciaId: null,
+    referenciaModelo: null,
     creadaEn: new Date('2026-04-25T10:00:00Z'),
     ...overrides,
   }

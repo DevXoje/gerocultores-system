@@ -13,14 +13,19 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  *   - No store imports — all state flows via composable in parent.
  */
-import type { TurnoResumen } from '@/business/turno/infrastructure/api/turnoApi'
 
 const props = defineProps<{
   open: boolean
   isLoading: boolean
   initialResumen?: string | null
   /** Populated after finalizarTurno — shows aggregated stats */
-  resumenData?: TurnoResumen | null
+  resumenData?: {
+    readonly tareasCompletadas: number
+    readonly tareasPendientes: number
+    readonly incidenciasRegistradas: number
+    readonly residentesAtendidos: readonly string[]
+    readonly textoResumen: string
+  } | null
 }>()
 
 const emit = defineEmits<{
