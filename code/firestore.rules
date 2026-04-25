@@ -21,23 +21,26 @@ service cloud.firestore {
     function isAccountOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    function isResourceOwner() {
-      return isAuthenticated() && resource.data.userId != null && resource.data.userId == request.auth.uid;
+
+    // Safe field read: returns the field value, or null if absent.
+    // In Firestore rules v2, accessing a nonexistent field as a VALUE
+    // (not in hasAll/hasAny) throws "Null value error".
+    // Wrapping in a function that checks hasAll first prevents the error.
+    function get(field) {
+      return resource.data.keys().hasAll([field]) ? resource.data[field] : null;
     }
 
+    function isResourceOwner() {
+      return isAuthenticated() && get('userId') == request.auth.uid;
+    }
 
     // --- Usuarios ---
-    // Cada usuario sólo puede leer su propio documento;
-    // sólo admins pueden escribir (crear/actualizar roles).
     match /users/{userId} {
       allow read: if isAccountOwner(userId);
       allow write: if isAdmin();
     }
 
     // --- Tareas ---
-    // Un gerocultor puede leer y actualizar sus propias tareas.
-    // Admins tienen acceso completo de lectura/actualización.
-    // Sólo roles permitidos pueden crear tareas nuevas.
     match /tasks/{tareaId} {
       allow read: if isResourceOwner() || isAdmin();
       allow update: if isResourceOwner() || isAdmin();
@@ -45,16 +48,12 @@ service cloud.firestore {
     }
 
     // --- Residentes ---
-    // Datos sensibles: sólo admins.
     match /residents/{residenteId} {
       allow read: if isAdmin();
       allow write: if isAdmin();
     }
 
     // --- Incidencias ---
-    // Gerocultores pueden crear incidencias.
-    // Cualquier usuario autenticado puede leerlas.
-    // Actualización y eliminación están prohibidas (inmutabilidad del registro).
     match /incidencias/{incidenciaId} {
       allow create: if isGerocultor() || isAdmin();
       allow read: if isAuthenticated();
@@ -62,33 +61,22 @@ service cloud.firestore {
     }
 
     // --- Notificaciones ---
-    // El propietario puede leer y marcar como leída (sólo el campo leida).
-    // Admins pueden leer todas. Crear/borrar sólo desde servidor (alertas service).
     match /notificaciones/{notifId} {
-      allow read: if isAuthenticated() && (
-        (resource.data.usuarioId != null && request.auth.uid == resource.data.usuarioId) || isAdmin()
-      );
+      allow read: if isAuthenticated() && (get('usuarioId') == request.auth.uid || isAdmin());
       allow update: if isAuthenticated()
-        && resource.data.usuarioId != null
-        && request.auth.uid == resource.data.usuarioId
+        && get('usuarioId') == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['leida']);
       allow create, delete: if false;
     }
 
     // --- Turnos (colección: 'shifts') ---
-    // El propietario puede leer su propio turno.
-    // Los autenticados pueden crear un turno como propietario.
-    // El propietario puede actualizar (cerrar) su turno si fin == null.
-    // Admins pueden leer todos. No se puede borrar.
     match /shifts/{turnoId} {
-      allow read: if isAuthenticated() && (
-        (resource.data.usuarioId != null && request.auth.uid == resource.data.usuarioId) || isAdmin()
-      );
+      allow read: if isAuthenticated() && (get('usuarioId') == request.auth.uid || isAdmin());
       allow create: if isAuthenticated()
         && request.resource.data.usuarioId == request.auth.uid;
       allow update: if isAuthenticated()
-        && request.auth.uid == resource.data.usuarioId
-        && resource.data.fin == null;
+        && get('usuarioId') == request.auth.uid
+        && !resource.data.keys().hasAll(['fin']);
       allow delete: if false;
     }
   }
