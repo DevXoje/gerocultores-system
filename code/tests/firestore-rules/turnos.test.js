@@ -57,12 +57,14 @@ describe('Colección /shifts (turnos)', () => {
   const ADMIN_UID = 'admin-uid-001';
   const TURNO_ID = 'shift-001';
 
+  // NOTE: fin and resumenTraspaso are intentionally omitted — in production these
+  // fields are absent (not null) until a shift is closed. Firestore returns null
+  // for missing fields, but JS null serializes as the string 'null' which causes
+  // Firestore rules v2 to throw Null value error on == null comparisons.
   const BASE_TURNO = {
     usuarioId: OWNER_UID,
     tipoTurno: 'manyana',
     inicio: '2026-04-25T06:00:00Z',
-    fin: null,
-    resumenTraspaso: null,
   };
 
   beforeEach(async () => {
@@ -102,8 +104,6 @@ describe('Colección /shifts (turnos)', () => {
         usuarioId: OWNER_UID,
         tipoTurno: 'tarde',
         inicio: '2026-04-25T14:00:00Z',
-        fin: null,
-        resumenTraspaso: null,
       }),
     );
   });
@@ -115,8 +115,6 @@ describe('Colección /shifts (turnos)', () => {
         usuarioId: OWNER_UID, // trying to spoof as OWNER
         tipoTurno: 'noche',
         inicio: '2026-04-25T22:00:00Z',
-        fin: null,
-        resumenTraspaso: null,
       }),
     );
   });
@@ -128,8 +126,6 @@ describe('Colección /shifts (turnos)', () => {
         usuarioId: 'anyone',
         tipoTurno: 'manyana',
         inicio: '2026-04-25T06:00:00Z',
-        fin: null,
-        resumenTraspaso: null,
       }),
     );
   });
