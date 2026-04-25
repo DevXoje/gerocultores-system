@@ -2,17 +2,18 @@
  * Firestore Security Rules Unit Tests
  * US-02: Role-based access control
  *
- * Requires Firebase Emulator running on localhost:8080
- * Set FIRESTORE_EMULATOR_HOST=localhost:8080 before running.
+ * Requires Firebase Emulator running on localhost:18080
+ * Set FIRESTORE_EMULATOR_HOST=localhost:18080 before running.
  */
 
-const {
+import {
   initializeTestEnvironment,
   assertFails,
   assertSucceeds,
-} = require('@firebase/rules-unit-testing');
-const fs = require('fs');
-const path = require('path');
+} from '@firebase/rules-unit-testing';
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, test, beforeAll, afterAll, afterEach, beforeEach } from 'vitest';
 
 const PROJECT_ID = 'demo-test';
 const RULES_PATH = path.resolve(__dirname, '../../firestore.rules');
@@ -25,7 +26,7 @@ beforeAll(async () => {
     firestore: {
       rules: fs.readFileSync(RULES_PATH, 'utf8'),
       host: 'localhost',
-      port: 8080,
+      port: 18080,
     },
   });
 });
