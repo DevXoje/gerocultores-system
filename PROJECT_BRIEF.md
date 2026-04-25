@@ -71,11 +71,13 @@ Tecnologías confirmadas tras los ADRs de stack (ADR-01b a ADR-04b):
 | **Routing** | Vue Router 4 | ADR-01b |
 | **HTTP client** | Axios con interceptores para token Firebase Auth | ADR-01b |
 | **Testing frontend** | Vitest (unitarios) + Playwright (E2E) | ADR-01b |
-| **Backend** | Express.js (Node.js) + Firebase Admin SDK | ADR-02b |
+| **Backend** | Express.js (Node.js) + Firebase Admin SDK (Cloud Run) | ADR-02b |
 | **Base de datos** | Cloud Firestore (región `europe-west1` / `europe-west3`, EU) | ADR-02b |
 | **Autenticación** | Firebase Auth (email/password) + Custom Claims de rol | ADR-03b |
 | **Seguridad datos** | Firestore Security Rules + middleware Express `verifyIdToken` | ADR-03b |
-| **Hosting** | Por decidir — candidatos: Firebase Hosting, Cloud Run (ver ADR-04b) | ADR-04b |
+| **Hosting** | Firebase Hosting (frontend SPA Vue 3) | ADR-04b |
+| **API** | Cloud Run — Express.js con Firebase Admin SDK (contenedor Docker, región EU) | ADR-04b |
+| **Functions** | Cloud Functions callable (2nd gen) — alertas críticas, triggers | ADR-04b |
 | **CI/CD** | GitHub Actions (lint + type-check + build + tests) | ADR-04b |
 | **Dev local** | Firebase Local Emulator Suite (Auth + Firestore) | ADR-02b |
 | **Linting** | ESLint + Prettier + Husky | — |

@@ -1,4 +1,4 @@
-# ADR-04b: Despliegue, Infraestructura y RGPD (Firebase Stack)
+# ADR-04b: Despliegue, Infraestructura y RGPD (Firebase Hosting + Cloud Run)
 
 - **Estado**: ACCEPTED
 - **Fecha**: 2026-03-29
@@ -43,49 +43,64 @@ Se elige **Firebase Hosting** como plataforma de hosting para el frontend (SPA V
 - CDN global con HTTPS automático.
 - Dominio personalizable (subdominio `.web.app` gratuito o dominio propio).
 - Integración nativa con Firebase Auth y Firestore (mismo proyecto, misma consola).
-- Plan Spark (gratuito) suficiente para proyecto académico.
-- La Express API se ejecuta localmente o vía Firebase Local Emulator Suite en desarrollo; en producción puede desplegarse como Cloud Function si se necesita (fuera del scope académico inicial).
+- Plan Spark (gratuito) suficiente para el frontend.
+
+### 6. API — Cloud Run ✅
+
+Se elige **Google Cloud Run** para desplegar la API Express en producción.
+
+- Contenedor Docker (Dockerfile en `code/api/`).
+- Región EU (`europe-west1` o `europe-west3`).
+- Escalado automático a cero (solo consume cuando hay tráfico).
+- Integración con Firebase Auth mediante Firebase Admin SDK validando tokens en el middleware.
+- Plan Spark gratuito de Firebase incluye uso de Cloud Run (380.000 vCPU-segundos, 180.000 solicitudes/mes).
+
+### 7. Functions — Cloud Functions (callable) ✅
+
+Se usa **Cloud Functions (2nd gen)** para funciones callable desde el frontend.
+
+- Uso previsto: notificaciones push, triggers de Firestore para alertas críticas.
+- Desplegadas en región EU.
+- Plan Spark gratuito: 2.000.000 invocaciones/mes, 400.000 GB-segundos.
 
 ## Opciones consideradas (hosting)
 
-### Opción A — Firebase Hosting ✅ (elegida)
-- **Pro**: Mismo ecosistema, deploy en un comando, CDN, SSL automático, plan gratuito Spark. Integración nativa con Firebase Auth/Firestore. Sin coste adicional.
-- **Contra**: Limitado a assets estáticos + Cloud Functions si se necesita SSR o API serverless. Para este proyecto (SPA + Express local/emulador), es suficiente.
+### Opción A — Firebase Hosting + Cloud Run + Cloud Functions ✅ (elegida)
+- **Pro**: Stack unificado Firebase/Google Cloud, región EU, plan gratuito Spark suficiente, escalado automático, CI/CD con GitHub Actions.
+- **Contra**: Vendor lock-in con Google. Requiere Dockerfile para Cloud Run.
 
-### Opción B — Google Cloud Run
-- **Pro**: Contenedor Docker, Express API y SPA juntos, escalado automático, región EU.
-- **Contra**: Requiere Dockerfile, mayor complejidad de CI/CD. Coste por invocación. Excesivo para proyecto académico individual.
+### Opción B — Vercel/Netlify (frontend) + Cloud Run (API)
+- **Pro**: Deploy frontend excelente con previews por PR.
+- **Contra**: Dos proveedores distintos, sin integración nativa con Firebase Auth/Firestore. Mayor fricción operativa y complejidad de CI/CD.
 
-### Opción C — Firebase Hosting (frontend) + Cloud Functions (API Express)
-- **Pro**: Frontend estático en CDN + API serverless, misma consola Firebase.
-- **Contra**: Cloud Functions tiene cold starts, plan Blaze requerido para egress. Mayor complejidad que necesaria para el scope académico.
-
-### Opción D — Vercel/Netlify (frontend) + otro servicio (API)
-- **Pro**: Deploy frontend excelente, previews por PR.
-- **Contra**: Dos proveedores distintos de Firebase. Sin integración nativa con Firebase Auth/Firestore. Mayor fricción operativa.
+### Opción C — Solo Firebase Hosting + Cloud Functions (sin Cloud Run)
+- **Pro**: Todo dentro del ecosistema Firebase.
+- **Contra**: Cloud Functions tiene cold starts y el plan Blaze es de pago por egress. Cloud Run es más flexible y económico para una API Express.
 
 ## Consecuencias
 
-- **Positivas**: Deploy en un comando (`firebase deploy`), CDN global, HTTPS automático, integración nativa con Firebase Auth y Firestore, dominio personalizable, plan gratuito Spark suficiente para proyecto académico.
-- **Negativas**: Vendor lock-in con Google/Firebase. Si se necesita SSR o endpoints API en producción real, requeriría Cloud Functions (plan Blaze) o separar el deploy.
+- **Positivas**: Stack unificado Google Cloud/Firebase, deploys separados (frontend + API), CDN global para frontend, escalado automático en Cloud Run, plan gratuito Spark suficiente para el volumen académico, región EU asegurada.
+- **Negativas**: Vendor lock-in con Google/Firebase. Requiere mantener Dockerfile para Cloud Run. CI/CD más complejo (dos despliegues distintos).
 - **RGPD**: Cumplido mediante región EU + datos ficticios + HTTPS automático + cifrado en reposo de Firestore.
-- **Académica**: La memoria debe documentar la justificación de Firebase Hosting frente a alternativas y la estrategia de RGPD con datos ficticios.
+- **Académica**: La memoria debe documentar la justificación del stack Firebase/Cloud Run frente a alternativas y la estrategia de RGPD con datos ficticios.
 
 ## Criterios de aceptación
 
 - [ ] Proyecto Firebase creado en región EU (`europe-west1` o `europe-west3`).
-- [ ] Firebase Hosting configurado en `firebase.json` con el directorio de build correcto.
-- [ ] `firebase deploy` ejecutado con éxito al menos una vez.
-- [ ] CI/CD configurado con GitHub Actions (lint + build + test + deploy).
+- [ ] Firebase Hosting configurado con directorio de build correcto (`dist/`).
+- [ ] Dockerfile en `code/api/` para Cloud Run, builds erfolgreich.
+- [ ] Cloud Run desplegado y accesible con `GET /health`.
+- [ ] Cloud Functions callable desplegadas para alertas críticas.
+- [ ] CI/CD configurado con GitHub Actions (lint + build + test + deploy frontend + deploy API).
 - [ ] No hay PII real en ningún entorno.
-- [ ] HTTPS en todos los entornos (automático con Firebase Hosting).
-- [ ] `.env.example` documentado con todas las variables requeridas.
+- [ ] HTTPS en todos los entornos (automático con Firebase Hosting y Cloud Run).
+- [ ] `.env.example` documentado con todas las variables requeridas (frontend + API).
 
 ## Nota de aprobación
 
-> **ACCEPTED**: Aprobado por Jose Vilches Sánchez el 2026-04-01. Hosting decidido: Firebase Hosting.  
-> Fecha de creación: 2026-03-29  
-> Actualizado: 2026-04-01 — Hosting resuelto a Firebase Hosting; DRAFT → ACCEPTED.  
+> **ACCEPTED**: Aprobado por Jose Vilches Sánchez el 2026-04-01.
+> **Actualizado**: 2026-04-25 — Cloud Run para API + Cloud Functions callable añadidos.
+> Fecha de creación: 2026-03-29
 > Creado por: SDD Design Agent (IA)
 
 ## Referencias
