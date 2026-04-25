@@ -88,7 +88,7 @@ service cloud.firestore {
         && request.resource.data.usuarioId == request.auth.uid;
       allow update: if isAuthenticated()
         && request.auth.uid == resource.data.usuarioId
-        && resource.data.fin == null;
+        && !resource.data.keys().hasAll(['fin']);
       allow delete: if false;
     }
   }
