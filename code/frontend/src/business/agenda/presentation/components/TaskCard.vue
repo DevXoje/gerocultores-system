@@ -15,6 +15,18 @@
 import { computed } from 'vue'
 import { useTaskCard } from '../composables/useTaskCard'
 import type { TareaDTO, EstadoTarea } from '@/services/tareas.api'
+import {
+  BeakerIcon,
+  HeartIcon,
+  BoltIcon,
+  ClockIcon,
+  ArrowPathIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  ArrowUturnLeftIcon,
+  ClipboardDocumentCheckIcon,
+} from '@heroicons/vue/24/outline'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 // ─── Props ─────────────────────────────────────────────────────────────────
 
@@ -56,48 +68,56 @@ const horaFormateada = computed(() => {
 type EstadoInfo = {
   label: string
   modifier: string
-  icon: string
+  icon: FunctionalComponent<SVGAttributes>
 }
 
 const estadoInfo = computed<EstadoInfo>(() => {
   const map: Record<EstadoTarea, EstadoInfo> = {
-    pendiente: { label: 'Pendiente', modifier: 'pendiente', icon: 'schedule' },
-    en_curso: { label: 'En curso', modifier: 'en-curso', icon: 'autorenew' },
-    completada: { label: 'Completada', modifier: 'completada', icon: 'check_circle' },
-    con_incidencia: { label: 'Con incidencia', modifier: 'con-incidencia', icon: 'warning' },
+    pendiente: { label: 'Pendiente', modifier: 'pendiente', icon: ClockIcon },
+    en_curso: { label: 'En curso', modifier: 'en-curso', icon: ArrowPathIcon },
+    completada: { label: 'Completada', modifier: 'completada', icon: CheckCircleIcon },
+    con_incidencia: {
+      label: 'Con incidencia',
+      modifier: 'con-incidencia',
+      icon: ExclamationTriangleIcon,
+    },
   }
   return (
     map[props.tarea.estado] ?? {
       label: props.tarea.estado,
       modifier: 'pendiente',
-      icon: 'schedule',
+      icon: ClockIcon,
     }
   )
 })
 
 /** Next status transitions available from current status (CA-1) */
-const accionesDisponibles = computed<Array<{ estado: EstadoTarea; label: string; icon: string }>>(
-  () => {
-    const all: Array<{ estado: EstadoTarea; label: string; icon: string }> = [
-      { estado: 'en_curso', label: 'Marcar en curso', icon: 'autorenew' },
-      { estado: 'completada', label: 'Completar', icon: 'check_circle' },
-      { estado: 'con_incidencia', label: 'Con incidencia', icon: 'warning' },
-      { estado: 'pendiente', label: 'Volver a pendiente', icon: 'undo' },
-    ]
-    return all.filter((a) => a.estado !== props.tarea.estado)
-  }
-)
+const accionesDisponibles = computed<
+  Array<{ estado: EstadoTarea; label: string; icon: FunctionalComponent<SVGAttributes> }>
+>(() => {
+  const all: Array<{
+    estado: EstadoTarea
+    label: string
+    icon: FunctionalComponent<SVGAttributes>
+  }> = [
+    { estado: 'en_curso', label: 'Marcar en curso', icon: ArrowPathIcon },
+    { estado: 'completada', label: 'Completar', icon: CheckCircleIcon },
+    { estado: 'con_incidencia', label: 'Con incidencia', icon: ExclamationTriangleIcon },
+    { estado: 'pendiente', label: 'Volver a pendiente', icon: ArrowUturnLeftIcon },
+  ]
+  return all.filter((a) => a.estado !== props.tarea.estado)
+})
 
-const tipoIconos: Record<string, string> = {
-  higiene: 'soap',
-  medicacion: 'medication',
-  alimentacion: 'restaurant',
-  actividad: 'sports_and_outdoors',
-  revision: 'stethoscope',
-  otro: 'task_alt',
+const tipoIconos: Record<string, FunctionalComponent<SVGAttributes>> = {
+  higiene: BeakerIcon,
+  medicacion: HeartIcon,
+  alimentacion: BoltIcon,
+  actividad: BoltIcon,
+  revision: ClipboardDocumentCheckIcon,
+  otro: ClipboardDocumentCheckIcon,
 }
 
-const tipoIcono = computed(() => tipoIconos[props.tarea.tipo] ?? 'task_alt')
+const tipoIcono = computed(() => tipoIconos[props.tarea.tipo] ?? ClipboardDocumentCheckIcon)
 
 async function onCambiarEstado(estado: EstadoTarea): Promise<void> {
   if (estado === 'con_incidencia') {
@@ -115,9 +135,7 @@ async function onCambiarEstado(estado: EstadoTarea): Promise<void> {
     <!-- ─── Header row ─────────────────────────────────────────────────── -->
     <div class="task-card__header">
       <div class="task-card__meta">
-        <span class="material-symbols-outlined task-card__tipo-icon" aria-hidden="true">
-          {{ tipoIcono }}
-        </span>
+        <component :is="tipoIcono" class="task-card__tipo-icon" aria-hidden="true" />
         <time class="task-card__hora" :datetime="tarea.fechaHora">{{ horaFormateada }}</time>
       </div>
 
@@ -127,9 +145,7 @@ async function onCambiarEstado(estado: EstadoTarea): Promise<void> {
         :class="`task-card__badge--${estadoInfo.modifier}`"
         :aria-label="`Estado: ${estadoInfo.label}`"
       >
-        <span class="material-symbols-outlined task-card__badge-icon" aria-hidden="true">
-          {{ estadoInfo.icon }}
-        </span>
+        <component :is="estadoInfo.icon" class="task-card__badge-icon" aria-hidden="true" />
         {{ estadoInfo.label }}
       </span>
     </div>
@@ -154,9 +170,7 @@ async function onCambiarEstado(estado: EstadoTarea): Promise<void> {
           :class="`task-card__action-btn--${accion.estado.replace('_', '-')}`"
           @click="onCambiarEstado(accion.estado)"
         >
-          <span class="material-symbols-outlined task-card__action-icon" aria-hidden="true">
-            {{ accion.icon }}
-          </span>
+          <component :is="accion.icon" class="task-card__action-icon" aria-hidden="true" />
           {{ accion.label }}
         </button>
       </template>
@@ -204,9 +218,16 @@ async function onCambiarEstado(estado: EstadoTarea): Promise<void> {
 }
 
 .task-card__tipo-icon {
-  font-size: 1rem;
+  @apply w-4 h-4;
   color: var(--color-outline);
-  font-variation-settings: 'FILL' 0;
+}
+
+.task-card__badge-icon {
+  @apply w-3 h-3;
+}
+
+.task-card__action-icon {
+  @apply w-3.5 h-3.5;
 }
 
 .task-card__hora {

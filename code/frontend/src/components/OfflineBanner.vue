@@ -11,6 +11,7 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
 import { useConnectivity } from '@/composables/useConnectivity'
+import { SignalSlashIcon } from '@heroicons/vue/24/solid'
 
 const { isOnline } = useConnectivity()
 </script>
@@ -24,9 +25,7 @@ const { isOnline } = useConnectivity()
       aria-live="polite"
       aria-label="Sin conexión a internet"
     >
-      <span class="material-symbols-outlined offline-banner__icon" aria-hidden="true">
-        wifi_off
-      </span>
+      <SignalSlashIcon class="offline-banner__icon" aria-hidden="true" />
       <span class="offline-banner__text">Sin conexión — las notificaciones están pausadas.</span>
     </div>
   </transition>
@@ -43,8 +42,7 @@ const { isOnline } = useConnectivity()
 }
 
 .offline-banner__icon {
-  font-size: 1.1rem;
-  font-variation-settings: 'FILL' 1;
+  @apply w-5 h-5;
   flex-shrink: 0;
 }
 

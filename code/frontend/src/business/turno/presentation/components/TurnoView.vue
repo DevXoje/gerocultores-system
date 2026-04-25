@@ -15,6 +15,7 @@
 import { onMounted, ref } from 'vue'
 import { useTurno } from '../composables/useTurno'
 import ResumenTurnoModal from '../components/ResumenTurnoModal.vue'
+import { ClockIcon } from '@heroicons/vue/24/outline'
 
 const {
   turnoActivo,
@@ -111,9 +112,7 @@ function formatDate(date: Date): string {
     <!-- No active turno -->
     <template v-else-if="!isLoading">
       <section class="turno-view__empty" aria-label="Sin turno activo">
-        <span class="material-symbols-outlined turno-view__empty-icon" aria-hidden="true">
-          schedule
-        </span>
+        <ClockIcon class="turno-view__empty-icon" aria-hidden="true" />
         <p class="turno-view__empty-msg">No tienes un turno activo.</p>
         <button
           type="button"
@@ -236,9 +235,8 @@ function formatDate(date: Date): string {
 }
 
 .turno-view__empty-icon {
-  font-size: 3rem;
+  @apply w-12 h-12;
   color: var(--color-outline-variant);
-  font-variation-settings: 'FILL' 0;
 }
 
 .turno-view__empty-msg {

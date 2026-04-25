@@ -13,6 +13,14 @@
  *   - No store imports — component is driven by props only.
  */
 import type { Notificacion } from '../../domain/entities/Notificacion'
+import {
+  ExclamationTriangleIcon,
+  ClockIcon,
+  ArrowsRightLeftIcon,
+  InformationCircleIcon,
+  XMarkIcon,
+} from '@heroicons/vue/24/solid'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 const props = defineProps<{
   notification: Notificacion
@@ -26,14 +34,14 @@ function handleDismiss(): void {
   emit('dismiss', props.notification.id)
 }
 
-const iconMap: Record<Notificacion['tipo'], string> = {
-  incidencia_critica: 'emergency',
-  tarea_proxima: 'alarm',
-  traspaso_turno: 'swap_horiz',
-  sistema: 'info',
+const iconMap: Record<Notificacion['tipo'], FunctionalComponent<SVGAttributes>> = {
+  incidencia_critica: ExclamationTriangleIcon,
+  tarea_proxima: ClockIcon,
+  traspaso_turno: ArrowsRightLeftIcon,
+  sistema: InformationCircleIcon,
 }
 
-const icon = iconMap[props.notification.tipo]
+const IconComponent = iconMap[props.notification.tipo]
 </script>
 
 <template>
@@ -43,9 +51,7 @@ const icon = iconMap[props.notification.tipo]
     role="alert"
     aria-live="assertive"
   >
-    <span class="material-symbols-outlined notification-toast__icon" aria-hidden="true">{{
-      icon
-    }}</span>
+    <component :is="IconComponent" class="notification-toast__icon" aria-hidden="true" />
     <div class="notification-toast__body">
       <p class="notification-toast__title">{{ notification.titulo }}</p>
       <p class="notification-toast__message">{{ notification.mensaje }}</p>
@@ -56,7 +62,7 @@ const icon = iconMap[props.notification.tipo]
       aria-label="Cerrar notificación"
       @click="handleDismiss"
     >
-      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      <XMarkIcon class="notification-toast__close-icon" aria-hidden="true" />
     </button>
   </div>
 </template>
@@ -95,9 +101,8 @@ const icon = iconMap[props.notification.tipo]
 }
 
 .notification-toast__icon {
-  font-size: 1.25rem;
+  @apply w-5 h-5;
   flex-shrink: 0;
-  font-variation-settings: 'FILL' 1;
 }
 
 .notification-toast__body {
@@ -123,7 +128,7 @@ const icon = iconMap[props.notification.tipo]
   opacity: 1;
 }
 
-.notification-toast__close .material-symbols-outlined {
-  font-size: 1rem;
+.notification-toast__close-icon {
+  @apply w-4 h-4;
 }
 </style>

@@ -10,6 +10,14 @@
  * (design-source.md row: Login screen — Care & Serenity portal)
  */
 import { useLogin } from '../composables/useLogin'
+import {
+  SparklesIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ExclamationCircleIcon,
+  ArrowRightIcon,
+  LockClosedIcon,
+} from '@heroicons/vue/24/outline'
 
 const {
   email,
@@ -30,7 +38,7 @@ const year = Temporal.Now.plainDateISO().year
     <header class="login-header">
       <!-- Spa icon badge -->
       <div class="login-header__icon-badge">
-        <span class="material-symbols-outlined login-header__icon" aria-hidden="true">spa</span>
+        <SparklesIcon class="login-header__icon" aria-hidden="true" />
       </div>
       <h1 class="login-header__title">Care &amp; Serenity</h1>
       <p class="login-header__subtitle">Accede a tu turno</p>
@@ -78,18 +86,19 @@ const year = Temporal.Now.plainDateISO().year
               :aria-label="showPassword ? 'Ocultar clave' : 'Mostrar clave'"
               @click="togglePassword"
             >
-              <span class="material-symbols-outlined" aria-hidden="true">
-                {{ showPassword ? 'visibility_off' : 'visibility' }}
-              </span>
+              <EyeSlashIcon
+                v-if="showPassword"
+                class="login-form__visibility-icon"
+                aria-hidden="true"
+              />
+              <EyeIcon v-else class="login-form__visibility-icon" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         <!-- Generic error message (TC-04, TC-05) -->
         <div v-if="errorMessage" class="login-form__error" data-testid="error-message" role="alert">
-          <span class="material-symbols-outlined login-form__error-icon" aria-hidden="true"
-            >error</span
-          >
+          <ExclamationCircleIcon class="login-form__error-icon" aria-hidden="true" />
           <span>{{ errorMessage }}</span>
         </div>
 
@@ -113,9 +122,7 @@ const year = Temporal.Now.plainDateISO().year
           </template>
           <template v-else>
             <span>Iniciar sesión</span>
-            <span class="material-symbols-outlined login-form__submit-icon" aria-hidden="true"
-              >arrow_forward</span
-            >
+            <ArrowRightIcon class="login-form__submit-icon" aria-hidden="true" />
           </template>
         </button>
       </form>
@@ -124,7 +131,7 @@ const year = Temporal.Now.plainDateISO().year
     <!-- Footer -->
     <footer class="login-footer">
       <p class="login-footer__notice">
-        <span class="material-symbols-outlined login-footer__lock" aria-hidden="true">lock</span>
+        <LockClosedIcon class="login-footer__lock" aria-hidden="true" />
         Solo para personal autorizado
       </p>
       <nav class="login-footer__links" aria-label="Legal y soporte">
@@ -161,11 +168,8 @@ const year = Temporal.Now.plainDateISO().year
 }
 
 .login-header__icon {
-  font-size: 1.5rem;
+  @apply w-6 h-6;
   color: var(--color-primary);
-  font-variation-settings:
-    'FILL' 1,
-    'wght' 400;
 }
 
 .login-header__title {
@@ -242,8 +246,8 @@ const year = Temporal.Now.plainDateISO().year
   color: var(--color-primary);
 }
 
-.login-form__toggle-visibility .material-symbols-outlined {
-  font-size: 1.125rem;
+.login-form__toggle-visibility .login-form__visibility-icon {
+  @apply w-[1.125rem] h-[1.125rem];
 }
 
 /* ─── Error message ──────────────────────────────────────────────────────────── */
@@ -254,7 +258,7 @@ const year = Temporal.Now.plainDateISO().year
 }
 
 .login-form__error-icon {
-  font-size: 1rem;
+  @apply w-4 h-4;
   flex-shrink: 0;
 }
 
@@ -297,7 +301,7 @@ const year = Temporal.Now.plainDateISO().year
 }
 
 .login-form__submit-icon {
-  font-size: 1.125rem;
+  @apply w-[1.125rem] h-[1.125rem];
 }
 
 /* ─── Spinner ────────────────────────────────────────────────────────────────── */
@@ -323,8 +327,7 @@ const year = Temporal.Now.plainDateISO().year
 }
 
 .login-footer__lock {
-  font-size: 0.875rem;
-  font-variation-settings: 'FILL' 1;
+  @apply w-3.5 h-3.5;
 }
 
 .login-footer__links {

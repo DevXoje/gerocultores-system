@@ -18,6 +18,7 @@ import { useRouter, useRoute } from 'vue-router'
 import IncidenceForm from '../components/IncidenceForm.vue'
 import { getResidentes } from '../../../residents/infrastructure/residentes.api'
 import type { ResidenteDTO } from '../../../residents/domain/entities/residente.types'
+import { ArrowLeftIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { DASHBOARD_ROUTES } from '@/views/route-names'
 
 // ─── Router ──────────────────────────────────────────────────────────────────
@@ -81,9 +82,7 @@ function onCancelled(): void {
     <!-- Header / back nav -->
     <header class="incident-view__header">
       <button type="button" class="incident-view__back-btn" @click="onCancelled">
-        <span class="material-symbols-outlined incident-view__back-icon" aria-hidden="true">
-          arrow_back
-        </span>
+        <ArrowLeftIcon class="incident-view__back-icon" aria-hidden="true" />
         Volver
       </button>
       <h1 class="incident-view__title">Registrar Incidencia</h1>
@@ -97,9 +96,7 @@ function onCancelled(): void {
 
     <!-- Residents load error -->
     <div v-else-if="residentsError" class="incident-view__error" role="alert">
-      <span class="material-symbols-outlined incident-view__error-icon" aria-hidden="true">
-        error
-      </span>
+      <ExclamationCircleIcon class="incident-view__error-icon" aria-hidden="true" />
       <p class="incident-view__error-msg">{{ residentsError }}</p>
       <button type="button" class="incident-view__retry-btn" @click="fetchResidents">
         Reintentar
@@ -148,7 +145,7 @@ function onCancelled(): void {
 }
 
 .incident-view__back-icon {
-  font-size: 1.25rem;
+  @apply w-5 h-5;
 }
 
 .incident-view__title {
@@ -187,7 +184,7 @@ function onCancelled(): void {
 }
 
 .incident-view__error-icon {
-  font-size: 2rem;
+  @apply w-8 h-8;
   color: var(--color-error);
 }
 
