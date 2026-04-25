@@ -1,14 +1,7 @@
-name: Firestore Rules Tests
+name: Reusable — Firestore Rules Tests
 
 on:
-  pull_request:
-    branches:
-      - develop
-      - master
-  push:
-    branches:
-      - develop
-      - master
+  workflow_call:
 
 jobs:
   firestore-rules:
