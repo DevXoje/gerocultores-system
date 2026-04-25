@@ -1,0 +1,48 @@
+{
+  "auditDate": "2026-04-25",
+  "url": "https://gero-care--staging-o2g72gqa.web.app",
+  "channel": "staging",
+  "device": "desktop",
+  "performanceScore": 60,
+  "metrics": {
+    "FCP": {
+      "displayValue": "3.9\u00a0s",
+      "numericValue": 3947.631900000004,
+      "score": 0.01
+    },
+    "LCP": {
+      "displayValue": "3.9\u00a0s",
+      "numericValue": 3947.631900000004,
+      "score": 0.17
+    },
+    "TBT": {
+      "displayValue": "0\u00a0ms",
+      "numericValue": 0,
+      "score": 1
+    },
+    "CLS": {
+      "displayValue": "0",
+      "numericValue": 0.00039200000000000004,
+      "score": 1
+    },
+    "TTI": {
+      "displayValue": "3.9\u00a0s",
+      "numericValue": 3947.631900000004,
+      "score": 0.61
+    },
+    "SpeedIndex": {
+      "displayValue": "3.9\u00a0s",
+      "numericValue": 3947.631900000004,
+      "score": 0.1
+    }
+  },
+  "totalTransferSizeKB": 4064,
+  "mainCulprit": "Material Symbols Outlined font (Google Fonts) \u2014 3834 KB transfer",
+  "rnf02Status": "FAIL \u2014 LCP=3.9s (threshold: <2.5s)",
+  "rnf04Status": "PASS \u2014 CLS=0, TBT=0ms",
+  "topOpportunities": [
+    "Replace Material Symbols Outlined with local/subset font or icon library (saves ~3.8 MB)",
+    "Add cache headers for static assets (Firebase Hosting default: short TTL on some assets)",
+    "Tree-shake unused JS (index-97dsNQv8.js has ~94 KB unused)"
+  ]
+}
