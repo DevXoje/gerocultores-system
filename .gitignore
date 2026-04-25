@@ -42,4 +42,6 @@ npm-debug.log*
 # TypeScript build info
 *.tsbuildinfo
 
-
+# Temporary files
+tmp/
+.tmp
