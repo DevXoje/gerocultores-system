@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     name: Lint, Type-check, Unit Tests
@@ -57,11 +61,7 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Cache Firebase Emulator binaries
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/firebase/emulators
-          key: firebase-emulators-${{ runner.os }}-v2
+      # No cache — firebase emulators downloaded fresh each run.
 
       - name: Install firebase-tools
         run: npm install -g firebase-tools

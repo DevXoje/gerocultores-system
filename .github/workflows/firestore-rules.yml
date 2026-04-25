@@ -5,10 +5,20 @@ on:
     branches:
       - develop
       - master
+    paths:
+      - 'code/firestore.rules'
+      - 'code/tests/firestore-rules/**'
   push:
     branches:
       - develop
       - master
+    paths:
+      - 'code/firestore.rules'
+      - 'code/tests/firestore-rules/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   firestore-rules:
@@ -32,11 +42,9 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Cache Firebase Emulator binaries
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/firebase/emulators
-          key: firebase-emulators-${{ runner.os }}-v2
+      # No cache — firebase emulators are downloaded fresh each run.
+      # The binary is ~130MB and cache invalidation issues have caused
+      # stale emulator versions to persist in CI causing null-value rule errors.
 
       - name: Install firebase-tools
         run: npm install -g firebase-tools
