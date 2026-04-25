@@ -5,10 +5,20 @@ on:
     branches:
       - develop
       - master
+    paths:
+      - 'code/firestore.rules'
+      - 'code/tests/firestore-rules/**'
   push:
     branches:
       - develop
       - master
+    paths:
+      - 'code/firestore.rules'
+      - 'code/tests/firestore-rules/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   firestore-rules:

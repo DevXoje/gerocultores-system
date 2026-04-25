@@ -66,9 +66,10 @@ service cloud.firestore {
     // Admins pueden leer todas. Crear/borrar sólo desde servidor (alertas service).
     match /notificaciones/{notifId} {
       allow read: if isAuthenticated() && (
-        request.auth.uid == resource.data.usuarioId || isAdmin()
+        (resource.data.usuarioId != null && request.auth.uid == resource.data.usuarioId) || isAdmin()
       );
       allow update: if isAuthenticated()
+        && resource.data.usuarioId != null
         && request.auth.uid == resource.data.usuarioId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['leida']);
       allow create, delete: if false;
@@ -81,7 +82,7 @@ service cloud.firestore {
     // Admins pueden leer todos. No se puede borrar.
     match /shifts/{turnoId} {
       allow read: if isAuthenticated() && (
-        request.auth.uid == resource.data.usuarioId || isAdmin()
+        (resource.data.usuarioId != null && request.auth.uid == resource.data.usuarioId) || isAdmin()
       );
       allow create: if isAuthenticated()
         && request.resource.data.usuarioId == request.auth.uid;

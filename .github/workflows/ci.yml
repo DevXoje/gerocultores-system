@@ -1,13 +1,21 @@
-name: CI
+name: CI & Preview
 
 on:
   pull_request:
     branches:
       - develop
       - master
+    paths:
+      - 'code/frontend/**'
   push:
     branches:
       - develop
+    paths:
+      - 'code/frontend/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
@@ -66,3 +74,38 @@ jobs:
         with:
           name: playwright-report
           path: code/frontend/playwright-report/
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: code/frontend/dist/
+
+  deploy_preview:
+    name: Deploy Preview
+    needs: ci
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: code/frontend/dist/
+
+      - name: Deploy to Firebase Hosting — PR preview
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GERO_CARE }}
+          projectId: gero-care
+          entryPoint: code
