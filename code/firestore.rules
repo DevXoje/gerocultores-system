@@ -7,10 +7,10 @@ service cloud.firestore {
       return request.auth != null;
     }
     function hasRole(rol) {
-      return isAuthenticated() && request.auth.token.rol == rol;
+      return isAuthenticated() && request.auth.token.role == rol;
     }
     function hasAnyRole(roles) {
-      return isAuthenticated() && request.auth.token.rol in roles;
+      return isAuthenticated() && request.auth.token.role in roles;
     }
     function isGerocultor() {
       return hasRole('gerocultor');
