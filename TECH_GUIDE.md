@@ -3,7 +3,7 @@
 > El Developer Agent debe leer este archivo antes de generar cualquier código.
 > El Reviewer Agent lo usa para validar que el código generado es consistente.
 >
-> **Stack activo**: Vue 3 + Vite + TypeScript + Tailwind CSS + Pinia (frontend) | Express.js + Firebase Admin SDK + Firestore (backend)
+> **Stack activo**: Vue 3.5 + Vite 8 + TypeScript 6 + Tailwind CSS 4 + Pinia 3 (frontend) | Express 5.2 + Firebase Admin 13 + Firestore (backend)
 > **ADRs de referencia**: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05
 
 ---
@@ -31,15 +31,21 @@
 ```
 code/
 ├── firebase.json           # Configuración Firebase (hosting, firestore, emulators)
+├── firestore.rules         # Firestore Security Rules v2
 ├── .firebaserc             # Alias del proyecto Firebase
 ├── frontend/
 │   ├── src/
+│   │   ├── style.css           # ← Punto de entrada Tailwind CSS v4 (@import 'tailwindcss' + @theme tokens)
 │   │   ├── assets/
-│   │   │   └── styles/         # Resets globales, variables CSS, tokens de diseño
+│   │   │   └── styles/         # Resets globales, variables CSS adicionales
 │   │   ├── business/           # ← Arquitectura DDD por módulo de dominio
-│   │   │   ├── residents/      #   Módulo de residentes
-│   │   │   ├── schedule/       #   Módulo de agenda/tareas
+│   │   │   ├── agenda/         #   Módulo de agenda/tareas
+│   │   │   ├── auth/           #   Módulo de autenticación
 │   │   │   ├── incidents/      #   Módulo de incidencias
+│   │   │   ├── notification/   #   Módulo de notificaciones
+│   │   │   ├── residents/      #   Módulo de residentes
+│   │   │   ├── turno/          #   Módulo de gestión de turnos
+│   │   │   ├── users/          #   Módulo de gestión de usuarios (admin)
 │   │   │   └── {module}/
 │   │   │       ├── domain/
 │   │   │       │   ├── entities/       # TypeScript interfaces + Zod schemas
@@ -48,25 +54,28 @@ code/
 │   │   │       ├── application/        # Casos de uso (sin dependencias de framework)
 │   │   │       ├── infrastructure/
 │   │   │       │   ├── repositories/  # Implementaciones Firebase
+│   │   │       │   ├── api/           # Clientes HTTP para la Express API
 │   │   │       │   └── mappers/       # Datos Firebase → entidad de dominio
 │   │   │       └── presentation/
 │   │   │           ├── atoms/         # Button, Input, Badge...
 │   │   │           ├── molecules/     # ResidentCard, IncidentRow...
-│   │   │           ├── pages/         # Vistas completas (una por ruta)
+│   │   │           ├── components/    # Componentes de la vista (composables + template)
+│   │   │           ├── pages/ | views/ # Vista completa (una por ruta)
 │   │   │           └── composables/   # Puente componentes ↔ stores/repos
 │   │   ├── shared/
 │   │   │   ├── ui/             # Atoms/molecules verdaderamente cross-módulo
 │   │   │   ├── composables/    # Composables verdaderamente compartidos
 │   │   │   ├── types/          # Tipos TypeScript compartidos
 │   │   │   └── utils/          # Funciones utilitarias puras
-│   │   ├── stores/             # Solo estado global (ej: auth). Estado de módulo va en business/{module}/
+│   │   ├── components/         # Componentes globales (OfflineBanner, etc.)
+│   │   ├── stores/             # Solo estado global (auth, notificaciones). Estado de módulo va en business/{module}/
 │   │   ├── router/             # Vue Router 4 — index.ts + guards.ts
-│   │   ├── App.vue
+│   │   ├── services/           # Clientes HTTP globales (apiClient.ts)
+│   │   ├── App.vue             # AppShell: monta NotificationToast, NotificationPanel, OfflineBanner
 │   │   └── main.ts
 │   ├── public/
 │   ├── index.html
 │   ├── vite.config.ts
-│   ├── tailwind.config.ts
 │   └── tsconfig.json
 └── api/
     ├── src/
@@ -74,6 +83,7 @@ code/
     │   ├── middleware/         # verifyAuth, errorHandler, validateBody
     │   ├── routes/             # Express Router (index.ts + modular)
     │   ├── services/           # Lógica de negocio (acceso a Firestore)
+    │   │   └── collections.ts  # ← Constante COLLECTIONS (G04 — nunca strings literales)
     │   └── types/              # Tipos compartidos (espejo de SPEC/entities.md)
     ├── app.ts                  # Configuración Express
     ├── server.ts               # Punto de entrada (puerto, listen)
@@ -197,7 +207,7 @@ export const useResidentsStore = defineStore('residents', () => {
 
 ### 3.1 Cliente HTTP (Axios)
 
-Un único cliente Axios configurado con el token Firebase Auth:
+Un único cliente Axios configurado con el token Firebase Auth en `src/services/apiClient.ts`:
 
 ```typescript
 // services/apiClient.ts
@@ -222,29 +232,44 @@ apiClient.interceptors.request.use(async (config) => {
 export default apiClient
 ```
 
-### 3.2 Estructura de services
+> **Nota**: en desarrollo, Vite proxea `/api/*` y `/health` a `http://localhost:3000`. No es necesario configurar manualmente la URL del backend.
 
-Los services encapsulan las llamadas HTTP. **Solo** los stores los llaman directamente.
+### 3.2 Estructura de services en módulos
+
+Los módulos frontend usan un cliente HTTP por módulo en `infrastructure/api/` en lugar de un service global. Solo los composables los llaman.
 
 ```typescript
-// services/tareaService.ts
-import apiClient from './apiClient'
-import type { Tarea, ActualizarTareaDto } from '@/types/tarea.types'
+// business/turno/infrastructure/api/turnoApi.ts
+import apiClient from '@/services/apiClient'
 
-export const tareaService = {
-  async getTareasHoy(): Promise<Tarea[]> {
-    const { data } = await apiClient.get<Tarea[]>('/tareas/hoy')
-    return data
+export const turnoApi = {
+  async getResumen(turnoId: string) {
+    const { data } = await apiClient.get(`/api/turnos/${turnoId}/resumen`)
+    return TurnoResumenSchema.parse(data)
   },
-
-  async actualizarEstado(id: string, dto: ActualizarTareaDto): Promise<Tarea> {
-    const { data } = await apiClient.patch<Tarea>(`/tareas/${id}`, dto)
-    return data
-  }
 }
 ```
 
-### 3.3 Manejo de errores en la API (Express)
+### 3.3 Rutas de la API
+
+Todas las rutas Express están montadas bajo `/api/` o `/` (health check):
+
+| Ruta | Método | US | Requiere auth |
+|------|--------|-----|--------------|
+| `/health` | GET | US-13 | No |
+| `/api/protected` | GET | US-02 | Sí (cualquier rol) |
+| `/api/admin/users` | GET | US-10 | Sí (`admin`) |
+| `/api/admin/users` | POST | US-10 | Sí (`admin`) |
+| `/api/admin/users/:uid/role` | PATCH | US-10 | Sí (`admin`) |
+| `/api/admin/users/:uid/disable` | PATCH | US-10 | Sí (`admin`) |
+| `/api/turnos` | POST | US-11 | Sí |
+| `/api/turnos/activo` | GET | US-11 | Sí |
+| `/api/turnos/:id` | PATCH | US-11 | Sí |
+| `/api/turnos/:id/resumen` | GET | US-11 | Sí |
+| `/api/notificaciones` | GET | US-08 | Sí |
+| `/api/notificaciones/:id/leer` | PATCH | US-08 | Sí |
+
+### 3.4 Manejo de errores en la API (Express)
 
 - Todos los errores devuelven `{ error: string, code?: string }`.
 - Los códigos HTTP siguen estándar REST: 200, 201, 400, 401, 403, 404, 500.
@@ -265,7 +290,7 @@ export function errorHandler(
 }
 ```
 
-### 3.4 Autenticación en Express
+### 3.5 Autenticación en Express
 
 El middleware `verifyAuth` valida el ID Token de Firebase y extrae el usuario:
 
@@ -302,7 +327,9 @@ export async function verifyAuth(req: Request, res: Response, next: NextFunction
 
 | Nivel | Framework | Uso |
 |-------|-----------|-----|
-| Unit | Vitest + Vue Test Utils | Composables, stores, use cases, domain entities, utils |
+| Unit | Vitest 4 + Vue Test Utils | Composables, stores, use cases, domain entities, utils |
+| Integration | Vitest + Supertest | API routes, services con mocks de Firestore |
+| Firestore Rules | Jest + `@firebase/rules-unit-testing` | Reglas de seguridad Firestore |
 | E2E | Playwright | Flujos críticos de usuario (login, agenda, incidencias) |
 | Manual | Guías en `OUTPUTS/test-plans/` | Casos de uso completos, UX táctil |
 
@@ -312,6 +339,7 @@ export async function verifyAuth(req: Request, res: Response, next: NextFunction
 - Tests E2E: `tests/e2e/nombreDelFlujo.spec.ts`.
 - Describe por comportamiento: `describe('ResidentCard', () => { it('should display name when active', ...) })`.
 - Usar `vi.mock` para mockear stores y repositorios en tests de composables.
+- Usar `@pinia/testing` (`createTestingPinia`) para aislar stores en tests de componentes.
 
 ### 4.3 Coverage mínimo (MVP)
 
@@ -323,20 +351,31 @@ export async function verifyAuth(req: Request, res: Response, next: NextFunction
 | `infrastructure/repositories/` | Todos los paths (mock de Firestore) |
 | `presentation/molecules/` y `atoms/` | Smoke test + props principales |
 
+> **Nota**: La cobertura total del proyecto se sitúa ~72–73% (Sprint-4 final). Los módulos críticos (`domain/`, `application/`) deben superar el 80%.
+
 ### 4.4 Comandos de test
 
 ```bash
-# Frontend — tests unitarios
+# Frontend — tests unitarios (modo run)
 cd code/frontend && npm run test
+
+# Frontend — modo watch
+cd code/frontend && npm run test:watch
 
 # Frontend — coverage
 cd code/frontend && npm run test:coverage
 
-# E2E (requiere servidor activo)
-cd code/frontend && npx playwright test
+# Frontend — E2E (requiere servidor activo)
+cd code/frontend && npm run test:e2e
 
 # API — tests unitarios
 cd code/api && npm run test
+
+# API — tests de integración
+cd code/api && npm run test:integration
+
+# Firestore Rules (requiere emuladores activos)
+cd code/tests/firestore-rules && npm test
 ```
 
 ---
@@ -355,7 +394,7 @@ cd code/api && npm run test
 
 ### 5.2 Variables de entorno
 
-    **Frontend** (`code/frontend/.env.local`):
+**Frontend** (`code/frontend/.env.local`):
 ```
 VITE_API_URL=http://localhost:3000
 VITE_FIREBASE_API_KEY=...
@@ -382,6 +421,12 @@ CORS_ORIGIN=http://localhost:5173
 - Datos de residentes son datos de categoría especial (art. 9 RGPD) — acceso solo con autenticación.
 - Los datos de test se generan con Faker.js — **nunca** datos reales de personas.
 
+### 5.4 Firestore Security Rules
+
+- Archivo: `code/firestore.rules` — rules_version `'2'`.
+- **Patrón para campos opcionales**: usar `resource.data.keys().hasAll(['field']) ? resource.data['field'] : null` en lugar de acceder directamente a `resource.data.field` (lanza error si el campo no existe en Firestore Rules v2).
+- Tests de reglas: `code/tests/firestore-rules/` con Jest + `@firebase/rules-unit-testing`.
+
 ---
 
 ## 6. Anti-patrones prohibidos
@@ -403,6 +448,8 @@ CORS_ORIGIN=http://localhost:5173
 | Llamadas a Firebase dentro de un Pinia store | Mover al composable o caso de uso en `application/` |
 | Clases Tailwind directamente en HTML del template | BEM en HTML + `@apply` en `<style scoped>` |
 | `v-for` con índice como `:key` | Usar el `id` único de la entidad |
+| Strings literales para nombres de colecciones Firestore | Usar siempre la constante `COLLECTIONS` de `services/collections.ts` |
+| `@apply` en `<style scoped>` sin `@reference` | Añadir `@reference "../../../../style.css"` como primera línea del bloque `<style scoped>` |
 
 ---
 
@@ -416,7 +463,36 @@ CORS_ORIGIN=http://localhost:5173
 - Al implementar pantallas, alinear la UI con **SPEC/** (comportamiento, campos, flujos) y usar los exports como referencia visual.
 - Si el diseño exige un cambio funcional, actualizar SPEC antes de tratar el diseño como cerrado (G06).
 
-### 7.1 Tailwind CSS — convenciones BEM
+### 7.1 Tailwind CSS v4 — patrón `@reference` obligatorio
+
+> **Tailwind CSS v4 rompe con v3**: ya no existe `tailwind.config.ts`. La configuración de tokens (colores, fuentes, breakpoints) se define en `src/style.css` mediante directivas `@theme {}`.
+
+**Patrón obligatorio en `<style scoped>`**:
+
+```css
+/* TODA sección <style scoped> que use @apply debe empezar con @reference */
+<style scoped>
+@reference "../../../../style.css";   /* ← ajustar ruta relativa según profundidad */
+
+.mi-componente {
+  @apply rounded-lg shadow-md p-4;
+}
+</style>
+```
+
+- **`@reference` es obligatorio** si el componente usa `@apply`. Sin él, Vite/build falla silenciosamente o `@apply` ignora los tokens del design system.
+- La ruta en `@reference` debe ser **relativa** al archivo `.vue` (no alias `@/`).
+- Tabla de rutas según profundidad del componente:
+
+| Ubicación del componente | `@reference` |
+|--------------------------|-------------|
+| `src/App.vue` | `"./style.css"` |
+| `src/components/*.vue` | `"../style.css"` |
+| `src/business/{mod}/presentation/components/*.vue` | `"../../../../style.css"` |
+| `src/business/{mod}/presentation/pages/*.vue` | `"../../../../style.css"` |
+| `src/business/{mod}/presentation/views/*.vue` | `"../../../../style.css"` |
+
+### 7.2 BEM naming
 
 - **BEM naming para TODOS los atributos `class` en HTML**: patrón `block__element--modifier`.
 - **Tailwind va en CSS, NO en HTML** — excepto en excepciones justificadas documentadas con `<!-- tailwind-exception: razón -->`.
@@ -430,7 +506,10 @@ CORS_ORIGIN=http://localhost:5173
 ```
 
 ```css
-/* <style scoped> — BEM → Tailwind via @apply */
+/* <style scoped> — siempre con @reference primero */
+<style scoped>
+@reference "../../../../style.css";
+
 .resident-card {
   @apply rounded-lg shadow-md p-4;
 }
@@ -442,14 +521,13 @@ CORS_ORIGIN=http://localhost:5173
   text-decoration: line-through;          /* regla única → raw CSS */
   text-decoration-thickness: 2px;
 }
+</style>
 ```
 
 - Usar `<style scoped>` en todos los componentes `.vue`.
-- Estilos globales (resets, variables CSS, tokens) en `src/assets/styles/`.
-- Usar el sistema de diseño definido en `tailwind.config.ts` (colores, tipografía, breakpoints).
+- Estilos globales (resets, tokens) en `src/style.css` (archivo de entrada de Tailwind v4).
 - Breakpoints principales: `sm` (640px — móvil grande), `md` (768px — tablet), `lg` (1024px — desktop).
 - Target principal: tablet 10" en orientación portrait → diseñar mobile-first.
-- No usar clases de Tailwind para lógica de negocio visual (ej: mostrar/ocultar con `hidden` según estado de negocio → usar `v-if`/`v-show`).
 
 ---
 
@@ -480,23 +558,26 @@ cd code && firebase emulators:start
 # Frontend (Vite dev server en http://localhost:5173)
 cd code/frontend && npm run dev
 
-# API (Express en http://localhost:3000)
+# API (Express en http://localhost:3000, tsx watch)
 cd code/api && npm run dev
 
-# Firebase emulators (Auth: 9099, Firestore: 8080, Emulator UI: 4000) — desde code/
+# Firebase emulators — desde code/
+# Auth: 9099  |  Firestore: 8080  |  Emulator UI: http://localhost:4000
 cd code && firebase emulators:start
 ```
+
+> **Nota**: el frontend Vite proxea `/api/*` y `/health` a `http://localhost:3000`. No es necesario configurar CORS manualmente en desarrollo.
 
 ### 8.3 Build y despliegue
 
 ```bash
-# Build del frontend
+# Build del frontend (vue-tsc + vite build)
 cd code/frontend && npm run build
 
-# Build de la API
+# Build de la API (tsc)
 cd code/api && npm run build
 
-# Deploy completo a Firebase Hosting + Functions (si aplica) — desde code/
+# Deploy completo a Firebase Hosting — desde code/
 cd code && firebase deploy
 
 # Deploy solo Hosting
@@ -506,12 +587,25 @@ cd code && firebase deploy --only hosting
 cd code && firebase deploy --only firestore:rules
 ```
 
-### 8.4 Type checking
+### 8.4 Type checking y linting
 
 ```bash
-cd code/frontend && npm run type-check
-cd code/api && npx tsc --noEmit
+# Frontend
+cd code/frontend && npm run type-check   # vue-tsc --noEmit
+cd code/frontend && npm run lint
+cd code/frontend && npm run format:check
+
+# API
+cd code/api && npm run type-check        # tsc --noEmit
 ```
+
+### 8.5 Path aliases
+
+| Alias | Resuelve a | Configurado en |
+|-------|-----------|---------------|
+| `@/` | `code/frontend/src/` | `vite.config.ts` → `resolve.alias` |
+
+> No existe alias `~/`. Usar `@/` para todos los imports absolutos del frontend.
 
 ---
 
@@ -562,6 +656,8 @@ const statusLabel = computed(() => props.resident.active ? 'Activo' : 'Inactivo'
 </template>
 
 <style scoped>
+@reference "../../../../style.css";
+
 /* BEM en HTML → @apply Tailwind en CSS */
 .resident-card {
   @apply rounded-lg shadow-md p-4 cursor-pointer;
@@ -622,10 +718,6 @@ const resident = rawData as Resident
 
 ---
 
-*Última actualización: 2026-04-06 — Actualizado al stack Vue 3 + Firebase + DDD frontend (ADR-01b, ADR-02b, ADR-03b)*
-
----
-
 ## 10. Arquitectura Frontend — DDD por módulos
 
 > **Referencia completa**: `AGENTS/frontend-specialist.md`
@@ -659,6 +751,7 @@ domain/ (entities, value-objects, repo interfaces)
 | `domain/repositories/` | Define interfaces de repositorio (puertos) | Contener implementación alguna |
 | `application/` | Orquesta casos de uso con entidades + repos | Importar Vue, Pinia o componentes UI |
 | `infrastructure/repositories/` | Implementa repos con Firebase/Firestore | Contener lógica de negocio |
+| `infrastructure/api/` | Clientes HTTP para la Express API | Contener lógica de negocio |
 | `infrastructure/mappers/` | Convierte datos Firebase ↔ entidades de dominio | Llamar Firebase directamente |
 | `presentation/composables/` | Puente componentes ↔ stores/repos | Contener markup o ser importado por capas inferiores |
 | `presentation/atoms/` y `molecules/` | Renderiza UI — puramente presentacional | Importar stores, repos o composables |
@@ -709,11 +802,38 @@ export function assertIsResident(val: unknown): asserts val is Resident {
 ### 10.6 Reglas CSS / BEM
 
 1. **HTML**: solo clases BEM (`block__element--modifier`).
-2. **`<style scoped>`**: clases BEM mapean a Tailwind via `@apply` (simple) o raw CSS (complejo/único).
-3. **Excepción documentada**: `<!-- tailwind-exception: razón -->` si es necesario Tailwind en HTML.
-4. Estilos globales en `src/assets/styles/` (reset, tokens, tipografía).
+2. **`<style scoped>`**: primera línea obligatoria `@reference "ruta/a/style.css"` (Tailwind v4).
+3. Clases BEM mapean a Tailwind via `@apply` (simple) o raw CSS (complejo/único).
+4. **Excepción documentada**: `<!-- tailwind-exception: razón -->` si es necesario Tailwind en HTML.
+5. Estilos globales en `src/style.css` (tokens del design system) y `src/assets/styles/` (resets adicionales).
 
-### 10.7 TDD — Red → Green → Refactor
+### 10.7 Colecciones Firestore
+
+Las colecciones Firestore **nunca** se referencian con strings literales. Siempre usar la constante `COLLECTIONS`:
+
+```typescript
+// ✅ Correcto
+import { COLLECTIONS } from '../services/collections'
+const snapshot = await db.collection(COLLECTIONS.turnos).doc(id).get()
+
+// ❌ Prohibido
+const snapshot = await db.collection('shifts').doc(id).get()
+```
+
+**Mapa de colecciones actuales** (archivo `code/api/src/services/collections.ts`):
+
+| Clave COLLECTIONS | Nombre Firestore | Entidad |
+|-------------------|-----------------|---------|
+| `usuarios` | `users` | Usuario |
+| `residentes` | `residents` | Residente |
+| `tareas` | `tasks` | Tarea |
+| `incidences` | `incidences` | Incidencia |
+| `turnos` | `shifts` | Turno |
+| `notificaciones` | `notificaciones` | Notificación |
+
+> **Nota**: `incidencias` es alias deprecated de `incidences`. Usar siempre `COLLECTIONS.incidences`.
+
+### 10.8 TDD — Red → Green → Refactor
 
 **TDD es obligatorio** para toda la lógica de dominio y composables.
 
@@ -731,4 +851,104 @@ PARA CADA TAREA:
 - Tests unitarios: co-ubicados (`resident.spec.ts` junto a `resident.ts`).
 - Tests E2E: `tests/e2e/{feature}.spec.ts`.
 - Mocking en composables: `vi.mock` para store y repositorio.
+- Para stores Pinia en tests de componentes: `createTestingPinia` de `@pinia/testing`.
 - Coverage mínimo: 80% en `domain/` y `application/`, 70% en `presentation/composables/`.
+
+---
+
+## 11. Common Pitfalls
+
+Errores frecuentes detectados durante el desarrollo. **Leer antes de escribir código**.
+
+### P-01 — `@apply` sin `@reference` (Tailwind v4 build failure)
+
+**Síntoma**: Las clases de `@apply` son ignoradas o Vite lanza error en build. Los estilos compilados no incluyen las utilidades de Tailwind.
+
+**Causa**: Tailwind CSS v4 no inyecta automáticamente su CSS en bloques `<style scoped>`. Sin `@reference`, el `@apply` no puede resolver las utilidades del design system.
+
+**Solución**: añadir `@reference "ruta/a/style.css"` como primera línea del bloque `<style scoped>`.
+
+```css
+/* ✅ Correcto — siempre la primera línea */
+<style scoped>
+@reference "../../../../style.css";
+
+.mi-bloque {
+  @apply rounded-lg p-4;
+}
+</style>
+
+/* ❌ Falla silenciosamente en build */
+<style scoped>
+.mi-bloque {
+  @apply rounded-lg p-4;
+}
+</style>
+```
+
+### P-02 — `any` en TypeScript
+
+**Síntoma**: ESLint error `@typescript-eslint/no-explicit-any`.
+
+**Causa**: El proyecto tiene `strict: true` y `no-explicit-any: error`. El tipo `any` desactiva completamente el type checking.
+
+**Solución**: usar `unknown` con narrowing explícito o tipos genéricos.
+
+```typescript
+// ❌ Prohibido
+function parseData(data: any) { ... }
+
+// ✅ Correcto
+function parseData(data: unknown) {
+  if (typeof data === 'object' && data !== null) { ... }
+}
+```
+
+### P-03 — Strings literales para nombres de colecciones Firestore
+
+**Síntoma**: discrepancias entre colecciones en código y reglas de Firestore; errores difíciles de rastrear al renombrar colecciones.
+
+**Causa**: los nombres reales de colecciones difieren del nombre semántico del dominio (ej: `turnos` en dominio → `shifts` en Firestore).
+
+**Solución**: siempre importar y usar `COLLECTIONS` de `code/api/src/services/collections.ts`.
+
+### P-04 — Firestore Rules v2: acceso a campo opcional sin `keys().hasAll()`
+
+**Síntoma**: la regla de Firestore lanza un error en runtime si el campo no existe en el documento.
+
+**Causa**: en Firestore Rules v2, acceder a `resource.data.campo` cuando `campo` no existe en el documento lanza una excepción de evaluación (a diferencia de v1 que devolvía `null`).
+
+**Solución**:
+
+```javascript
+// ❌ Lanza error si 'fin' no existe en el documento
+allow update: if resource.data.fin == null;
+
+// ✅ Patrón seguro con keys().hasAll()
+allow update: if !resource.data.keys().hasAll(['fin']);
+
+// ✅ Patrón helper para leer campo opcional
+function getField(data, field) {
+  return data.keys().hasAll([field]) ? data[field] : null;
+}
+```
+
+### P-05 — Notificaciones polling antes de autenticación
+
+**Síntoma**: requests `401` repetidas a `/api/notificaciones` antes de que el usuario haga login, visibles en los logs de consola.
+
+**Causa**: si el polling de notificaciones se inicia en `App.vue` sin verificar el estado de autenticación, se realizan requests no autenticadas.
+
+**Solución**: iniciar el polling solo después de confirmar que `useAuthStore().user` está disponible (listener `onAuthStateChanged`).
+
+### P-06 — Lint errors por imports sin usar en test files
+
+**Síntoma**: ESLint reporta `no-unused-vars` en archivos `.spec.ts`.
+
+**Causa**: al refactorizar tests, es fácil dejar imports `ref`, `Mock`, `beforeEach` etc. sin usar.
+
+**Solución**: revisar `npm run lint` antes de hacer commit. Usar `npm run lint:fix` para correcciones automáticas.
+
+---
+
+*Última actualización: 2026-04-25 — Sprint-4 completo: añadido @reference obligatorio (Tailwind v4), COLLECTIONS pattern, infrastructure/api layer, scripts actualizados, Common Pitfalls, colecciones Firestore canónicas (ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05)*

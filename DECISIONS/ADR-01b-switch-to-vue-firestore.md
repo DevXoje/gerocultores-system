@@ -1,6 +1,7 @@
 # ADR-01b: Switch Frontend a Vue.js + Vite + Tailwind + Pinia + Axios
 
 - **Estado**: ACCEPTED
+- **Última revisión**: 2026-04-25 — corregida arquitectura de componentes (feature-based, no Atomic Design)
 - **Fecha**: 2026-03-29
 - **Fecha de aceptación**: 2026-04-01
 - **Autor**: Jose Vilches Sánchez
@@ -38,10 +39,10 @@ Se elige **Opción B: Vue 3 + Vite + Pinia + Axios + Tailwind CSS**.
 - **Framework**: Vue 3 con Composition API (`<script setup>`).
 - **Bundler**: Vite 5+.
 - **Estilos**: Tailwind CSS v3.
-- **Estado**: Pinia (store por dominio: `useAuthStore`, `useAgendaStore`, `useResidenteStore`).
+- **Estado**: Pinia (store por dominio: `useAuthStore`, `useAgendaStore`, `useResidenteStore`). Stores ubicados en `business/{domain}/` (no en `src/stores/`).
 - **HTTP**: Axios con interceptores para token Firebase Auth.
 - **Routing**: Vue Router 4.
-- **Arquitectura de componentes**: Atomic Design simplificado (atoms → molecules → organisms → pages).
+- **Arquitectura de componentes**: Feature-based (`business/{domain}/presentation/{components,views,pages,composables,stores}`).
 - **Testing**: Vitest (unit) + Playwright (E2E).
 
 ## Consecuencias
@@ -78,3 +79,7 @@ Se elige **Opción B: Vue 3 + Vite + Pinia + Axios + Tailwind CSS**.
 - ADR-01 (superseded) — Stack original React.
 - Propuesta: Engram `sdd/switch-stack-to-vue-firebase/proposal`.
 - SPEC/constraints.md § 2.1 — Stack tecnológico (JS/TS).
+
+## Nota de revisión (2026-04-25)
+
+> **Drift corregido**: La arquitectura de componentes documentada originalmente como "Atomic Design simplificado" fue reemplazada en la práctica por una arquitectura **feature-based** (`business/{domain}/presentation/{components,views,pages,composables,stores}`). Los Pinia stores residen en `business/{domain}/` en lugar de `src/stores/`. Este ADR se actualiza para reflejar la implementación real.

@@ -1,15 +1,18 @@
 # ADR-04b: Despliegue, Infraestructura y RGPD (Firebase Hosting + Cloud Run)
 
-- **Estado**: ACCEPTED
+- **Estado**: SUPERSEDED
 - **Fecha**: 2026-03-29
 - **Fecha de aceptación**: 2026-04-01
+- **Supersedida por**: ADR-04c (2026-04-25)
 - **Autor**: Jose Vilches Sánchez
 - **Tutor**: ANDRES MARTOS GAZQUEZ
 - **Centro**: CIPFP Batoi d'Alcoi
 - **Curso**: 2025-2026
 - **Supersede**: ADR-04 (Supabase Frankfurt + Vercel)
 
-> ✅ **ACCEPTED — Aprobado por Jose Vilches Sánchez el 2026-04-01.**
+> ⚠️ **SUPERSEDED — Reemplazada por ADR-04c el 2026-04-25.**
+> Este ADR documentaba Firebase Hosting (frontend) con la Express API como servicio **solo local/emulador**.
+> La decisión real de producción (Cloud Run para la API + Cloud Functions callable) está en **ADR-04c**.
 
 ## Contexto
 
