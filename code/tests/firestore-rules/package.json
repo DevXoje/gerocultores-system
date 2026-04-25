@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",
-    "firebase": "^10.14.0"
+    "firebase": "^12.12.1"
   },
   "devDependencies": {
     "vitest": "^4.1.4"
