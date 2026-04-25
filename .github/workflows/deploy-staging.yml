@@ -72,7 +72,7 @@ jobs:
       - name: Run Firestore rules tests
         working-directory: code
         env:
-          FIRESTORE_EMULATOR_HOST: localhost:18080
+          FIRESTORE_EMULATOR_HOST: localhost:8080
         run: |
           firebase emulators:exec \
             --only firestore \
