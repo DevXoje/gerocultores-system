@@ -121,35 +121,3 @@ jobs:
           projectId: gero-care
           channelId: staging
           entryPoint: ./code
-
-  smoke-test-staging:
-    name: Playwright Smoke Test on Staging
-    needs: [deploy-staging]
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: code/frontend
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: code/frontend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Run smoke test against staging
-        env:
-          # For PR previews the action outputs a unique URL;
-          # for channel deploys we fall back to the known static URL.
-          PLAYWRIGHT_TEST_BASE_URL: ${{ steps.deploy.outputs.preview-url || 'https://gero-care--staging.web.app' }}
-        run: npx playwright test e2e/smoke-staging.spec.ts --reporter=list

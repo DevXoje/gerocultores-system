@@ -62,3 +62,5 @@ Cuando añadas o cambies un export, actualiza la fila correspondiente o crea una
 | `DashboardView.vue` | `src/views/DashboardView.vue` | Caregiver Dashboard | `OUTPUTS/design-exports/US-03-agenda-home__caregiver-dashboard__20260328.png` |
 | `UsersView.vue` | `src/business/users/presentation/views/UsersView.vue` | Resident Records (`US-09-resident-records__resident-records__20260328.png`) | `OUTPUTS/design-exports/US-09-resident-records__resident-records__20260328.png` |
 | `ResidenteView.vue` | `src/business/residents/presentation/views/ResidenteView.vue` | Resident Detail - Eleanor Vance | `OUTPUTS/design-exports/US-05-resident-detail__resident-detail-eleanor-vance__20260328.png` |
+| `NotificationPanel.vue` | `src/business/notification/presentation/components/NotificationPanel.vue` | Notification Panel - Mobile (`9da813299be1474bb3293febda0c35fe`) | — |
+| `TurnoView.vue` | `src/business/turno/presentation/views/TurnoView.vue` | Shift Management - Care & Serenity (`74dc49b5d18c44ea8ab1b6079320622f`) | — |

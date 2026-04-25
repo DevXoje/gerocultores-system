@@ -128,6 +128,14 @@ ACTION_ON_VIOLATION: Flag commit message as non-compliant.
 CHECK: Does the commit message follow feat(US-XX) pattern?
 ```
 
+### G11 — No skip of pre-push safety nets
+```
+RULE: git push --no-verify (or any variant that bypasses lint-staged or test hooks)
+      is STRICTLY PROHIBITED. The pre-push hook exists to protect shared CI state.
+      If tests fail, fix the root cause — never bypass the safety net.
+SEVERITY: BLOCKED — do not use --no-verify under any circumstances.
+```
+
 ### G09 — Academic coverage
 ```
 RULE: Writer MUST verify that every section of the DAW memoria has coverage in
@@ -203,6 +211,8 @@ required:
 ---
 
 ## Commit Convention (Agent-Enforced)
+
+> **G11**: `git push --no-verify` is **STRICTLY PROHIBITED**. Fix failing tests instead of bypassing the safety net.
 
 All commits must follow **Conventional Commits** format:
 

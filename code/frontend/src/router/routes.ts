@@ -5,6 +5,7 @@ import { authRoutes } from '@/business/auth/routes'
 import { residentsRoutes } from '@/business/residents/routes'
 import { incidentsRoutes } from '@/business/incidents/routes'
 import DashboardView from '@/views/DashboardView.vue'
+import TurnoView from '@/business/turno/presentation/components/TurnoView.vue'
 
 /**
  * Application route definitions.
@@ -28,6 +29,12 @@ export const routes: RouteRecordRaw[] = [
     path: DASHBOARD_ROUTES.path,
     name: DASHBOARD_ROUTES.name,
     component: DashboardView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/turno',
+    name: 'turno',
+    component: TurnoView,
     meta: { requiresAuth: true },
   },
 ]
