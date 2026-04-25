@@ -22,7 +22,7 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     function isResourceOwner() {
-      return isAuthenticated() && resource.data.userId == request.auth.uid;
+      return isAuthenticated() && resource.data.userId != null && resource.data.userId == request.auth.uid;
     }
 
 
