@@ -79,6 +79,9 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E tests
+        env:
+          E2E_USER: ${{ secrets.E2E_USER }}
+          E2E_PASS: ${{ secrets.E2E_PASS }}
         run: npm run test:e2e
 
       - name: Upload Playwright report
