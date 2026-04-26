@@ -9,14 +9,19 @@ import { getAuth, getIdToken } from 'firebase/auth'
 /**
  * Centralized Axios instance used by all API modules.
  *
- * If VITE_API_BASE_URL is set (staging/production), requests go directly to that URL.
- * If not set (local dev), requests go to '/api' which Vite proxies to localhost:3000.
+ * VITE_API_BASE_URL must be set in all environments (local, staging, production).
+ * No silent fallback to '/api' — if missing, the app fails immediately at import time.
  *
  * Interceptor: attaches the Firebase ID token as `Authorization: Bearer <token>`
  * to every outgoing request. If no user is logged in, the header is omitted
  * and the server will return 401 (expected behavior for unauthenticated calls).
  */
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
+const baseURL = import.meta.env.VITE_API_BASE_URL
+if (!baseURL) {
+  throw new Error(
+    '[apiClient] VITE_API_BASE_URL is not set. Configure it in .env.local (local) or via CI secret (staging/prod).'
+  )
+}
 
 export const apiClient = axios.create({
   baseURL,
@@ -38,16 +43,10 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
  * Lightweight health-check function for connectivity validation.
  * Returns true if the server responds with 2xx, false otherwise.
  * Does NOT throw — returns boolean to allow clean branching in callers.
- *
- * In staging/production (VITE_API_BASE_URL set), calls the absolute health URL.
- * In local dev, uses the Vite proxy to localhost:3000.
  */
 export async function isServerHealthy(): Promise<boolean> {
   try {
-    // Health endpoint is at /health (mounted at root level, not under /api).
-    const healthUrl = import.meta.env.VITE_API_BASE_URL
-      ? `${import.meta.env.VITE_API_BASE_URL}/health`
-      : '/health'
+    const healthUrl = `${import.meta.env.VITE_API_BASE_URL}/health`
     const response = await axios.get(healthUrl, { timeout: 3000 })
     return response.status >= 200 && response.status < 300
   } catch {
