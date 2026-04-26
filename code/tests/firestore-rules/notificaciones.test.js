@@ -41,8 +41,8 @@ afterEach(async () => {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function authedDb(uid, rol) {
-  return testEnv.authenticatedContext(uid, { rol }).firestore();
+function authedDb(uid, role) {
+  return testEnv.authenticatedContext(uid, { role }).firestore();
 }
 
 function unauthDb() {

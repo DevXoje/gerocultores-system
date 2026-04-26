@@ -15,6 +15,7 @@
 import { onMounted } from 'vue'
 import { useNotificacion } from '../composables/useNotificacion'
 import type { Notificacion } from '../../domain/entities/Notificacion'
+import { XMarkIcon, BellSlashIcon } from '@heroicons/vue/24/outline'
 
 defineProps<{
   open: boolean
@@ -90,7 +91,7 @@ onMounted(() => {
           aria-label="Cerrar panel"
           @click="emit('close')"
         >
-          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          <XMarkIcon class="notification-panel__close-icon" aria-hidden="true" />
         </button>
       </header>
 
@@ -102,9 +103,7 @@ onMounted(() => {
 
       <!-- Empty state -->
       <div v-else-if="items.length === 0" class="notification-panel__empty" aria-live="polite">
-        <span class="material-symbols-outlined notification-panel__empty-icon" aria-hidden="true">
-          notifications_none
-        </span>
+        <BellSlashIcon class="notification-panel__empty-icon" aria-hidden="true" />
         <p class="notification-panel__empty-msg">No tienes notificaciones.</p>
       </div>
 
@@ -177,7 +176,9 @@ onMounted(() => {
   color: var(--color-on-surface);
 }
 
-/* ─── Loading ─────────────────────────────────────────────────────────────── */
+.notification-panel__close-icon {
+  @apply w-5 h-5;
+}
 .notification-panel__loading {
   @apply flex items-center justify-center gap-2 py-8 text-sm;
   color: var(--color-on-surface-variant);
@@ -202,9 +203,8 @@ onMounted(() => {
 }
 
 .notification-panel__empty-icon {
-  font-size: 2.5rem;
+  @apply w-10 h-10;
   color: var(--color-outline-variant);
-  font-variation-settings: 'FILL' 0;
 }
 
 .notification-panel__empty-msg {

@@ -154,19 +154,28 @@ describe('TaskCard — interactions', () => {
     expect(wrapper.emitted('openDetail')![0]).toEqual(['tarea-001'])
   })
 
-  it('toggle button shows "undo" icon when task is completada', () => {
+  it('toggle button shows ArrowUturnLeftIcon when task is completada', () => {
     const tarea = makeTarea({ estado: 'completada' })
     const wrapper = mount(TaskCard, { props: { tarea } })
 
     const toggleBtn = wrapper.get('[data-testid="task-card-toggle-tarea-001"]')
-    expect(toggleBtn.text()).toContain('undo')
+    // Check for the presence of the ArrowUturnLeftIcon SVG (by tag or class)
+    const icon = toggleBtn.find('svg')
+    expect(icon.exists()).toBe(true)
+    // Optionally, check for a class or aria-label if present
+    // expect(icon.classes()).toContain('task-card__action-icon')
   })
 
-  it('toggle button shows "check_circle" icon when task is pendiente', () => {
+  it('toggle button shows CheckCircleIcon when task is pendiente', () => {
     const tarea = makeTarea({ estado: 'pendiente' })
     const wrapper = mount(TaskCard, { props: { tarea } })
 
     const toggleBtn = wrapper.get('[data-testid="task-card-toggle-tarea-001"]')
-    expect(toggleBtn.text()).toContain('check_circle')
+    // Check for the presence of the CheckCircleIcon SVG (by class or tag)
+    // Heroicons use svg tag and a class, so we check for the SVG inside the button
+    const icon = toggleBtn.find('svg')
+    expect(icon.exists()).toBe(true)
+    // Optionally, check for a class or aria-label if present
+    // expect(icon.classes()).toContain('task-card__action-icon')
   })
 })

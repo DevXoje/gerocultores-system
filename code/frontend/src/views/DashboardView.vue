@@ -20,6 +20,12 @@ import { useAgendaHoy } from '../business/agenda/application/useAgendaHoy'
 import TaskCard from '../business/agenda/presentation/components/TaskCard.vue'
 import type { EstadoTarea } from '@/services/tareas.api'
 import { INCIDENTS_ROUTES } from '../business/incidents/route-names'
+import {
+  SparklesIcon,
+  CloudIcon,
+  CalendarDaysIcon,
+  ExclamationCircleIcon,
+} from '@heroicons/vue/24/outline'
 
 // ─── Router ─────────────────────────────────────────────────────────────────
 const router = useRouter()
@@ -92,9 +98,7 @@ onMounted(() => {
     <!-- ─── Header ──────────────────────────────────────────────────────── -->
     <header class="dashboard-page__header">
       <div class="dashboard-page__header-brand">
-        <span class="material-symbols-outlined dashboard-page__logo-icon" aria-hidden="true">
-          spa
-        </span>
+        <SparklesIcon class="dashboard-page__logo-icon" aria-hidden="true" />
         <span class="dashboard-page__brand-name">Care &amp; Serenity</span>
       </div>
       <div class="dashboard-page__header-user">
@@ -125,9 +129,7 @@ onMounted(() => {
 
         <!-- Error state -->
         <div v-else-if="error" class="dashboard-page__error" role="alert">
-          <span class="material-symbols-outlined dashboard-page__error-icon" aria-hidden="true">
-            cloud_off
-          </span>
+          <CloudIcon class="dashboard-page__error-icon" aria-hidden="true" />
           <p class="dashboard-page__error-msg">{{ error }}</p>
           <p v-if="!isServerReachable" class="dashboard-page__error-hint">
             El servidor no responde. Comprueba tu conexión o intenta más tarde.
@@ -137,9 +139,7 @@ onMounted(() => {
 
         <!-- Empty state -->
         <div v-else-if="tareas.length === 0" class="dashboard-page__empty" aria-live="polite">
-          <span class="material-symbols-outlined dashboard-page__empty-icon" aria-hidden="true">
-            event_available
-          </span>
+          <CalendarDaysIcon class="dashboard-page__empty-icon" aria-hidden="true" />
           <p class="dashboard-page__empty-msg">No hay tareas programadas para hoy.</p>
         </div>
 
@@ -161,9 +161,7 @@ onMounted(() => {
     <!-- ─── Toast notification ──────────────────────────────────────────── -->
     <transition name="toast">
       <div v-if="toastMsg" class="dashboard-page__toast" role="alert" aria-live="assertive">
-        <span class="material-symbols-outlined dashboard-page__toast-icon" aria-hidden="true">
-          error_outline
-        </span>
+        <ExclamationCircleIcon class="dashboard-page__toast-icon" aria-hidden="true" />
         {{ toastMsg }}
       </div>
     </transition>
@@ -191,9 +189,8 @@ onMounted(() => {
 }
 
 .dashboard-page__logo-icon {
-  font-size: 1.25rem;
+  @apply w-5 h-5;
   color: var(--color-primary);
-  font-variation-settings: 'FILL' 1;
 }
 
 .dashboard-page__brand-name {
@@ -278,7 +275,7 @@ onMounted(() => {
 }
 
 .dashboard-page__error-icon {
-  font-size: 2rem;
+  @apply w-8 h-8;
   color: var(--color-error);
 }
 
@@ -309,9 +306,8 @@ onMounted(() => {
 }
 
 .dashboard-page__empty-icon {
-  font-size: 3rem;
+  @apply w-12 h-12;
   color: var(--color-outline-variant);
-  font-variation-settings: 'FILL' 1;
 }
 
 .dashboard-page__empty-msg {
@@ -337,7 +333,7 @@ onMounted(() => {
 }
 
 .dashboard-page__toast-icon {
-  font-size: 1rem;
+  @apply w-4 h-4;
   flex-shrink: 0;
 }
 

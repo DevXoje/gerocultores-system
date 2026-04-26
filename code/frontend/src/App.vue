@@ -15,6 +15,7 @@
  *  - No store imports directly — uses composables.
  */
 import { onMounted, ref } from 'vue'
+import { BellIcon } from '@heroicons/vue/24/outline'
 import OfflineBanner from '@/components/OfflineBanner.vue'
 import NotificationPanel from '@/business/notification/presentation/components/NotificationPanel.vue'
 import NotificationToast from '@/business/notification/presentation/components/NotificationToast.vue'
@@ -40,7 +41,7 @@ onMounted(() => {
     aria-label="Abrir panel de notificaciones"
     @click="isPanelOpen = true"
   >
-    <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+    <BellIcon class="app-shell__notification-bell-icon" aria-hidden="true" />
   </button>
 
   <!-- Notification toast — shows for the latest unread notification -->
@@ -69,5 +70,9 @@ onMounted(() => {
 
 .app-shell__notification-bell:hover {
   opacity: 0.8;
+}
+
+.app-shell__notification-bell-icon {
+  @apply w-5 h-5;
 }
 </style>

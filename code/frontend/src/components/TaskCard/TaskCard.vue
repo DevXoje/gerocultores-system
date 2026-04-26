@@ -15,6 +15,13 @@ import type {
   TareaEstado,
   TareaTipo,
 } from '@/business/agenda/domain/entities/tarea.types'
+import {
+  UserIcon,
+  ArrowUturnLeftIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  ChevronRightIcon,
+} from '@heroicons/vue/24/outline'
 
 // ─── Props & Emits ────────────────────────────────────────────────────────────
 
@@ -137,9 +144,7 @@ function isCompleted(estado: TareaEstado): boolean {
             :data-testid="`task-card-assignee-${tarea.id}`"
             :aria-label="`Asignado a: ${props.assignedToDisplayName}`"
           >
-            <span class="material-symbols-outlined task-card__assignee-icon" aria-hidden="true"
-              >person</span
-            >
+            <UserIcon class="task-card__assignee-icon" aria-hidden="true" />
             {{ props.assignedToDisplayName }}
           </span>
         </template>
@@ -160,9 +165,12 @@ function isCompleted(estado: TareaEstado): boolean {
             :data-testid="`task-card-toggle-${tarea.id}`"
             @click.stop="emit('toggleComplete', tarea.id)"
           >
-            <span class="material-symbols-outlined" aria-hidden="true">
-              {{ isCompleted(tarea.estado) ? 'undo' : 'check_circle' }}
-            </span>
+            <ArrowUturnLeftIcon
+              v-if="isCompleted(tarea.estado)"
+              class="task-card__action-icon"
+              aria-hidden="true"
+            />
+            <CheckCircleIcon v-else class="task-card__action-icon" aria-hidden="true" />
           </button>
 
           <!-- Report incident (con_incidencia CTA — US-06) -->
@@ -173,7 +181,7 @@ function isCompleted(estado: TareaEstado): boolean {
             :data-testid="`task-card-incident-${tarea.id}`"
             @click.stop="emit('reportIncident', tarea.id)"
           >
-            <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+            <ExclamationTriangleIcon class="task-card__action-icon" aria-hidden="true" />
           </button>
 
           <!-- Open detail -->
@@ -184,7 +192,7 @@ function isCompleted(estado: TareaEstado): boolean {
             :data-testid="`task-card-detail-${tarea.id}`"
             @click.stop="emit('openDetail', tarea.id)"
           >
-            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+            <ChevronRightIcon class="task-card__action-icon" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -306,7 +314,7 @@ function isCompleted(estado: TareaEstado): boolean {
 }
 
 .task-card__assignee-icon {
-  font-size: 0.875rem;
+  @apply w-3.5 h-3.5;
 }
 
 /* ─── Actions ────────────────────────────────────────────────────────────────── */
@@ -331,8 +339,8 @@ function isCompleted(estado: TareaEstado): boolean {
     outline-offset: 2px;
   }
 
-  .material-symbols-outlined {
-    font-size: 1.25rem;
+  .task-card__action-icon {
+    @apply w-5 h-5;
   }
 }
 
