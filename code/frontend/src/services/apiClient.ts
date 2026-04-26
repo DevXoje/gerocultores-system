@@ -9,17 +9,17 @@ import { getAuth, getIdToken } from 'firebase/auth'
 /**
  * Centralized Axios instance used by all API modules.
  *
- * VITE_API_BASE_URL must be set in all environments (local, staging, production).
+ * VITE_API_URL must be set in all environments (local, staging, production).
  * No silent fallback to '/api' — if missing, the app fails immediately at import time.
  *
  * Interceptor: attaches the Firebase ID token as `Authorization: Bearer <token>`
  * to every outgoing request. If no user is logged in, the header is omitted
  * and the server will return 401 (expected behavior for unauthenticated calls).
  */
-const baseURL = import.meta.env.VITE_API_BASE_URL
+const baseURL = import.meta.env.VITE_API_URL
 if (!baseURL) {
   throw new Error(
-    '[apiClient] VITE_API_BASE_URL is not set. Configure it in .env.local (local) or via CI secret (staging/prod).'
+    '[apiClient] VITE_API_URL is not set. Configure it in .env.local (local) or via CI secret (staging/prod).'
   )
 }
 
@@ -46,7 +46,7 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
  */
 export async function isServerHealthy(): Promise<boolean> {
   try {
-    const healthUrl = `${import.meta.env.VITE_API_BASE_URL}/health`
+    const healthUrl = `${import.meta.env.VITE_API_URL}/health`
     const response = await axios.get(healthUrl, { timeout: 3000 })
     return response.status >= 200 && response.status < 300
   } catch {
