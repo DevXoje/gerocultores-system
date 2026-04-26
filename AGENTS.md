@@ -16,6 +16,7 @@ Full per-agent artifacts live in:
 - `AGENTS/guardrails.md` — Non-negotiable guardrails (authoritative)
 - `AGENTS/roles.md`      — Agent role definitions and scope boundaries
 - `AGENTS/contracts.md`  — I/O contracts per agent
+- `AGENTS/git-flow.md`   — Branch model, sprint lifecycle, merge strategy (authoritative)
 
 ### Project Context
 
