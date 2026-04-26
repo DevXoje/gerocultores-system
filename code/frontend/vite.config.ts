@@ -6,10 +6,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    tailwindcss(),
-  ],
+  plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
       // Alias '@/' apunta a 'code/frontend/src/' usando una ruta relativa al propio vite.config.ts.
@@ -41,6 +38,7 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['src/**/*.spec.ts', 'src/**/*.test.ts'],
     exclude: ['node_modules', 'e2e/**'],
+    setupFiles: ['./src/test-setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
