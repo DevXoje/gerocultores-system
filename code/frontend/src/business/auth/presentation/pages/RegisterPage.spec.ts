@@ -203,7 +203,7 @@ describe('RegisterPage', () => {
       new Promise(() => {}) as unknown as ReturnType<typeof vi.fn>
     )
     ;(fetchMock as ReturnType<typeof vi.fn>).mockReturnValue(
-      new Promise(() => {}) as ReturnType<typeof vi.fn>
+      new Promise(() => {}) as unknown as ReturnType<typeof vi.fn>
     )
 
     const router = createTestRouter()
@@ -234,7 +234,7 @@ describe('RegisterPage', () => {
       new Promise(() => {}) as unknown as ReturnType<typeof vi.fn>
     )
     ;(fetchMock as ReturnType<typeof vi.fn>).mockReturnValue(
-      new Promise(() => {}) as ReturnType<typeof vi.fn>
+      new Promise(() => {}) as unknown as ReturnType<typeof vi.fn>
     )
 
     const router = createTestRouter()

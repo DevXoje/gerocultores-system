@@ -184,7 +184,7 @@ function handleCancel(): void {
 
       <!-- Severity toggle group -->
       <div class="incidence-form__field">
-        <p class="incidence-form__label" id="incidence-severidad-label">Nivel de Gravedad</p>
+        <p id="incidence-severidad-label" class="incidence-form__label">Nivel de Gravedad</p>
         <div
           class="incidence-form__severity-group"
           role="group"

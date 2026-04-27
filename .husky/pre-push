@@ -14,7 +14,7 @@ echo "[pre-push] Type-checking frontend..."
 npm --prefix code/frontend run type-check
 
 echo "[pre-push] Type-checking frontend vitest types..."
-npm --prefix code/frontend exec vue-tsc --noEmit -p tsconfig.vitest.json
+npx vue-tsc --noEmit -p tsconfig.vitest.json
 
 echo "[pre-push] Running frontend unit tests..."
 npm --prefix code/frontend run test
