@@ -40,6 +40,11 @@ function createTestRouter() {
       { path: ROUTES.HOME.path, component: { template: '<div />' } },
       { path: ROUTES.AUTH.LOGIN.path, name: ROUTES.AUTH.LOGIN.name, component: LoginPage },
       {
+        path: ROUTES.AUTH.REGISTER.path,
+        name: ROUTES.AUTH.REGISTER.name,
+        component: { template: '<div>Register</div>' },
+      },
+      {
         path: ROUTES.DASHBOARD.path,
         name: ROUTES.DASHBOARD.name,
         component: { template: '<div>Dashboard</div>' },

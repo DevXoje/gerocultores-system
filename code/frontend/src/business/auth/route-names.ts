@@ -7,4 +7,8 @@ export const AUTH_ROUTES = {
     name: 'login',
     path: '/login',
   },
+  REGISTER: {
+    name: 'register',
+    path: '/register',
+  },
 } as const

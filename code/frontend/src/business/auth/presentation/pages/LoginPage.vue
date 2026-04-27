@@ -10,6 +10,7 @@
  * (design-source.md row: Login screen — Care & Serenity portal)
  */
 import { useLogin } from '../composables/useLogin'
+import { AUTH_ROUTES } from '../../route-names'
 import {
   SparklesIcon,
   EyeIcon,
@@ -126,6 +127,17 @@ const year = Temporal.Now.plainDateISO().year
           </template>
         </button>
       </form>
+
+      <!-- Register link -->
+      <p class="login-card__register-link">
+        ¿No tienes cuenta?
+        <router-link
+          class="login-card__register-link-text"
+          :to="{ name: AUTH_ROUTES.REGISTER.name }"
+        >
+          Regístrate
+        </router-link>
+      </p>
     </div>
 
     <!-- Footer -->
@@ -196,6 +208,16 @@ const year = Temporal.Now.plainDateISO().year
   @apply text-xl font-semibold mb-5 text-center;
   font-family: var(--font-headline);
   color: var(--color-on-surface);
+}
+
+.login-card__register-link {
+  @apply text-center text-sm mt-4;
+  color: var(--color-on-surface-variant);
+}
+
+.login-card__register-link-text {
+  @apply font-semibold ml-1;
+  color: var(--color-primary);
 }
 
 /* ─── Form ───────────────────────────────────────────────────────────────────── */

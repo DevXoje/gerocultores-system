@@ -15,7 +15,7 @@ import { auth } from '@/services/firebase'
  * - State + basic mutations live here (Pinia composable store)
  * - Firebase calls are kept minimal: signIn/signOut/onAuthStateChanged only
  * - The `role` claim is sourced from Firebase ID token custom claims
- * - init() must be called once from main.ts before app.mount()
+ * - initAuth() must be called from the router guard before checking auth state
  *
  * Placed in business/auth/ as the auth domain's canonical store.
  * Pages/composables access this via useAuthStore() — never import Firebase directly.
@@ -61,14 +61,26 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Set up the Firebase Auth state listener.
-   * Call this ONCE from main.ts before app.mount() so that
-   * the auth state is restored on page reload (TC-06).
+   * Set up the Firebase Auth state listener with a timeout.
+   * Call this from the router guard before checking auth state — NOT from main.ts.
+   * The 3-second timeout prevents the navigation from being blocked indefinitely
+   * when Firebase is slow (e.g., emulator cold start, network latency).
+   *
+   * Pattern adapted from ride-on-workshop-v2 (router/index.ts initAuth).
    */
-  async function init(): Promise<void> {
+  function initAuth(): Promise<void> {
     return new Promise((resolve) => {
-      // Use an object container so the callback can reference the unsubscribe
-      // function even when the mock invokes the callback synchronously (TDZ-safe).
+      // Short-circuit: if a user is already cached, resolve immediately.
+      // This avoids waiting for onAuthStateChanged when Firebase already has the session.
+      if (auth.currentUser !== null) {
+        user.value = auth.currentUser
+        loadRoleFromToken(auth.currentUser).catch(() => {
+          // Non-fatal: role may be null but user is still valid
+        })
+        resolve()
+        return
+      }
+
       const holder: { unsubscribe?: () => void } = {}
 
       holder.unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -82,8 +94,18 @@ export const useAuthStore = defineStore('auth', () => {
         if (holder.unsubscribe) holder.unsubscribe()
         resolve()
       })
+
+      // Timeout: do not block navigation for more than 3 seconds.
+      // This prevents a white screen on slow Firebase responses (e.g., Edge with
+      // storage blocked, emulator cold start, or network latency).
+      setTimeout(() => {
+        if (holder.unsubscribe) {
+          holder.unsubscribe()
+        }
+        resolve()
+      }, 3000)
     })
   }
 
-  return { user, role, isLoading, signIn, signOut, init }
+  return { user, role, isLoading, signIn, signOut, initAuth }
 })

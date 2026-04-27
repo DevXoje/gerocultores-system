@@ -13,7 +13,9 @@ vi.mock('firebase/auth', () => ({
 
 // Mock the firebase service (which calls initializeApp, getAuth, etc.)
 vi.mock('@/services/firebase', () => ({
-  auth: {},
+  // auth.currentUser must be null so that initAuth() does NOT short-circuit
+  // and instead calls onAuthStateChanged (which is what the tests verify).
+  auth: { currentUser: null },
 }))
 
 import {
@@ -184,9 +186,9 @@ describe('useAuthStore', () => {
     expect(store.isLoading).toBe(false)
   })
 
-  // ─── TC: init() sets up onAuthStateChanged listener ─────────────────────
+  // ─── TC: initAuth() sets up onAuthStateChanged listener ───────────────────
 
-  it('should call onAuthStateChanged during init', async () => {
+  it('should call onAuthStateChanged during initAuth', async () => {
     vi.mocked(onAuthStateChanged).mockImplementationOnce((_auth, callback) => {
       // Simulate no user (unauthenticated)
       if (typeof callback === 'function') callback(null)
@@ -194,7 +196,7 @@ describe('useAuthStore', () => {
     })
 
     const store = useAuthStore()
-    await store.init()
+    await store.initAuth()
 
     expect(onAuthStateChanged).toHaveBeenCalledOnce()
     expect(store.user).toBeNull()
@@ -211,7 +213,7 @@ describe('useAuthStore', () => {
     })
 
     const store = useAuthStore()
-    await store.init()
+    await store.initAuth()
 
     expect(store.user).not.toBeNull()
     expect(store.role).toBe('gerocultor')
