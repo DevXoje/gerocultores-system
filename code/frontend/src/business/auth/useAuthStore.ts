@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  onAuthStateChanged,
+  onIdTokenChanged,
   type User,
 } from 'firebase/auth'
 import { auth } from '@/services/firebase'
@@ -13,7 +13,7 @@ import { auth } from '@/services/firebase'
  *
  * Architecture note (frontend-specialist.md §4):
  * - State + basic mutations live here (Pinia composable store)
- * - Firebase calls are kept minimal: signIn/signOut/onAuthStateChanged only
+ * - Firebase calls are kept minimal: signIn/signOut/onIdTokenChanged only
  * - The `role` claim is sourced from Firebase ID token custom claims
  * - initAuth() must be called from the router guard before checking auth state
  *
@@ -53,6 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Sign out the current user and clear local state.
+   * Note: caller is responsible for redirecting to login (keeps store router-agnostic).
    */
   async function signOut(): Promise<void> {
     await firebaseSignOut(auth)
@@ -61,17 +62,21 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Set up the Firebase Auth state listener with a timeout.
+   * Set up the Firebase ID token listener with a timeout.
    * Call this from the router guard before checking auth state — NOT from main.ts.
    * The 3-second timeout prevents the navigation from being blocked indefinitely
    * when Firebase is slow (e.g., emulator cold start, network latency).
+   *
+   * Uses onIdTokenChanged (instead of onAuthStateChanged) so that token refreshes
+   * and custom claims changes also trigger a role reload — enabling real-time
+   * detection of privilege changes (e.g., admin revokes a user's role).
    *
    * Pattern adapted from ride-on-workshop-v2 (router/index.ts initAuth).
    */
   function initAuth(): Promise<void> {
     return new Promise((resolve) => {
       // Short-circuit: if a user is already cached, resolve immediately.
-      // This avoids waiting for onAuthStateChanged when Firebase already has the session.
+      // This avoids waiting for onIdTokenChanged when Firebase already has the session.
       if (auth.currentUser !== null) {
         user.value = auth.currentUser
         loadRoleFromToken(auth.currentUser).catch(() => {
@@ -83,7 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       const holder: { unsubscribe?: () => void } = {}
 
-      holder.unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      holder.unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           await loadRoleFromToken(firebaseUser)
           user.value = firebaseUser

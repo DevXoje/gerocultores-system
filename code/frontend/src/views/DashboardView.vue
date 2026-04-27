@@ -16,6 +16,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../business/auth/useAuthStore'
+import { AUTH_ROUTES } from '../business/auth/route-names'
 import { useAgendaHoy } from '../business/agenda/application/useAgendaHoy'
 import TaskCard from '../business/agenda/presentation/components/TaskCard.vue'
 import type { EstadoTarea } from '@/services/tareas.api'
@@ -36,6 +37,7 @@ const nombreUsuario = auth.user?.displayName ?? auth.user?.email ?? 'Cuidador/a'
 
 function signOut() {
   auth.signOut()
+  router.push({ name: AUTH_ROUTES.LOGIN.name })
 }
 
 // ─── Agenda ────────────────────────────────────────────────────────────────

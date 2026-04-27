@@ -7,7 +7,7 @@ vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({})),
   signInWithEmailAndPassword: vi.fn(),
   signOut: vi.fn(),
-  onAuthStateChanged: vi.fn(),
+  onIdTokenChanged: vi.fn(),
   connectAuthEmulator: vi.fn(),
 }))
 
@@ -21,7 +21,7 @@ vi.mock('@/services/firebase', () => ({
 import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  onAuthStateChanged,
+  onIdTokenChanged,
   type User,
   type UserCredential,
   type IdTokenResult,
@@ -186,10 +186,10 @@ describe('useAuthStore', () => {
     expect(store.isLoading).toBe(false)
   })
 
-  // ─── TC: initAuth() sets up onAuthStateChanged listener ───────────────────
+  // ─── TC: initAuth() sets up onIdTokenChanged listener ───────────────────
 
-  it('should call onAuthStateChanged during initAuth', async () => {
-    vi.mocked(onAuthStateChanged).mockImplementationOnce((_auth, callback) => {
+  it('should call onIdTokenChanged during initAuth', async () => {
+    vi.mocked(onIdTokenChanged).mockImplementationOnce((_auth, callback) => {
       // Simulate no user (unauthenticated)
       if (typeof callback === 'function') callback(null)
       return vi.fn() // unsubscribe function
@@ -198,15 +198,15 @@ describe('useAuthStore', () => {
     const store = useAuthStore()
     await store.initAuth()
 
-    expect(onAuthStateChanged).toHaveBeenCalledOnce()
+    expect(onIdTokenChanged).toHaveBeenCalledOnce()
     expect(store.user).toBeNull()
     expect(store.role).toBeNull()
   })
 
-  it('should set user and role from onAuthStateChanged when user is authenticated', async () => {
+  it('should set user and role from onIdTokenChanged when user is authenticated', async () => {
     const mockUser = makeMockUser('test.gerocultor@example.com')
 
-    vi.mocked(onAuthStateChanged).mockImplementationOnce((_auth, callback) => {
+    vi.mocked(onIdTokenChanged).mockImplementationOnce((_auth, callback) => {
       // mockUser satisfies User fully — no cast needed
       if (typeof callback === 'function') callback(mockUser)
       return vi.fn()
