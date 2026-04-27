@@ -9,7 +9,7 @@
  *
  * Required env vars (set via integration-setup.ts):
  *   FIRESTORE_EMULATOR_HOST=localhost:8080
- *   FIREBASE_PROJECT_ID=demo-gerocultores-system
+ *   FIREBASE_PROJECT_ID=gero-care
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
@@ -21,7 +21,7 @@ import { COLLECTIONS } from './collections'
 // FIRESTORE_EMULATOR_HOST is injected by `firebase emulators:exec`.
 // integration-setup.ts sets these env vars before this module loads.
 
-const PROJECT_ID = process.env['FIREBASE_PROJECT_ID'] ?? 'demo-gerocultores-system'
+const PROJECT_ID = process.env['FIREBASE_PROJECT_ID'] ?? 'gero-care'
 
 // ─── Firebase Admin init (isolated app for integration tests) ─────────────────
 

@@ -8,7 +8,7 @@
  * Required env vars (set automatically via firebase emulators:exec, or manually):
  *   FIRESTORE_EMULATOR_HOST=localhost:8080
  *   FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
- *   FIREBASE_PROJECT_ID=demo-gerocultores-system
+ *   FIREBASE_PROJECT_ID=gero-care
  *
  * US-10: Gestión de cuentas de usuarios
  */
@@ -18,7 +18,7 @@ import { COLLECTIONS } from './collections'
 
 // ─── Emulator setup ───────────────────────────────────────────────────────────
 
-const PROJECT_ID = process.env['FIREBASE_PROJECT_ID'] ?? 'demo-gerocultores-system'
+const PROJECT_ID = process.env['FIREBASE_PROJECT_ID'] ?? 'gero-care'
 const FIRESTORE_HOST = process.env['FIRESTORE_EMULATOR_HOST'] ?? 'localhost:8080'
 const AUTH_HOST = process.env['FIREBASE_AUTH_EMULATOR_HOST'] ?? 'localhost:9099'
 

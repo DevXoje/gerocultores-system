@@ -4,10 +4,10 @@
  * Run with: npx vitest run --config vitest.integration.config.ts
  *
  * Requires the Firebase Emulator to be running:
- *   firebase emulators:start --only auth,firestore --project demo-gerocultores-system
+ *   firebase emulators:start --only auth,firestore --project gero-care
  *
  * Or via emulators:exec:
- *   firebase emulators:exec --only auth,firestore --project demo-gerocultores-system \
+ *   firebase emulators:exec --only auth,firestore --project gero-care \
  *     "cd code/api && npx vitest run --config vitest.integration.config.ts"
  */
 import { defineConfig } from 'vitest/config'

@@ -5,12 +5,14 @@ import type { UserRole } from '../types/user.types'
 import { UserRoleEnum } from '../types/user.types'
 
 function getAuthUser(req: Request): { uid: string; role: UserRole } {
+  // Support both emulator tokens (user_id) and production tokens (uid)
+  const uid = req.user?.['uid'] || req.user?.['user_id']
   const rawRole = req.user?.['role']
   const role = UserRoleEnum.safeParse(rawRole)
-  if (!role.success || !req.user?.uid) {
+  if (!role.success || !uid) {
     throw new Error('Autorización inválida')
   }
-  return { uid: req.user.uid, role: role.data }
+  return { uid, role: role.data }
 }
 
 export class TareasController {
@@ -29,7 +31,18 @@ export class TareasController {
       }
 
       const filters = parsed.data
-      const { uid: userUid, role: userRole } = getAuthUser(req)
+
+      // Extract auth user — return 401 if missing/invalid role
+      let userUid: string
+      let userRole: UserRole
+      try {
+        const authUser = getAuthUser(req)
+        userUid = authUser.uid
+        userRole = authUser.role
+      } catch (authError) {
+        res.status(401).json({ error: authError instanceof Error ? authError.message : 'Autorización inválida', code: 'UNAUTHORIZED' })
+        return
+      }
 
       // gerocultor can only see their own tasks
       if (userRole === 'gerocultor') {
