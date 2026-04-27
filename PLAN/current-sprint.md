@@ -1,41 +1,46 @@
-# Sprint Activo — Sprint-3
+# Sprint Activo — Sprint-6
 
-> **Sprint-3: Features US-04, US-05, US-06**
-> Fechas: 2026-04-19 → 2026-05-02 (2 semanas)
-> Deadline académico: 2026-05-18
+> **Sprint-6: Memoria académica + Presentación + Cierre**
+> **Fechas**: 2026-04-26 → 2026-05-18
+> **Deadline académico**: 2026-05-18
 
-> **Estado**: Activo. Deuda técnica Sprint-2 resuelta. Backend de US-05 y US-06 completado.
+> **Estado**: En curso. Sprint-3, Sprint-4 y Sprint-5 cerrados.
 
 ---
 
 ## Objetivo del Sprint
 
-Implementar las tres user stories del núcleo funcional de GeroCare:
-- **US-04**: Actualizar estado de una tarea (frontend)
-- **US-05**: Consulta de ficha de residente
-- **US-06**: Registro de incidencia
+Memoria académica DAW (GeroCare), slides de presentación y video demo:
+- **T-77**: Portada y primera página reales (Jose Vilches / ANDRES MARTOS GAZQUEZ / CIPFP Batoi / 2025-2026)
+- **T-78..T-84**: Secciones de la memoria (introducción, diseño, tecnologías, implementación, pruebas, conclusiones)
+- **T-85**: Slides de presentación
+- **T-86**: Video demo de la aplicación
+- **T-87**: Revisión final y entrega
+- **T-94**: Reescribir placeholders de la memoria (stack Vue/Firebase, no React/Supabase)
+- **T-95**: Regenerar `.docx` desde plantilla con metadatos correctos
 
 ---
 
-## Deuda Técnica — Estado Final (pre-Sprint-3)
+## Deuda Técnica — Estado Final (pre-Sprint-6)
 
 | ID | Descripción | Estado |
 |----|-------------|--------|
-| DT-01, 02, 03, 04, 05, 06, 08, 09, 12, 14 | Múltiples items de deuda técnica, tests y CI | ✅ Resueltos (PR #20 al #48) |
-| DT-07 | Smoke test automatizado post-deploy en CI | 🔲 Diferido (Sprint-4) |
+| DT-01..DT-14 | Toda la deuda técnica de Sprint-0 a Sprint-5 | ✅ Resuelta |
+| — | Ninguna deuda técnica pendiente | — |
 
 ---
 
-## Work Items del Sprint-3
+## Estado de Sprint-5 (cerrado)
 
-| ID | Tarea | US ref | Estado |
-|----|-------|--------|--------|
-| T-S3-01 | Frontend: conectar `TaskCard` con `PATCH /api/tareas/:id/estado` | US-04 | 🔲 PENDIENTE |
-| T-S3-02 | Frontend: vista `ResidenteView` — ficha de residente | US-05 | 🔲 PENDIENTE |
-| T-S3-03 | API: endpoint `GET /api/residentes/:id` | US-05 | ✅ COMPLETADO (PR #49) |
-| T-S3-04 | Frontend: formulario de registro de incidencia | US-06 | 🔲 PENDIENTE |
-| T-S3-05 | API: endpoint `POST /api/incidencias` | US-06 | ✅ COMPLETADO (PR #50) |
-| T-S3-06 | Test plans US-05 y US-06 | US-05, US-06 | ✅ COMPLETADO (engram) |
+| Métrica | Valor |
+|---------|-------|
+| **Duración real** | 2026-04-19 → 2026-04-25 |
+| **Tests** | 476 total (143 API + 285 FE + 48 Firestore Rules), 0 fallos |
+| **Cobertura API** | 81.13% stmts / 68.78% branch / 84.41% functions |
+| **Cobertura Frontend** | 72.56% stmts / 71.6% branch / 66.82% functions |
+| **Lighthouse LCP** | 3.9s → 193ms (RNF-02 ✅) |
+| **Docs** | api-and-rules-reference.md, lighthouse reports, responsive review |
+| **ADRs** | ADR-04c production deployment |
 
 ---
 
@@ -43,9 +48,10 @@ Implementar las tres user stories del núcleo funcional de GeroCare:
 
 - Todas las PRs usan **squash merge** a `master`.
 - Commits: `feat(US-XX): descripción`.
-- G10: toda vista nueva requiere pantalla Stitch referenciada en `OUTPUTS/technical-docs/design-source.md` (Añadidas en PR #48).
+- G10: toda vista nueva requiere pantalla Stitch referenciada en `OUTPUTS/technical-docs/design-source.md`.
 - G01: no implementar código sin US en SPEC/.
 - `any` prohibido en TypeScript.
-- Collection names siempre desde constante `COLLECTIONS`.
+- Roles: exactamente `admin` y `gerocultor` (sin `coordinador`).
+- Memoria: Checklist en `OUTPUTS/academic/README.md` — ninguna sección puede tener placeholders del stack antiguo.
 
-*Última actualización: 2026-04-19 — Backend de US-05 y US-06 completado.*
+*Última actualización: 2026-04-27 — Sprint-5 cerrado; Sprint-6 en curso.*

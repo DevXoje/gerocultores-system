@@ -157,7 +157,7 @@ npm run dev
 
 La app estará disponible en http://localhost:5173 (Vite).
 
-> Si `VITE_API_URL` no está definida, el frontend no podrá llamar a la API. Asegúrate de que `code/frontend/.env.local` contiene `VITE_API_URL=http://localhost:3000`.
+> Si `VITE_API_URL` no está definida, el frontend no podrá llamar a la API. Asegúrate de que `code/frontend/.env.local` contiene `VITE_API_URL=http://localhost:3000/api`.
 
 ### 6. Arrancar la API (Express)
 

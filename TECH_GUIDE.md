@@ -355,26 +355,78 @@ cd code/api && npm run test
 
 ### 5.2 Variables de entorno
 
-    **Frontend** (`code/frontend/.env.local`):
+#### Canonical sources
+
+Cada paquete tiene su propio `.env.example` — esa es la lista canónica de vars requeridas para ese paquete:
+
+| Paquete | Archivo canonical | Vars |
+|---------|------------------|------|
+| Frontend | `code/frontend/.env.example` | `VITE_FIREBASE_*`, `VITE_API_URL` |
+| API | `code/api/.env.example` | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `PORT`, `NODE_ENV`, `CORS_ORIGIN`, vars de emuladores |
+
+> El archivo `.env.example` en la raíz del proyecto (`/.env.example`) ha sido eliminado para evitar duplicación y confusión. Usar siempre el `.env.example` correspondiente al paquete.
+
+#### Archivos y precedencia
+
 ```
-VITE_API_URL=http://localhost:3000
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_APP_ID=...
+# Frontend (Vite — vars en tiempo de build)
+code/frontend/.env.example        # template documented (committed)
+code/frontend/.env                # gitignored, valores reales (NO commit)
+code/frontend/.env.local          # gitignored, overrides locales (NO commit)
+code/frontend/.env.test           # gitignored, vars para tests E2E
+
+# API (Node.js — vars en tiempo de ejecución)
+code/api/.env.example             # template documentado (committed)
+code/api/.env                     # gitignored, valores reales (NO commit)
+code/api/.env.local               # gitignored, overrides locales (NO commit)
+```
+
+**Precedencia** (Vite y dotenv):
+- Later files override earlier ones: `.env` → `.env.local` → `.env.{MODE}`
+- Modo por defecto en `npm run dev` es `development`
+
+#### G05 — No hardcoded secrets
+
+> Ninguna variable de entorno aparece en el código fuente. Los archivos `.env` y `.env.local` están en `.gitignore` en ambos paquetes.
+
+Vars sensibles (API keys, passwords, credenciales Firebase):
+- **Jamás** hardcodearlas en el código
+- Usar siempre `import.meta.env.VITE_*` (frontend) o `process.env.*` (api)
+- `.env` con valores reales **nunca se comitea**
+
+#### Vars de build vs runtime
+
+| Prefijo | Cuándo se resuelve | Ejemplo |
+|---------|-------------------|---------|
+| `VITE_*` | Build-time (Vite) | `VITE_FIREBASE_API_KEY`, `VITE_API_URL` |
+| `FIREBASE_*` | Runtime (Node.js) | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` |
+
+#### Ejemplo de configuración local
+
+**Frontend** (`code/frontend/.env.local`):
+```
+VITE_API_URL=http://localhost:3000/api
+VITE_FIREBASE_API_KEY=AIzaSy...
+VITE_FIREBASE_AUTH_DOMAIN=gerocultores.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=gerocultores
+VITE_FIREBASE_APP_ID=1:...:web:...
 ```
 
 **API** (`code/api/.env`):
 ```
-FIREBASE_PROJECT_ID=...
-FIREBASE_CLIENT_EMAIL=...
-FIREBASE_PRIVATE_KEY=...
+FIREBASE_PROJECT_ID=gerocultores
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-...@gerocultores.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...
 PORT=3000
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:5173
+FIRESTORE_EMULATOR_HOST=localhost:18080
+FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
 ```
 
-> **G05**: Ninguna de estas variables aparece en el código fuente. Los archivos `.env` están en `.gitignore`.
+#### Credenciales E2E (Playwright)
+
+Las vars de test E2E (`E2E_USER`, `E2E_PASS`, `PLAYWRIGHT_TEST_BASE_URL`) **no van en `.env` ni `.env.local`**. Se suministran via secrets de CI o archivo `.env.test` gitignored. Ver `playwright.config.ts` para la configuración completa.
 
 ### 5.3 RGPD
 

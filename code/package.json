@@ -1,0 +1,5 @@
+{
+    "scripts": {
+        "emulators":"firebase emulators:start --only firestore,auth --import=./emulator-data --export-on-exit=./emulator-data"
+    }
+}
