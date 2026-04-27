@@ -143,13 +143,13 @@ VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
-VITE_USE_EMULATOR=true       # set to true in dev to use local Firebase emulators
+VITE_USE_EMULATOR="true"       # set to true in dev to use local Firebase emulators
 ```
 
 ### Firebase Emulator (Development)
 
 - Emulators run via Docker from `code/` directory
-- When `VITE_USE_EMULATOR=true`, the app auto-connects to local emulator ports
+- When `VITE_USE_EMULATOR="true"`, the app auto-connects to local emulator ports
 - Auth emulator: `localhost:9099`
 - Firestore emulator: `localhost:8080`
 - **NEVER point dev code at production Firebase** — always use emulator locally
