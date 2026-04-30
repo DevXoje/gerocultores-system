@@ -35,5 +35,11 @@ export function createAuthGuard(): NavigationGuard {
     if (to.meta['requiresAuth'] === true && auth.user === null) {
       return { name: AUTH_ROUTES.LOGIN.name }
     }
+
+    // Admin-only route guard
+    if (to.meta['requiresAdmin'] === true && auth.role !== 'admin') {
+      // User is authenticated but not admin — redirect to dashboard
+      return { name: 'dashboard' }
+    }
   }
 }

@@ -24,7 +24,7 @@ router.use(verifyAuth)
 /**
  * POST /api/turnos
  * Opens a new turno for the authenticated user.
- * Body: { tipoTurno: 'manyana' | 'tarde' | 'noche' }
+ * Body: { tipoTurno: TipoTurno }
  */
 router.post('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

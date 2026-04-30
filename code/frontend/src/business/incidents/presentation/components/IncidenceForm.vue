@@ -104,6 +104,10 @@ function handleCancel(): void {
   resetForm()
   emit('cancelled')
 }
+
+function handleSeveritySelect(value: IncidenciaSeveridad): void {
+  form.severidad = value
+}
 </script>
 
 <template>
@@ -199,7 +203,7 @@ function handleCancel(): void {
                 'incidence-form__severity-btn--active': form.severidad === opt.value,
               }"
               :aria-pressed="form.severidad === opt.value"
-              @click="form.severidad = opt.value"
+              @click="handleSeveritySelect(opt.value)"
             >
               {{ opt.label }}
             </button>

@@ -48,9 +48,21 @@ service cloud.firestore {
     }
 
     // --- Residentes ---
+    // Campo gerocultoresAsignados: array de UIDs de gerocultores asignados.
+    // Campo archivado: boolean — si true, el residente no aparece en agendas activas.
+    function isGerocultorAssignedTo(residenteId) {
+      return isAuthenticated() &&
+        get('gerocultoresAsignados') != null &&
+        request.auth.uid in get('gerocultoresAsignados');
+    }
+
     match /residents/{residenteId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin();
+      // Lectura: admin ve todos; gerocultor ve solo residentes asignados Y no archivados
+      allow read: if isAdmin() ||
+        (isGerocultor() && isGerocultorAssignedTo(residenteId) && get('archivado') == false);
+      // Escritura (create/update/archive): solo admin
+      allow create, update: if isAdmin();
+      // No delete — el archivo es un update que setea archivado=true
     }
 
     // --- Incidencias ---

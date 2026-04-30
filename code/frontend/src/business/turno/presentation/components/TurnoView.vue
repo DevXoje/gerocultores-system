@@ -16,6 +16,7 @@ import { onMounted, ref } from 'vue'
 import { useTurno } from '../composables/useTurno'
 import ResumenTurnoModal from '../components/ResumenTurnoModal.vue'
 import { ClockIcon } from '@heroicons/vue/24/outline'
+import type { TipoTurno } from '../../domain/entities/Turno'
 
 const {
   turnoActivo,
@@ -34,7 +35,7 @@ onMounted(() => {
   cargarTurnoActivo()
 })
 
-function handleIniciar(tipoTurno: 'manyana' | 'tarde' | 'noche' = 'manyana'): void {
+function handleIniciar(tipoTurno: TipoTurno = 'manyana'): void {
   iniciarTurno(tipoTurno)
 }
 

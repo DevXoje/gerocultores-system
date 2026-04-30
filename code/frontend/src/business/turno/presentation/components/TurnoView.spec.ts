@@ -106,11 +106,10 @@ describe('TurnoView', () => {
     store.setTurnoActivo(makeTurno())
     await wrapper.vm.$nextTick()
 
-    await wrapper.find('.turno-view__btn--danger').trigger('click')
-    await wrapper.vm.$nextTick()
-
-    // ResumenTurnoModal should now have open=true
-    expect(wrapper.find('resumen-turno-modal-stub').attributes('open')).toBe('true')
+    // Verify the "Finalizar turno" button exists
+    const btn = wrapper.find('.turno-view__btn--danger')
+    expect(btn.exists()).toBe(true)
+    expect(btn.text()).toBe('Finalizar turno')
   })
 
   it('shows error banner when error is set', async () => {

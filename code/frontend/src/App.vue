@@ -28,6 +28,18 @@ const { startPolling, items } = useNotificacion()
 onMounted(() => {
   startPolling()
 })
+
+function handleOpenPanel(): void {
+  isPanelOpen.value = true
+}
+
+function handleDismissPanel(): void {
+  isPanelOpen.value = false
+}
+
+function handleClosePanel(): void {
+  isPanelOpen.value = false
+}
 </script>
 
 <template>
@@ -39,7 +51,7 @@ onMounted(() => {
     class="app-shell__notification-bell"
     data-testid="notification-bell"
     aria-label="Abrir panel de notificaciones"
-    @click="isPanelOpen = true"
+    @click="handleOpenPanel"
   >
     <BellIcon class="app-shell__notification-bell-icon" aria-hidden="true" />
   </button>
@@ -49,10 +61,10 @@ onMounted(() => {
     v-if="items.length > 0 && !items[0].leida"
     :notification="items[0]"
     data-testid="notification-toast"
-    @dismiss="isPanelOpen = false"
+    @dismiss="handleDismissPanel"
   />
 
-  <NotificationPanel :open="isPanelOpen" @close="isPanelOpen = false" />
+  <NotificationPanel :open="isPanelOpen" @close="handleClosePanel" />
   <RouterView />
 </template>
 

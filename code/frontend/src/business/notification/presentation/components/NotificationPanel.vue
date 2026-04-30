@@ -35,6 +35,10 @@ async function handleMarkAsRead(notif: Notificacion): Promise<void> {
   emit('read', notif.id)
 }
 
+function handleClose(): void {
+  emit('close')
+}
+
 function formatDate(date: Date): string {
   return date.toLocaleDateString('es-ES', {
     day: 'numeric',
@@ -59,12 +63,7 @@ onMounted(() => {
 <template>
   <!-- Overlay -->
   <transition name="overlay">
-    <div
-      v-if="open"
-      class="notification-panel__overlay"
-      aria-hidden="true"
-      @click="emit('close')"
-    />
+    <div v-if="open" class="notification-panel__overlay" aria-hidden="true" @click="handleClose" />
   </transition>
 
   <!-- Panel -->
@@ -89,7 +88,7 @@ onMounted(() => {
           type="button"
           class="notification-panel__close"
           aria-label="Cerrar panel"
-          @click="emit('close')"
+          @click="handleClose"
         >
           <XMarkIcon class="notification-panel__close-icon" aria-hidden="true" />
         </button>

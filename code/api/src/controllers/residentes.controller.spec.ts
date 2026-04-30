@@ -54,6 +54,10 @@ import app from '../app'
 // ─── Mocked service methods ────────────────────────────────────────────────────
 
 const mockGetResidenteById = vi.mocked(ResidentesService.prototype.getResidenteById)
+const mockCreateResidente = vi.mocked(ResidentesService.prototype.createResidente)
+const mockListResidentes = vi.mocked(ResidentesService.prototype.listResidentes)
+const mockUpdateResidente = vi.mocked(ResidentesService.prototype.updateResidente)
+const mockArchiveResidente = vi.mocked(ResidentesService.prototype.archiveResidente)
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -150,5 +154,187 @@ describe('GET /api/residentes/:id — getResidente', () => {
       .set('Authorization', AUTH_HEADER)
 
     expect(res.status).toBe(500)
+  })
+})
+
+// ─── POST /api/residentes ─────────────────────────────────────────────────────
+
+describe('POST /api/residentes — createResidente', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('admin with valid body → 201 and returns created residente', async () => {
+    mockCreateResidente.mockResolvedValueOnce(sampleResidente)
+
+    const res = await request(app)
+      .post('/api/residentes')
+      .set('Authorization', AUTH_HEADER)
+      .send({
+        nombre: 'María',
+        apellidos: 'García López',
+        fechaNacimiento: '1955-03-15',
+        habitacion: '201-A',
+      })
+
+    expect(res.status).toBe(201)
+    expect(res.body.data).toMatchObject({ id: 'res-uuid-001' })
+    expect(mockCreateResidente).toHaveBeenCalledWith(
+      expect.objectContaining({ nombre: 'María', habitacion: '201-A' }),
+      'test-admin-uid',
+      'admin',
+    )
+  })
+
+  it('gerocultor → 403', async () => {
+    const res = await request(app)
+      .post('/api/residentes')
+      .set('Authorization', AUTH_HEADER)
+      .set('x-test-role', 'gerocultor')
+      .send({ nombre: 'X', apellidos: 'Y', fechaNacimiento: '1955-01-01', habitacion: '101' })
+
+    expect(res.status).toBe(403)
+    expect(mockCreateResidente).not.toHaveBeenCalled()
+  })
+
+  it('invalid body → 400 with VALIDATION_ERROR', async () => {
+    const res = await request(app)
+      .post('/api/residentes')
+      .set('Authorization', AUTH_HEADER)
+      .send({ nombre: '', apellidos: '', fechaNacimiento: '', habitacion: '' })
+
+    expect(res.status).toBe(400)
+    expect(res.body.code).toBe('VALIDATION_ERROR')
+  })
+})
+
+// ─── GET /api/residentes ─────────────────────────────────────────────────────
+
+describe('GET /api/residentes — listResidentes', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('admin gets 200 with array of residents', async () => {
+    mockListResidentes.mockResolvedValueOnce([sampleResidente])
+
+    const res = await request(app)
+      .get('/api/residentes')
+      .set('Authorization', AUTH_HEADER)
+
+    expect(res.status).toBe(200)
+    expect(res.body.data).toHaveLength(1)
+    expect(mockListResidentes).toHaveBeenCalledWith('active', 'test-admin-uid', 'admin')
+  })
+
+  it('gerocultor gets 200 with their assigned residents', async () => {
+    mockListResidentes.mockResolvedValueOnce([sampleResidente])
+
+    const res = await request(app)
+      .get('/api/residentes')
+      .set('Authorization', AUTH_HEADER)
+      .set('x-test-role', 'gerocultor')
+      .set('x-test-uid', GERO_UID)
+
+    expect(res.status).toBe(200)
+    expect(mockListResidentes).toHaveBeenCalledWith('active', GERO_UID, 'gerocultor')
+  })
+
+  it('?filter=archived → passes filter to service', async () => {
+    mockListResidentes.mockResolvedValueOnce([])
+
+    await request(app)
+      .get('/api/residentes?filter=archived')
+      .set('Authorization', AUTH_HEADER)
+
+    expect(mockListResidentes).toHaveBeenCalledWith('archived', 'test-admin-uid', 'admin')
+  })
+})
+
+// ─── PATCH /api/residentes/:id ────────────────────────────────────────────────
+
+describe('PATCH /api/residentes/:id — updateResidente', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('admin updates residente → 200', async () => {
+    mockUpdateResidente.mockResolvedValueOnce({ ...sampleResidente, nombre: 'Updated' })
+
+    const res = await request(app)
+      .patch('/api/residentes/res-uuid-001')
+      .set('Authorization', AUTH_HEADER)
+      .send({ nombre: 'Updated' })
+
+    expect(res.status).toBe(200)
+    expect(res.body.data.nombre).toBe('Updated')
+    expect(mockUpdateResidente).toHaveBeenCalledWith(
+      'res-uuid-001',
+      expect.objectContaining({ nombre: 'Updated' }),
+      'test-admin-uid',
+      'admin',
+    )
+  })
+
+  it('gerocultor → 403', async () => {
+    const res = await request(app)
+      .patch('/api/residentes/res-uuid-001')
+      .set('Authorization', AUTH_HEADER)
+      .set('x-test-role', 'gerocultor')
+      .send({ nombre: 'Hacked' })
+
+    expect(res.status).toBe(403)
+    expect(mockUpdateResidente).not.toHaveBeenCalled()
+  })
+
+  it('not found → 404', async () => {
+    mockUpdateResidente.mockRejectedValueOnce(new NotFoundError('Residente not found'))
+
+    const res = await request(app)
+      .patch('/api/residentes/non-existent')
+      .set('Authorization', AUTH_HEADER)
+      .send({ nombre: 'X' })
+
+    expect(res.status).toBe(404)
+  })
+})
+
+// ─── PATCH /api/residentes/:id/archive ─────────────────────────────────────────
+
+describe('PATCH /api/residentes/:id/archive — archiveResidente', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('admin archives residente → 200', async () => {
+    mockArchiveResidente.mockResolvedValueOnce({ ...sampleResidente, archivado: true })
+
+    const res = await request(app)
+      .patch('/api/residentes/res-uuid-001/archive')
+      .set('Authorization', AUTH_HEADER)
+
+    expect(res.status).toBe(200)
+    expect(res.body.data.archivado).toBe(true)
+    expect(mockArchiveResidente).toHaveBeenCalledWith('res-uuid-001', 'test-admin-uid', 'admin')
+  })
+
+  it('gerocultor → 403', async () => {
+    const res = await request(app)
+      .patch('/api/residentes/res-uuid-001/archive')
+      .set('Authorization', AUTH_HEADER)
+      .set('x-test-role', 'gerocultor')
+
+    expect(res.status).toBe(403)
+    expect(mockArchiveResidente).not.toHaveBeenCalled()
+  })
+
+  it('not found → 404', async () => {
+    mockArchiveResidente.mockRejectedValueOnce(new NotFoundError('Residente not found'))
+
+    const res = await request(app)
+      .patch('/api/residentes/non-existent/archive')
+      .set('Authorization', AUTH_HEADER)
+
+    expect(res.status).toBe(404)
   })
 })

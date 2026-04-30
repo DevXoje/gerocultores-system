@@ -17,6 +17,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../business/auth/useAuthStore'
 import { AUTH_ROUTES } from '../business/auth/route-names'
+import { RESIDENTS_ROUTES } from '../business/residents/route-names'
 import { useAgendaHoy } from '../business/agenda/application/useAgendaHoy'
 import TaskCard from '../business/agenda/presentation/components/TaskCard.vue'
 import CreateTareaModal from '../business/agenda/presentation/components/CreateTareaModal.vue'
@@ -74,6 +75,14 @@ function onTaskError(msg: string): void {
   showToast(msg)
 }
 
+function handleOpenCreateModal(): void {
+  showCreateModal.value = true
+}
+
+function handleCloseCreateModal(): void {
+  showCreateModal.value = false
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function onEstadoActualizado(_id: string, _estado: EstadoTarea): void {
   // Future: e.g. analytics, audit log hook (US-04 extension point)
@@ -115,6 +124,17 @@ onMounted(() => {
       </div>
     </header>
 
+    <!-- ─── Admin quick-nav ──────────────────────────────────────────────── -->
+    <nav class="dashboard-page__admin-nav" aria-label="Navegación de administrador">
+      <RouterLink
+        :to="{ name: RESIDENTS_ROUTES.RESIDENTS_ADMIN.name }"
+        class="dashboard-page__admin-link"
+      >
+        Residentes
+      </RouterLink>
+      <RouterLink to="/admin/users" class="dashboard-page__admin-link"> Usuarios </RouterLink>
+    </nav>
+
     <!-- ─── Main content ────────────────────────────────────────────────── -->
     <main class="dashboard-page__content">
       <!-- Page greeting -->
@@ -132,7 +152,7 @@ onMounted(() => {
             type="button"
             class="dashboard-page__fab"
             aria-label="Crear nueva tarea"
-            @click="showCreateModal = true"
+            @click="handleOpenCreateModal"
           >
             <PlusIcon class="dashboard-page__fab-icon" aria-hidden="true" />
           </button>
@@ -184,7 +204,7 @@ onMounted(() => {
     </transition>
 
     <!-- ─── Create Tarea Modal (US-14) ───────────────────────────────────── -->
-    <CreateTareaModal v-if="showCreateModal" @close="showCreateModal = false" />
+    <CreateTareaModal v-if="showCreateModal" @close="handleCloseCreateModal" />
   </div>
 </template>
 
@@ -236,6 +256,26 @@ onMounted(() => {
 
 .dashboard-page__signout:hover {
   opacity: 0.75;
+}
+
+/* ─── Admin nav (admin only) ─────────────────────────────────────────── */
+.dashboard-page__admin-nav {
+  @apply flex items-center gap-0.5 px-6 py-2;
+  background-color: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.dashboard-page__admin-link {
+  @apply px-3 py-1.5 rounded-lg text-sm font-medium no-underline;
+  color: var(--color-on-surface-variant);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.dashboard-page__admin-link:hover {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-surface);
 }
 
 /* ─── Main content ──────────────────────────────────────────────────────── */

@@ -15,8 +15,13 @@ import { useTareas } from '@/business/agenda/application/useTareas'
 import type { TareaTipo } from '@/business/agenda/domain/entities/tarea.types'
 import { useAuthStore } from '@/business/auth/useAuthStore'
 import type { CreateTareaDTO } from '@/business/agenda/domain/entities/tarea.types'
+import AppDialog from '@/components/dialogs/AppDialog.vue'
 
-const emit = defineEmits<{ close: [] }>()
+const modelValue = defineModel<boolean>()
+
+const emit = defineEmits<{
+  close: []
+}>()
 
 const { isCreating, createError, createTarea } = useTareas()
 const auth = useAuthStore()
@@ -86,6 +91,7 @@ async function handleSubmit(): Promise<void> {
   const result = await createTarea(dto)
 
   if (result.success) {
+    modelValue.value = false
     emit('close')
   }
   // If failed, createError is surfaced by the composable (can be displayed in UI)
@@ -94,194 +100,135 @@ async function handleSubmit(): Promise<void> {
 function handleClose(): void {
   emit('close')
 }
+
+function handleCancel(): void {
+  modelValue.value = false
+}
 </script>
 
 <template>
-  <div class="create-tarea-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <!-- Backdrop -->
-    <div class="create-tarea-modal__backdrop" aria-hidden="true" @click="handleClose" />
+  <AppDialog v-model="modelValue" title="Nueva tarea" size="sm" @close="handleClose">
+    <form class="create-tarea-modal__form" novalidate @submit.prevent="handleSubmit">
+      <!-- titulo -->
+      <div class="create-tarea-modal__field">
+        <label for="tarea-titulo" class="create-tarea-modal__label">Título</label>
+        <input
+          id="tarea-titulo"
+          v-model="titulo"
+          type="text"
+          class="create-tarea-modal__input"
+          :class="{ 'create-tarea-modal__input--error': fieldErrors['titulo'] }"
+          placeholder="Ej: Aseo matutino"
+          maxlength="200"
+        />
+        <span v-if="fieldErrors['titulo']" class="create-tarea-modal__error">
+          {{ fieldErrors['titulo'] }}
+        </span>
+      </div>
 
-    <!-- Sheet -->
-    <div class="create-tarea-modal__sheet">
-      <!-- Header -->
-      <header class="create-tarea-modal__header">
-        <h2 id="modal-title" class="create-tarea-modal__title">Nueva tarea</h2>
+      <!-- tipo -->
+      <div class="create-tarea-modal__field">
+        <label for="tarea-tipo" class="create-tarea-modal__label">Tipo</label>
+        <select
+          id="tarea-tipo"
+          v-model="tipo"
+          class="create-tarea-modal__select"
+          :class="{ 'create-tarea-modal__select--error': fieldErrors['tipo'] }"
+        >
+          <option value="" disabled>Selecciona un tipo</option>
+          <option v-for="opt in TIPO_OPTIONS" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+        <span v-if="fieldErrors['tipo']" class="create-tarea-modal__error">
+          {{ fieldErrors['tipo'] }}
+        </span>
+      </div>
+
+      <!-- fechaHora -->
+      <div class="create-tarea-modal__field">
+        <label for="tarea-fecha" class="create-tarea-modal__label">Fecha y hora</label>
+        <input
+          id="tarea-fecha"
+          v-model="fechaHora"
+          type="datetime-local"
+          class="create-tarea-modal__input"
+          :class="{ 'create-tarea-modal__input--error': fieldErrors['fechaHora'] }"
+        />
+        <span v-if="fieldErrors['fechaHora']" class="create-tarea-modal__error">
+          {{ fieldErrors['fechaHora'] }}
+        </span>
+      </div>
+
+      <!-- residenteId -->
+      <div class="create-tarea-modal__field">
+        <label for="tarea-residente" class="create-tarea-modal__label">Residente</label>
+        <select
+          id="tarea-residente"
+          v-model="residenteId"
+          class="create-tarea-modal__select"
+          :class="{ 'create-tarea-modal__select--error': fieldErrors['residenteId'] }"
+        >
+          <option value="" disabled>Selecciona un residente</option>
+          <option v-for="res in residentesList" :key="res.id" :value="res.id">
+            {{ res.nombre }}
+          </option>
+        </select>
+        <span v-if="fieldErrors['residenteId']" class="create-tarea-modal__error">
+          {{ fieldErrors['residenteId'] }}
+        </span>
+      </div>
+
+      <!-- notas (optional) -->
+      <div class="create-tarea-modal__field">
+        <label for="tarea-notas" class="create-tarea-modal__label">
+          Notas
+          <span class="create-tarea-modal__optional">(opcional)</span>
+        </label>
+        <textarea
+          id="tarea-notas"
+          v-model="notas"
+          class="create-tarea-modal__textarea"
+          placeholder="Indicaciones adicionales..."
+          rows="3"
+          maxlength="2000"
+        />
+      </div>
+
+      <!-- Submit error -->
+      <p v-if="createError" class="create-tarea-modal__submit-error" role="alert">
+        {{ createError }}
+      </p>
+    </form>
+
+    <template #footer>
+      <div class="create-tarea-modal__actions">
         <button
           type="button"
-          class="create-tarea-modal__close"
-          aria-label="Cerrar"
-          @click="handleClose"
+          class="create-tarea-modal__btn create-tarea-modal__btn--cancel"
+          @click="handleCancel"
         >
-          ✕
+          Cancelar
         </button>
-      </header>
-
-      <!-- Form -->
-      <form class="create-tarea-modal__form" novalidate @submit.prevent="handleSubmit">
-        <!-- titulo -->
-        <div class="create-tarea-modal__field">
-          <label for="tarea-titulo" class="create-tarea-modal__label">Título</label>
-          <input
-            id="tarea-titulo"
-            v-model="titulo"
-            type="text"
-            class="create-tarea-modal__input"
-            :class="{ 'create-tarea-modal__input--error': fieldErrors['titulo'] }"
-            placeholder="Ej: Aseo matutino"
-            maxlength="200"
-          />
-          <span v-if="fieldErrors['titulo']" class="create-tarea-modal__error">
-            {{ fieldErrors['titulo'] }}
-          </span>
-        </div>
-
-        <!-- tipo -->
-        <div class="create-tarea-modal__field">
-          <label for="tarea-tipo" class="create-tarea-modal__label">Tipo</label>
-          <select
-            id="tarea-tipo"
-            v-model="tipo"
-            class="create-tarea-modal__select"
-            :class="{ 'create-tarea-modal__select--error': fieldErrors['tipo'] }"
-          >
-            <option value="" disabled>Selecciona un tipo</option>
-            <option v-for="opt in TIPO_OPTIONS" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </option>
-          </select>
-          <span v-if="fieldErrors['tipo']" class="create-tarea-modal__error">
-            {{ fieldErrors['tipo'] }}
-          </span>
-        </div>
-
-        <!-- fechaHora -->
-        <div class="create-tarea-modal__field">
-          <label for="tarea-fecha" class="create-tarea-modal__label">Fecha y hora</label>
-          <input
-            id="tarea-fecha"
-            v-model="fechaHora"
-            type="datetime-local"
-            class="create-tarea-modal__input"
-            :class="{ 'create-tarea-modal__input--error': fieldErrors['fechaHora'] }"
-          />
-          <span v-if="fieldErrors['fechaHora']" class="create-tarea-modal__error">
-            {{ fieldErrors['fechaHora'] }}
-          </span>
-        </div>
-
-        <!-- residenteId -->
-        <div class="create-tarea-modal__field">
-          <label for="tarea-residente" class="create-tarea-modal__label">Residente</label>
-          <select
-            id="tarea-residente"
-            v-model="residenteId"
-            class="create-tarea-modal__select"
-            :class="{ 'create-tarea-modal__select--error': fieldErrors['residenteId'] }"
-          >
-            <option value="" disabled>Selecciona un residente</option>
-            <option v-for="res in residentesList" :key="res.id" :value="res.id">
-              {{ res.nombre }}
-            </option>
-          </select>
-          <span v-if="fieldErrors['residenteId']" class="create-tarea-modal__error">
-            {{ fieldErrors['residenteId'] }}
-          </span>
-        </div>
-
-        <!-- notas (optional) -->
-        <div class="create-tarea-modal__field">
-          <label for="tarea-notas" class="create-tarea-modal__label">
-            Notas
-            <span class="create-tarea-modal__optional">(opcional)</span>
-          </label>
-          <textarea
-            id="tarea-notas"
-            v-model="notas"
-            class="create-tarea-modal__textarea"
-            placeholder="Indicaciones adicionales..."
-            rows="3"
-            maxlength="2000"
-          />
-        </div>
-
-        <!-- Submit error -->
-        <p v-if="createError" class="create-tarea-modal__submit-error" role="alert">
-          {{ createError }}
-        </p>
-
-        <!-- Actions -->
-        <div class="create-tarea-modal__actions">
-          <button
-            type="button"
-            class="create-tarea-modal__btn create-tarea-modal__btn--cancel"
-            @click="handleClose"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            class="create-tarea-modal__btn create-tarea-modal__btn--submit"
-            :disabled="isCreating"
-          >
-            {{ isCreating ? 'Guardando...' : 'Guardar tarea' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+        <button
+          type="submit"
+          form="create-tarea-form"
+          class="create-tarea-modal__btn create-tarea-modal__btn--submit"
+          :disabled="isCreating"
+        >
+          {{ isCreating ? 'Guardando...' : 'Guardar tarea' }}
+        </button>
+      </div>
+    </template>
+  </AppDialog>
 </template>
 
 <style scoped>
 @reference "../../../../style.css";
 
-/* ─── Backdrop ────────────────────────────────────────────────────────────── */
-.create-tarea-modal__backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.32);
-  z-index: 40;
-}
-
-/* ─── Sheet ───────────────────────────────────────────────────────────────── */
-.create-tarea-modal__sheet {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background-color: var(--color-surface);
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  padding: 0 0 env(safe-area-inset-bottom);
-  max-height: 90dvh;
-  overflow-y: auto;
-}
-
-/* ─── Header ──────────────────────────────────────────────────────────────── */
-.create-tarea-modal__header {
-  @apply flex items-center justify-between px-6 py-4 border-b border-outline-variant;
-}
-
-.create-tarea-modal__title {
-  @apply text-lg font-semibold;
-  font-family: var(--font-headline);
-  color: var(--color-on-surface);
-}
-
-.create-tarea-modal__close {
-  @apply w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium cursor-pointer border-none;
-  background-color: var(--color-surface-container-high);
-  color: var(--color-on-surface-variant);
-  transition: opacity 0.15s ease;
-}
-
-.create-tarea-modal__close:hover {
-  opacity: 0.75;
-}
-
 /* ─── Form ───────────────────────────────────────────────────────────────── */
 .create-tarea-modal__form {
-  @apply flex flex-col gap-5 px-6 py-5;
+  @apply flex flex-col gap-5;
 }
 
 /* ─── Field ──────────────────────────────────────────────────────────────── */

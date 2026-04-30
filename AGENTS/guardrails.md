@@ -176,6 +176,30 @@ CHECK: Does the implementation reference a screen from design-source.md?
 SEVERITY: BLOCKED
 ```
 
+## G11 — Named event handlers in Vue templates
+
+```
+RULE: All DOM events in Vue component templates MUST be bound to a named
+      function, not an inline expression or statement.
+      ✅ @click="handleClose"
+      ✅ @input="onTitleChange"
+      ❌ @click="$emit('close')"
+      ❌ @click="count++"
+      ❌ @click="emit('update:modelValue', false)"
+SCOPE: DEVELOPER agent. Applies to ALL .vue template files.
+RATIONALE: Inline expressions hide logic, complicate debugging, and make
+           refactoring error-prone. Named functions are traceable, testable,
+           and readable.
+ACTION_ON_VIOLATION:
+  1. Flag as NEEDS_REVISION.
+  2. Extract the inline expression to a named function in <script setup>.
+  3. Replace the inline binding with the function reference.
+  4. Do not merge until all inline event handlers are refactored.
+CHECK: Does every @, :, and v- attribute in the template reference a
+       declared function, not an inline expression?
+SEVERITY: NEEDS_REVISION
+```
+
 ---
 
 ## Guardrail Severity Reference

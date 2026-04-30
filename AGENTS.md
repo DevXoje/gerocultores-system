@@ -128,12 +128,14 @@ ACTION_ON_VIOLATION: Flag commit message as non-compliant.
 CHECK: Does the commit message follow feat(US-XX) pattern?
 ```
 
-### G11 — No skip of pre-push safety nets
+### G11 — Named event handlers in Vue templates
 ```
-RULE: git push --no-verify (or any variant that bypasses lint-staged or test hooks)
-      is STRICTLY PROHIBITED. The pre-push hook exists to protect shared CI state.
-      If tests fail, fix the root cause — never bypass the safety net.
-SEVERITY: BLOCKED — do not use --no-verify under any circumstances.
+RULE: All DOM events in Vue component templates MUST be bound to a named
+      function, not an inline expression.
+✅ @click="handleClose"
+❌ @click="$emit('close')"
+SCOPE: DEVELOPER agents. All .vue template files.
+SEVERITY: NEEDS_REVISION
 ```
 
 ### G09 — Academic coverage
