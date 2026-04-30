@@ -4,12 +4,7 @@
  * Firebase Auth implementation of IAuthRepository.
  * This is the ONLY place in the auth module that imports Firebase Auth directly.
  */
-import {
-  signInWithEmailAndPassword,
-  signInWithRedirect,
-  getRedirectResult,
-  type User,
-} from 'firebase/auth'
+import { signInWithEmailAndPassword, signInWithRedirect, getRedirectResult } from 'firebase/auth'
 import { auth, googleProvider } from '@/services/firebase'
 import type { AuthResult, IAuthRepository } from '../domain/interfaces/IAuthRepository'
 

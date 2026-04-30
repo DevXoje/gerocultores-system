@@ -258,7 +258,7 @@ describe('LoginPage', () => {
   })
 
   it('should call signInWithRedirect on Google button click', async () => {
-    const { pinia, store } = createTestPinia()
+    const { pinia } = createTestPinia()
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
       global: { plugins: [pinia, router] },
