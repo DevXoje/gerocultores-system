@@ -15,7 +15,7 @@
 #   PROVIDER="lmstudio:qwen2.5-coder-7b-instruct"
 #   PROVIDER="github:gpt-4o"
 #   PROVIDER="github:deepseek-r1"
-PROVIDER="minimax-cn-coding-plan/MiniMax-M2.7"
+PROVIDER="github-gpt-5-mini"
 
 # File patterns to include in review (comma-separated)
 # Default: * (all files)
@@ -38,7 +38,7 @@ FILE_PATTERNS="*.ts,*.tsx,*.js,*.jsx"
 #     These are CI/DX tooling corollaries of ADR-01b and ADR-06.
 #     They contain no domain logic and are excluded from GGA review scope
 #     (same rationale as excluding *.spec.ts — tooling ≠ application code).
-EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts,vite.config.ts,playwright.config.ts,eslint.config.js"
+EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts,vite.config.ts,playwright.config.ts,eslint.config.js,*.docx,*.pdf,memoria.html"
 
 # File containing code review rules
 # Default: AGENTS.md

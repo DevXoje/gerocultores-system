@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import {
-  signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onIdTokenChanged,
   type User,
@@ -36,19 +35,15 @@ export const useAuthStore = defineStore('auth', () => {
   // ─── Public actions ─────────────────────────────────────────────────────
 
   /**
-   * Authenticate with email and password.
-   * Sets `user` and `role` on success. Throws on failure.
-   * Callers (composables/components) must catch and display a generic error.
+   * Set user and role from external auth flow (Google OAuth via composable).
+   * Store is state-only — Firebase calls live in application composables.
    */
-  async function signIn(email: string, password: string): Promise<void> {
-    isLoading.value = true
-    try {
-      const credential = await signInWithEmailAndPassword(auth, email, password)
-      await loadRoleFromToken(credential.user)
-      user.value = credential.user
-    } finally {
-      isLoading.value = false
-    }
+  function setUser(firebaseUser: User): void {
+    user.value = firebaseUser
+  }
+
+  async function setRoleFromUser(firebaseUser: User): Promise<void> {
+    await loadRoleFromToken(firebaseUser)
   }
 
   /**
@@ -112,5 +107,5 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
-  return { user, role, isLoading, signIn, signOut, initAuth }
+  return { user, role, isLoading, setUser, setRoleFromUser, signOut, initAuth }
 })

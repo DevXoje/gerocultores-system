@@ -57,12 +57,13 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ACADEMIC_DIR="${REPO_ROOT}/OUTPUTS/academic"
 DIST_DIR="${ACADEMIC_DIR}/dist"
 TEMPLATE="${ACADEMIC_DIR}/template/reference.docx"
-OUTPUT_DOCX="${DIST_DIR}/memoria-gerocultores.docx"
-OUTPUT_PDF="${DIST_DIR}/memoria-gerocultores.pdf"
 
-# Imagen Docker preferida para DOCX (pandoc/core es ligera y funciona en ARM64)
+# Output files — version suffix added after flags are parsed
+OUTPUT_DOCX=""
+OUTPUT_PDF=""
+
+# Docker image names (used by conversion engine)
 DOCKER_IMAGE_CORE="pandoc/core:latest"
-# Imagen Docker para PDF con LaTeX (pandoc/extra incluye xelatex)
 DOCKER_IMAGE_EXTRA="pandoc/extra:latest"
 
 # --------------- Section Order -----------------------------------------------
@@ -78,27 +79,37 @@ SECTION_ORDER=(
   "analisis-requisitos.md"             # Sección 4
   # "diseno-sistema.md"                # Sección 5 — PENDIENTE
   # "implementacion.md"                # Sección 6 — BLOQUEADA (requiere código)
-  "coste-economico.md"                 # Sección 7
+  "coste-economico.md"                # Sección 7
   "alternativas.md"                    # Sección 8
-  # "pruebas.md"                       # Sección 9 — PENDIENTE
+  # "pruebas.md"                      # Sección 9 — PENDIENTE
   "seguridad-rgpd.md"                  # Sección 10
-  # "conclusiones.md"                  # Sección 11 — BLOQUEADA (requiere fin desarrollo)
-  # "formacion-adicional.md"           # Sección 12 — PENDIENTE (info autor)
+  # "conclusiones.md"                 # Sección 11 — BLOQUEADA (requiere fin desarrollo)
+  # "formacion-adicional.md"          # Sección 12 — PENDIENTE (info autor)
   "bibliografia.md"                    # Sección 13
-  "recursos.md"                        # Sección 14
+  "recursos.md"                       # Sección 14
   "metodologia.md"                     # integrada como apéndice metodológico
 )
 
-# --------------- Flags -------------------------------------------------------
+# --------------- Helpers -----------------------------------------------------
+info()    { echo "  ✓  $*"; }
+warn()    { echo "  ⚠  $*" >&2; }
+error()   { echo "  ✗  $*" >&2; }
+section() { echo ""; echo "──────────────────────────────────────────"; echo "  $*"; echo "──────────────────────────────────────────"; }
+
+# --------------- Flags (parse first — used throughout) ------------------------
 SKIP_PDF=false
 PDF_ONLY=false
 DRY_RUN=false
+VERSION_SUFFIX=""
 
 for arg in "$@"; do
   case "$arg" in
     --sections)  SKIP_PDF=true ;;
     --pdf-only)  PDF_ONLY=true ;;
     --dry-run)   DRY_RUN=true ;;
+    --version)
+      VERSION_SUFFIX="$(date '+%Y%m%d-%H%M%S')"
+      ;;
     --help|-h)
       grep '^#' "$0" | sed 's/^# \{0,1\}//' | sed '/^!/d'
       exit 0
@@ -110,12 +121,6 @@ for arg in "$@"; do
       ;;
   esac
 done
-
-# --------------- Helpers -----------------------------------------------------
-info()    { echo "  ✓  $*"; }
-warn()    { echo "  ⚠  $*" >&2; }
-error()   { echo "  ✗  $*" >&2; }
-section() { echo ""; echo "──────────────────────────────────────────"; echo "  $*"; echo "──────────────────────────────────────────"; }
 
 # --------------- Validate environment ----------------------------------------
 section "🔍 Detectando entorno"
@@ -171,6 +176,10 @@ fi
 # --------------- Collect sections --------------------------------------------
 section "📄 Recopilando secciones"
 
+# Set output paths AFTER flags are parsed (VERSION_SUFFIX is now available)
+OUTPUT_DOCX="${DIST_DIR}/memoria-gerocultores${VERSION_SUFFIX:+.${VERSION_SUFFIX}}.docx"
+OUTPUT_PDF="${DIST_DIR}/memoria-gerocultores${VERSION_SUFFIX:+.${VERSION_SUFFIX}}.pdf"
+
 AVAILABLE_FILES=()
 MISSING_FILES=()
 
@@ -210,45 +219,76 @@ if [[ "${DRY_RUN}" == true ]]; then
   exit 0
 fi
 
+# --------------- Preprocess images (DOCX/PDF) ----------------------------------
+# Download/cache local images so pandoc can embed them.
+# Output goes to .cache/memoria-combined-images.md which pandoc reads directly.
+PREPROCESSED_MD="${REPO_ROOT}/.cache/memoria-combined-images.md"
+section "🖼️  Preprocesando imágenes"
+
+if [[ -f "${REPO_ROOT}/scripts/preprocess-images.py" ]]; then
+  python3 "${REPO_ROOT}/scripts/preprocess-images.py" \
+    "${DIST_DIR}/memoria-combined.md" \
+    "placeholder-output" 2>&1 | while read line; do
+    echo "  $line"
+  done
+  if [[ -f "${PREPROCESSED_MD}" ]]; then
+    info "Preprocesado listo: ${PREPROCESSED_MD}"
+  else
+    warn "Preprocesamiento falló — se usará el markdown original"
+  fi
+else
+  warn "preprocess-images.py no encontrado — omitiendo preprocesamiento"
+fi
+
 # --------------- Build DOCX --------------------------------------------------
 if [[ "${PDF_ONLY}" == false ]]; then
   section "📝 Generando DOCX"
 
-  # Build path arrays relative to REPO_ROOT for Docker
-  REL_FILES=()
-  for f in "${AVAILABLE_FILES[@]}"; do
-    REL_FILES+=("${f#${REPO_ROOT}/}")
-  done
-  REL_TEMPLATE="${TEMPLATE#${REPO_ROOT}/}"
-  REL_OUTPUT="${OUTPUT_DOCX#${REPO_ROOT}/}"
+  # Use preprocessed markdown with embedded image paths (from .cache/)
+  # Falls back to memory-combined if preprocessing failed
+  if [[ -f "${PREPROCESSED_MD}" ]]; then
+    DOCX_INPUT="${PREPROCESSED_MD}"
+    DOCX_INPUT_ABS="${PREPROCESSED_MD}"     # absolute for Docker -w
+    info "Usando markdown con imágenes preprocesadas"
+  else
+    DOCX_INPUT="${DIST_DIR}/memoria-combined.md"
+    DOCX_INPUT_ABS="${DIST_DIR}/memoria-combined.md"
+    warn "Usando memoria-combined.md (preprocesamiento falló)"
+  fi
+
+  # Run pandoc from .cache/ so relative path "images/..." resolves correctly
+  # Docker working dir must be the parent of where the markdown lives
+  DOCX_INPUT_REL="${DOCX_INPUT#${REPO_ROOT}/}"   # .cache/memoria-combined-images.md
+  PANDOC_WD="$(dirname "${PREPROCESSED_MD}")"   # .cache/
 
   if [[ "${USE_DOCKER}" == false ]]; then
     # --- Local pandoc ---
     pandoc \
-      "${AVAILABLE_FILES[@]}" \
+      "${DOCX_INPUT}" \
       --from=markdown \
       --to=docx \
       --reference-doc="${TEMPLATE}" \
       --output="${OUTPUT_DOCX}" \
+      --embed-resources \
       --toc \
       --toc-depth=3 \
       --metadata title="Memoria Académica — gerocultores-system" \
       --metadata author="Jose Vilches Sánchez"
   else
     # --- Docker fallback ---
-    # pandoc/core usa pandoc como entrypoint — no añadir "pandoc" como primer arg.
-    # Montamos el repo root en /data y usamos -w /data para que las rutas relativas funcionen.
-    # -u $(id -u):$(id -g) evita que los archivos de salida sean propiedad de root.
+    # Run from .cache/ so "images/..." relative paths resolve
     docker run --rm \
       -v "${REPO_ROOT}:/data" \
-      -w /data \
+      -w "/data/${PANDOC_WD#${REPO_ROOT}/}" \
       -u "$(id -u):$(id -g)" \
       "${DOCKER_IMAGE_CORE}" \
-        "${REL_FILES[@]}" \
+        "$(basename "${DOCX_INPUT}")" \
         --from=markdown \
         --to=docx \
-        --reference-doc="${REL_TEMPLATE}" \
-        --output="${REL_OUTPUT}" \
+        --reference-doc="/data/${TEMPLATE#${REPO_ROOT}/}" \
+        --output="/data/${OUTPUT_DOCX#${REPO_ROOT}/}" \
+        --embed-resources \
+        --resource-path=. \
         --toc \
         --toc-depth=3 \
         --metadata title="Memoria Académica — gerocultores-system" \
@@ -324,17 +364,40 @@ body {
   color: #000;
   margin: 0;
   padding: 0;
+  font-weight: normal;
 }
-h1, h2, h3, h4, h5, h6 {
+h1 {
+  font-size: 16pt;
+  font-weight: bold;
   font-family: Arial, sans-serif;
   page-break-after: avoid;
+  margin: 0 0 0.5em 0;
 }
-h1 { font-size: 16pt; }
-h2 { font-size: 14pt; }
-h3 { font-size: 12pt; }
+h2 {
+  font-size: 14pt;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  page-break-after: avoid;
+  margin: 0 0 0.5em 0;
+}
+h3 {
+  font-size: 12pt;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  page-break-after: avoid;
+  margin: 0 0 0.5em 0;
+}
+h4, h5, h6 {
+  font-size: 11pt;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  page-break-after: avoid;
+  margin: 0 0 0.5em 0;
+}
 p, li {
   line-height: 1.3;
   margin: 0 0 0.5em 0;
+  font-weight: normal;
 }
 table {
   border-collapse: collapse;
@@ -346,9 +409,14 @@ th, td {
   border: 1px solid #999;
   padding: 4px 6px;
   text-align: left;
+  font-weight: normal;
+}
+th {
+  font-weight: bold;
 }
 code, pre {
   font-size: 9pt;
+  font-weight: normal;
   background-color: #f5f5f5;
   border: 1px solid #ddd;
   padding: 2px 4px;
@@ -363,10 +431,17 @@ blockquote {
   padding-left: 12px;
   color: #555;
   font-size: 10pt;
+  font-weight: normal;
 }
 img {
   max-width: 100%;
   height: auto;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+figure {
+  page-break-inside: avoid;
+  margin: 1em 0;
 }
 /* @page margins are controlled via PDF_OPTS (Puppeteer API), not CSS @page,     */
 /* because Chrome/Puppeteer ignores CSS Paged Media running elements.             */

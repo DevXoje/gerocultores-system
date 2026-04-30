@@ -1,15 +1,5 @@
 # Resumen Ejecutivo
 
-> **Borrador** — para la memoria académica DAW (una página)  
-> **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: GeroCare — Agenda digital para gerocultores  
-> **Centro**: CIPFP Batoi d'Alcoi  
-> **Tutor**: ANDRES MARTOS GAZQUEZ  
-> **Ciclo**: CFS Desarrollo de Aplicaciones Web (DAW) — 2025-2026  
-> **Generado**: 2026-03-29 — sdd-init agent  
-> **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
-> **Longitud**: ~310 palabras (objetivo: 250–350 palabras / 1 página)
-
 ---
 
 ## Resumen Ejecutivo
@@ -26,29 +16,11 @@ El proyecto se entrega el 18 de mayo de 2026 como Trabajo de Final de Ciclo del 
 
 ---
 
-> **Notas para la versión final**:
-> - Actualizar con datos reales de cobertura de tests y US implementadas cuando estén disponibles.
-> - Añadir la frase de impacto: resultado cuantificable (p.ej. "el tiempo de registro de una incidencia se redujo de X minutos a Y taps").
-> - Si se realiza prueba con usuarios reales, mencionar el resultado brevemente.
-
 ---
-
-*Borrador generado: 2026-03-29 — sdd-init agent — GeroCare (gerocultores-system)*  
-*Fuentes: PROJECT_BRIEF.md, SPEC/requirements.md, SPEC/constraints.md, DECISIONS/ADR-01b.md*  
-*Engram topic key: academic/resumen-ejecutivo*
-
 
 ---
 
 # Introducción
-
-> **Borrador** — sección 1 de la memoria académica DAW  
-> **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: GeroCare — Agenda digital para gerocultores  
-> **Centro**: CIPFP Batoi d'Alcoi  
-> **Generado**: 2026-03-29 — sdd-init agent  
-> **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
-> **Longitud orientativa**: 250–350 palabras (este borrador) → expandir hasta 600–900 palabras en versión final
 
 ---
 
@@ -66,27 +38,11 @@ La memoria está organizada en catorce secciones: tras este capítulo introducto
 
 ---
 
-> **Notas para ampliar a versión final (objetivo: 600–900 palabras)**:
-> - Añadir párrafo sobre motivación personal del autor: ¿por qué este proyecto? ¿conexión con el entorno sanitario/social?
-> - Ampliar el contexto de las residencias de mayores en España (dato cuantitativo: aprox. 5.400 residencias, >380.000 plazas según IMSERSO).
-> - Describir brevemente la estructura de la memoria (qué encontrará el lector en cada capítulo).
-> - Incluir un párrafo sobre el alcance del MVP: qué funcionalidades entran y cuáles se dejaron fuera por limitaciones de tiempo (US-08 notificaciones = Should; US-12 agenda semanal = Could).
-
 ---
-
-*Borrador generado: 2026-03-29 — sdd-init agent — gerocultores-system*  
-*Fuentes: PROJECT_BRIEF.md, SPEC/requirements.md, SPEC/constraints.md, DECISIONS/ADR-01b.md*  
-*Engram topic key: academic/introduccion*
-
 
 ---
 
 # 2. Fundamentos teóricos y tecnológicos
-
-> **Sección de la memoria académica DAW — GeroCare**  
-> Autor: Jose Vilches Sánchez · CIPFP Batoi d'Alcoi · 2025-2026  
-> ADRs de referencia: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05  
-> Estado: BORRADOR — listo para revisión
 
 ---
 
@@ -101,8 +57,6 @@ La arquitectura que elegí sigue el modelo cliente-servidor en dos capas diferen
 ## 2.2 Vue 3 + Composition API + Vite
 
 Vue.js es un framework JavaScript progresivo para construir interfaces de usuario. La versión 3, lanzada en 2020, introdujo la *Composition API* (API de composición): un sistema de organización del código basado en funciones (`setup()`, `ref()`, `computed()`, `watch()`) que sustituye —o complementa— a la *Options API* clásica. La ventaja principal es que la lógica relacionada se agrupa en un mismo lugar en lugar de estar dispersa entre `data`, `methods` y `computed`, lo que facilita extraerla en composables (funciones de lógica reutilizable) independientes.
-
-> **Nota para revisión**: Añadir ejemplo real de uso de Vue 3 en producción (p. ej. GitLab, Wikimedia, o una aplicación española conocida) para cumplir la recomendación del centro de incluir ejemplos reales de uso de la tecnología.
 
 Elegí Vue 3 sobre React 18 (la opción inicial del proyecto, documentada en ADR-01 y descartada en ADR-01b) por razones prácticas: mi productividad es mayor con la Composition API que con los *hooks* de React, y el plazo académico (2026-05-18) no deja margen para curvas de aprendizaje largas. También evalué Svelte + SvelteKit: tiene un bundle (paquete compilado) más ligero y buen rendimiento, pero su ecosistema de componentes es más reducido y el riesgo de quedarme sin soluciones documentadas para requisitos específicos del proyecto era mayor. La comparativa detallada entre estas opciones se recoge en el ADR-01b del repositorio.
 
@@ -125,8 +79,6 @@ La gestión de estado es especialmente relevante en esta aplicación porque dist
 ### Firestore como base de datos
 
 Cloud Firestore es una base de datos NoSQL (*Not Only SQL*, no relacional) orientada a documentos, gestionada como servicio en la nube por Google. En lugar de tablas y filas, Firestore organiza los datos en colecciones de documentos JSON anidables. Para este proyecto, cada entidad del dominio (residentes, tareas, incidencias, usuarios, turnos) se mapea directamente a una colección de nivel superior, siguiendo el modelo definido en `SPEC/entities.md`.
-
-> **Nota para revisión**: Añadir ejemplo real de uso de Firestore en producción (p. ej. una aplicación conocida que use Firebase como base de datos) para cumplir la recomendación del centro.
 
 La elección de Firestore sobre PostgreSQL (la opción original con Supabase, descartada en ADR-02b) responde a dos razones principales. Primera, coherencia de ecosistema: al usar Firebase Auth y Firebase Hosting, concentrar también la base de datos en el mismo proveedor elimina la necesidad de gestionar credenciales, regiones y consolas de múltiples servicios. Segunda, velocidad de implementación: para un proyecto individual con plazo ajustado, evitar la configuración de PostgreSQL, migraciones SQL y un ORM supuso un ahorro de tiempo significativo. Como contrapartida, Firestore introduce complejidad en consultas relacionales —los *joins* no existen: hay que desnormalizar los datos o hacer consultas múltiples— y genera dependencia del proveedor Google (*vendor lock-in*). Este tradeoff (compensación entre ventajas e inconvenientes) está documentado en ADR-02b.
 
@@ -180,22 +132,9 @@ Dentro de este ciclo ágil, adopté **Spec-Driven Development (SDD)** como metod
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
-*ADRs fuente: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05*  
-*Extensión aproximada: 1.350 palabras*
-
-
 ---
 
 # 3. Contexto y organización del proyecto
-
-> **Borrador** — sección 3 de la memoria académica DAW  
-> **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: GeroCare — Agenda digital para gerocultores  
-> **Centro**: CIPFP Batoi d'Alcoi  
-> **Generado**: 2026-04-06 — WRITER agent  
-> **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
-> **Longitud**: ~520 palabras
 
 ---
 
@@ -225,22 +164,9 @@ Quedan fuera del MVP —pero documentadas como funcionalidades Should y Could—
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — gerocultores-system*  
-*Fuentes: PROJECT_BRIEF.md, SPEC/requirements.md, SPEC/user-stories.md, SPEC/constraints.md*  
-*Engram topic key: academic/contexto*
-
-
 ---
 
 # 4. Análisis de requisitos
-
-> **Borrador** — sección 4 de la memoria académica DAW  
-> **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: GeroCare — Agenda digital para gerocultores  
-> **Centro**: CIPFP Batoi d'Alcoi  
-> **Generado**: 2026-04-06 — WRITER agent  
-> **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
-> **Longitud**: ~1.050 palabras + tablas
 
 ---
 
@@ -302,7 +228,7 @@ Las historias de usuario formalizan los requisitos desde el punto de vista del a
 
 ---
 
-**US-01 — Inicio de sesión**  
+**US-01 — Inicio de sesión**
 *Como gerocultor o coordinador, quiero iniciar sesión con mis credenciales, para acceder a mi agenda y los datos de los residentes de forma segura.*
 
 **Criterios de aceptación (completos)**:
@@ -314,10 +240,10 @@ Las historias de usuario formalizan los requisitos desde el punto de vista del a
 
 ---
 
-**US-02 — Control de acceso por rol**  
+**US-02 — Control de acceso por rol**
 *Como administrador, quiero que cada usuario solo acceda a las funciones y datos que corresponden a su rol, para proteger la privacidad de los residentes y mantener la integridad del sistema.*
 
-**US-03 — Consulta de agenda diaria**  
+**US-03 — Consulta de agenda diaria**
 *Como gerocultor, quiero ver mi agenda del día actual al iniciar sesión, para saber qué tareas tengo pendientes, en qué orden y para qué residente.*
 
 **Criterios de aceptación (completos)**:
@@ -329,13 +255,13 @@ Las historias de usuario formalizan los requisitos desde el punto de vista del a
 
 ---
 
-**US-04 — Actualizar estado de una tarea**  
+**US-04 — Actualizar estado de una tarea**
 *Como gerocultor, quiero marcar una tarea como completada o añadir notas, para registrar lo que he hecho y avisar al siguiente turno.*
 
-**US-05 — Consulta de ficha de residente**  
+**US-05 — Consulta de ficha de residente**
 *Como gerocultor, quiero acceder a la ficha de un residente desde su tarea o desde una búsqueda, para recordar sus condiciones de salud, alergias y preferencias antes de atenderle.*
 
-**US-06 — Registro de incidencia**  
+**US-06 — Registro de incidencia**
 *Como gerocultor, quiero registrar una incidencia de un residente con un formulario rápido, para que quede constancia inmediata y el equipo pueda actuar.*
 
 **Criterios de aceptación (completos)**:
@@ -348,41 +274,29 @@ Las historias de usuario formalizan los requisitos desde el punto de vista del a
 
 ---
 
-**US-07 — Historial de incidencias de un residente**  
+**US-07 — Historial de incidencias de un residente**
 *Como gerocultor o coordinador, quiero consultar el historial de incidencias de un residente filtrado por fecha y tipo, para evaluar su evolución y detectar patrones.*
 
-**US-08 — Recibir notificaciones de alertas críticas** *(Should)*  
+**US-08 — Recibir notificaciones de alertas críticas** *(Should)*
 *Como gerocultor, quiero recibir notificaciones cuando haya una incidencia crítica o una tarea urgente, para reaccionar a tiempo sin tener que estar revisando la app constantemente.*
 
-**US-09 — Alta y gestión de residentes** *(Should)*  
+**US-09 — Alta y gestión de residentes** *(Should)*
 *Como coordinador, quiero dar de alta nuevos residentes y editar sus fichas, para mantener actualizado el registro de personas atendidas.*
 
-**US-10 — Gestión de cuentas de usuarios** *(Should)*  
+**US-10 — Gestión de cuentas de usuarios** *(Should)*
 *Como administrador, quiero crear y desactivar cuentas de gerocultores y coordinadores, para controlar quién tiene acceso al sistema.*
 
-**US-11 — Resumen de fin de turno** *(Should)*  
+**US-11 — Resumen de fin de turno** *(Should)*
 *Como gerocultor, quiero generar un resumen de mi turno al terminarlo, para facilitar el traspaso al compañero del turno siguiente.*
 
-**US-12 — Vista de agenda semanal** *(Could)*  
+**US-12 — Vista de agenda semanal** *(Could)*
 *Como gerocultor o coordinador, quiero ver la agenda de la semana en una vista de calendario, para planificar y revisar la distribución de tareas.*
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — gerocultores-system*  
-*Fuentes: SPEC/requirements.md, SPEC/user-stories.md, SPEC/constraints.md*  
-*Engram topic key: academic/analisis-requisitos*
-
-
 ---
 
 # 5. Diseño del sistema
-
-> **Autor**: Jose Vilches Sánchez  
-> **Tutor**: Andres Martos Gazquez  
-> **Centro**: CIPFP Batoi d'Alcoi  
-> **Proyecto**: GeroCare — Sistema de Gestión para Gerocultores  
-> **Estado**: BORRADOR — 2026-04-06  
-> **Longitud objetivo**: ~1.800–2.200 palabras (páginas 20–25 de la memoria)
 
 ---
 
@@ -568,55 +482,24 @@ El sistema define seis flujos de usuario (FL-01 a FL-06) que cubren las operacio
 
 Las pantallas principales del sistema se diseñaron usando Stitch (Google), una herramienta de prototipado que permite generar propuestas visuales rápidas. Los prototipos sirvieron para validar la distribución de elementos antes de empezar la implementación y para verificar que los flujos definidos en la especificación eran realizables en la interfaz.
 
-A continuación se muestran las capturas de las pantallas más representativas del sistema:
+Las pantallas principales prototipadas son:
 
-**Figura 1 — Pantalla de inicio de sesión (US-01)**
+| Pantalla | Descripción | US relacionada |
+|----------|-------------|----------------|
+| Login | Formulario de acceso con email y contraseña | US-01 |
+| Dashboard / Agenda diaria | Lista de tareas del día con estados y colores | US-03 |
+| Detalle de tarea | Panel de acción: completar, añadir nota, incidencia | US-04 |
+| Ficha de residente | Datos identificativos y campos clínicos sensibles | US-05 |
+| Formulario de incidencia | Selector de tipo, severidad y descripción libre | US-06 |
+| Historial de incidencias | Lista filtrable con paginación | US-07 |
+| Alertas críticas | Notificaciones de incidencias críticas en tiempo real | US-08 |
+| Gestión de residentes | Alta, edición y archivo de fichas (coordinador) | US-09 |
+| Panel del coordinador | Vista global de agenda y residentes | US-10 |
+| Agenda semanal | Vista de siete días con tareas por día | US-12 |
 
-![Pantalla de inicio de sesión](https://lh3.googleusercontent.com/aida/ADBb0ugiYoh_Ad7aV_MI_FWOSMnZLFnX4CpwuiO2juiNaLBw7UKGLuf01ouu4G2WCUl0OK3jiIkEEnVZ22NxIJCbl0LwHvuEplr5osSOt_huxaWEsLi2cMDdeFDuCI70yRLsBKxa15LgaVGLuQAzM9Djxmo-LYuo2kByRwztM0C6lxBBPN0Q1YP9Hl_NvOfIjxSuuh9BFqok51KdPNA3Zs4ur-oS53rcugUg07ApWpLFYYtFPNAqzGdYlusbAUQb)
-
-*Figura 1 — Pantalla de inicio de sesión. Muestra el formulario con email y contraseña y el botón de acceso. El diseño es limpio y centrado, optimizado para pantallas de tablet. Fuente: Elaboración propia / Stitch.*
-
----
-
-**Figura 2 — Dashboard del gerocultor (US-03)**
-
-![Dashboard del gerocultor](../../design-exports/US-03-agenda-home__caregiver-dashboard__20260328.png)
-
-*Figura 2 — Dashboard del gerocultor. Lista de tareas del día ordenadas por hora con código de colores (verde = completada, naranja = en curso, rojo = vencida). Fuente: Elaboración propia / Stitch.*
-
----
-
-**Figura 3 — Detalle de tarea: ronda de medicación (US-04)**
-
-![Detalle de tarea](../../design-exports/US-04-task-detail__task-detail-medication-round__20260328.png)
-
-*Figura 3 — Panel de detalle de tarea. Permite al gerocultor completar la tarea, añadir una nota o registrar una incidencia asociada. Fuente: Elaboración propia / Stitch.*
+> **Nota de revisión**: Incluir aquí capturas de pantalla de los prototipos Stitch cuando estén disponibles. Añadir pie de imagen con número y descripción según la norma del centro: *Figura N — Descripción. Fuente: Elaboración propia / Stitch.*
 
 ---
-
-**Figura 4 — Ficha de residente (US-05)**
-
-![Ficha de residente](../../design-exports/US-05-resident-detail__resident-detail-eleanor-vance__20260328.png)
-
-*Figura 4 — Ficha de residente con datos identificativos, fotografía, información de contacto de familiares y notas clínicas relevantes. Fuente: Elaboración propia / Stitch.*
-
----
-
-**Figura 5 — Formulario de registro de incidencia (US-06)**
-
-![Formulario de incidencia](../../design-exports/US-06-incident__new-incident-form-serenity-care__20260328.png)
-
-*Figura 5 — Formulario de registro de incidencia con selector de tipo, nivel de severidad y descripción libre. Optimizado para completarse en cinco pasos táctiles o menos. Fuente: Elaboración propia / Stitch.*
-
----
-
-**Figura 6 — Alertas críticas en tiempo real (US-08)**
-
-![Alertas críticas](../../design-exports/US-08-alerts__critical-alerts-serenity-care__20260328.png)
-
-*Figura 6 — Panel de alertas críticas. Notificaciones en tiempo real de incidencias clasificadas como críticas con acceso directo a la ficha del residente afectado. Fuente: Elaboración propia / Stitch.*
-
-El resto de pantallas diseñadas (historial de incidencias, gestión de residentes, panel del coordinador y agenda semanal) siguen la misma línea visual y cumplen los criterios de diseño definidos en la sección siguiente.
 
 ## 5.8 Sistema de diseño y componentes
 
@@ -644,10 +527,6 @@ El sistema implementa un modelo de seguridad de tres capas independientes y comp
 Este diseño multicapa cumple con los requisitos de seguridad RNF-03 y RNF-09, y con las obligaciones del RGPD para el tratamiento de datos de categoría especial (art. 9) como los diagnósticos y medicación de los residentes.
 
 ---
-
-*Generado: 2026-04-06 — WRITER agent — gerocultores-system*  
-*Fuentes: SPEC/entities.md, SPEC/api-contracts.md, SPEC/flows.md, SPEC/user-stories.md, DECISIONS/ADR-01b, ADR-02b, ADR-03b, ADR-04b*
-
 
 ---
 
@@ -900,7 +779,6 @@ Al cierre del Sprint-2, el flujo de integración y despliegue continuo está com
 
 *Última actualización: 2026-04-18 — Sprint-2 completado*
 
-
 ---
 
 # 7. Estudio del coste económico y organizativo
@@ -1013,18 +891,11 @@ La principal aportación del proyecto no es competir en precio con plataformas e
 
 ---
 
-*Sección generada: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
-*Fuentes: `PLAN/backlog.md`, `PLAN/tasks-summary.md`, `DECISIONS/ADR-04b-deployment-rgpd.md`*
-
+*Sección generada: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*
 
 ---
 
 # 8. Comparación con alternativas y soluciones existentes
-
-> **Sección de la memoria académica DAW — GeroCare**  
-> Autor: Jose Vilches Sánchez · CIPFP Batoi d'Alcoi · 2025-2026  
-> ADRs de referencia: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05  
-> Estado: BORRADOR — listo para revisión
 
 ---
 
@@ -1073,20 +944,9 @@ Todas las decisiones tecnológicas del proyecto pasaron por una evaluación expl
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
-*ADRs fuente: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05*  
-*Extensión aproximada: 560 palabras*
-
-
 ---
 
 # 9. Pruebas
-
-> **Estado**: Borrador — basado en cobertura real medida con Vitest (v8) al cierre del Sprint-2.
-> **Autor**: Jose Vilches Sánchez
-> **Proyecto**: GeroCare — Agenda digital para gerocultores
-> **Centro**: CIPFP Batoi d'Alcoi
-> **Última actualización**: 2026-04-18 — Sprint-2 completado
 
 ---
 
@@ -1230,18 +1090,9 @@ Esta combinación de herramientas crea un muro de calidad en cuatro niveles: edi
 
 *Última actualización: 2026-04-18 — Sprint-2 completado*
 
-
 ---
 
 # 10. Seguridad y cumplimiento RGPD
-
-> **Borrador** — sección 10 de la memoria académica DAW  
-> **Autor**: Jose Vilches Sánchez  
-> **Proyecto**: GeroCare — Agenda digital para gerocultores  
-> **Centro**: CIPFP Batoi d'Alcoi  
-> **Generado**: 2026-04-06 — WRITER agent  
-> **Estado**: BORRADOR — pendiente revisión y personalización por el autor  
-> **Longitud**: ~580 palabras
 
 ---
 
@@ -1294,11 +1145,6 @@ Las medidas descritas en las secciones anteriores están documentadas en los ADR
 - El panel de auditoría para que el administrador pueda revisar el registro de accesos es una funcionalidad futura no incluida en el alcance del MVP.
 
 ---
-
-*Borrador generado: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
-*Fuentes: SPEC/constraints.md, SPEC/entities.md, DECISIONS/ADR-03b-authentication-firebase.md, DECISIONS/ADR-04b-deployment-rgpd.md, SPEC/requirements.md (RNF-03, RNF-07, RNF-09)*  
-*Engram topic key: academic/seguridad-rgpd*
-
 
 ---
 
@@ -1458,18 +1304,11 @@ Las medidas descritas en las secciones anteriores están documentadas en los ADR
 
 ---
 
-*Sección generada: 2026-04-06 — WRITER agent — gerocultores-system*  
-*Fuentes: `DECISIONS/ADR-01b`, `ADR-02b`, `ADR-03b`, `ADR-04b`, `ADR-05`; `SPEC/requirements.md`; `OUTPUTS/academic/memory-template.md`*
-
+*Sección generada: 2026-04-06 — WRITER agent — gerocultores-system*
 
 ---
 
 # 14. Recursos utilizados
-
-> **Sección de la memoria académica DAW — GeroCare**  
-> Autor: Jose Vilches Sánchez · CIPFP Batoi d'Alcoi · 2025-2026  
-> ADRs de referencia: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05  
-> Estado: BORRADOR — completar versiones exactas al finalizar el desarrollo
 
 ---
 
@@ -1557,11 +1396,8 @@ El código fuente completo del proyecto está disponible en el siguiente reposit
 
 ---
 
-*Borrador generado: 2026-04-06 — WRITER agent — GeroCare (gerocultores-system)*  
-*ADRs fuente: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05*  
-*Extensión aproximada: 380 palabras (sin contar tablas)*  
 *⚠️ Completar: versiones exactas desde `package.json` al finalizar Sprint 0*
 
-
 ---
+
 

@@ -580,7 +580,7 @@ A continuación se muestran las capturas de las pantallas más representativas d
 
 **Figura 2 — Dashboard del gerocultor (US-03)**
 
-![Dashboard del gerocultor](../../design-exports/US-03-agenda-home__caregiver-dashboard__20260328.png)
+![Dashboard del gerocultor](images/4a3de55dad009e9a.png)
 
 *Figura 2 — Dashboard del gerocultor. Lista de tareas del día ordenadas por hora con código de colores (verde = completada, naranja = en curso, rojo = vencida). Fuente: Elaboración propia / Stitch.*
 
@@ -588,7 +588,7 @@ A continuación se muestran las capturas de las pantallas más representativas d
 
 **Figura 3 — Detalle de tarea: ronda de medicación (US-04)**
 
-![Detalle de tarea](../../design-exports/US-04-task-detail__task-detail-medication-round__20260328.png)
+![Detalle de tarea](images/52bfc2032d33dd92.png)
 
 *Figura 3 — Panel de detalle de tarea. Permite al gerocultor completar la tarea, añadir una nota o registrar una incidencia asociada. Fuente: Elaboración propia / Stitch.*
 
@@ -596,7 +596,7 @@ A continuación se muestran las capturas de las pantallas más representativas d
 
 **Figura 4 — Ficha de residente (US-05)**
 
-![Ficha de residente](../../design-exports/US-05-resident-detail__resident-detail-eleanor-vance__20260328.png)
+![Ficha de residente](images/5099d26f4884a9af.png)
 
 *Figura 4 — Ficha de residente con datos identificativos, fotografía, información de contacto de familiares y notas clínicas relevantes. Fuente: Elaboración propia / Stitch.*
 
@@ -604,7 +604,7 @@ A continuación se muestran las capturas de las pantallas más representativas d
 
 **Figura 5 — Formulario de registro de incidencia (US-06)**
 
-![Formulario de incidencia](../../design-exports/US-06-incident__new-incident-form-serenity-care__20260328.png)
+![Formulario de incidencia](images/2d6d312d619c6bcb.png)
 
 *Figura 5 — Formulario de registro de incidencia con selector de tipo, nivel de severidad y descripción libre. Optimizado para completarse en cinco pasos táctiles o menos. Fuente: Elaboración propia / Stitch.*
 
@@ -612,7 +612,7 @@ A continuación se muestran las capturas de las pantallas más representativas d
 
 **Figura 6 — Alertas críticas en tiempo real (US-08)**
 
-![Alertas críticas](../../design-exports/US-08-alerts__critical-alerts-serenity-care__20260328.png)
+![Alertas críticas](images/d6b9bda08a3590ef.png)
 
 *Figura 6 — Panel de alertas críticas. Notificaciones en tiempo real de incidencias clasificadas como críticas con acceso directo a la ficha del residente afectado. Fuente: Elaboración propia / Stitch.*
 
