@@ -44,6 +44,7 @@ Cuando añadas o cambies un export, actualiza la fila correspondiente o crea una
 | Dashboard - Care Home Mgmt | Incidents Log - Refined v2 | `OUTPUTS/design-exports/US-07-incidents-log__incidents-log-refined-v2__20260328.png` | [US-07](../../SPEC/user-stories.md) |
 | Dashboard - Care Home Mgmt | Critical Alerts - Serenity Care | `OUTPUTS/design-exports/US-08-alerts__critical-alerts-serenity-care__20260328.png` | [US-08](../../SPEC/user-stories.md) |
 | Dashboard - Care Home Mgmt | Dashboard - Refined v2 | `OUTPUTS/design-exports/SPEC-app-layout__dashboard-refined-v2__20260328.png` | SPEC / layout home refinado |
+| Dashboard - Care Home Mgmt | Task Creation Form (US-14) | — | [US-14](../../SPEC/changes/crear-tarea/spec.md) — Crear tarea |
 
 ## Notas
 
@@ -64,3 +65,4 @@ Cuando añadas o cambies un export, actualiza la fila correspondiente o crea una
 | `ResidenteView.vue` | `src/business/residents/presentation/views/ResidenteView.vue` | Resident Detail - Eleanor Vance | `OUTPUTS/design-exports/US-05-resident-detail__resident-detail-eleanor-vance__20260328.png` |
 | `NotificationPanel.vue` | `src/business/notification/presentation/components/NotificationPanel.vue` | Notification Panel - Mobile (`9da813299be1474bb3293febda0c35fe`) | — |
 | `TurnoView.vue` | `src/business/turno/presentation/views/TurnoView.vue` | Shift Management - Care & Serenity (`74dc49b5d18c44ea8ab1b6079320622f`) | — |
+| `CreateTareaModal.vue` | `src/business/agenda/presentation/components/CreateTareaModal.vue` | Task Creation Form — US-14 | — |

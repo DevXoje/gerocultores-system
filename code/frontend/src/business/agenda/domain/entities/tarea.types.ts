@@ -37,3 +37,13 @@ export interface TareaResponse {
 export interface UpdateTareaEstadoDTO {
   estado: TareaEstado
 }
+
+/** Payload for POST /api/tareas */
+export interface CreateTareaDTO {
+  titulo: string
+  tipo: TareaTipo
+  fechaHora: string // ISO8601
+  residenteId: string
+  usuarioId: string
+  notas?: string
+}

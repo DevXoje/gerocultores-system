@@ -1,8 +1,21 @@
 import type { Request, Response, NextFunction } from 'express'
-import { TareasService, NotFoundError, ForbiddenError } from '../services/tareas.service'
-import { UpdateEstadoSchema, ListTareasQuerySchema } from '../types/tarea.types'
+import {
+  TareasService,
+  NotFoundError,
+  ForbiddenError,
+  ValidationError,
+  ResidenteNotFoundError,
+  UsuarioNotFoundError,
+  AccessDeniedError,
+} from '../services/tareas.service'
+import {
+  UpdateEstadoSchema,
+  ListTareasQuerySchema,
+  CreateTareaSchema,
+} from '../types/tarea.types'
 import type { UserRole } from '../types/user.types'
 import { UserRoleEnum } from '../types/user.types'
+import type { CreateTareaDto } from '../types/tarea.types'
 
 function getAuthUser(req: Request): { uid: string; role: UserRole } {
   // Support both emulator tokens (user_id) and production tokens (uid)
@@ -112,6 +125,47 @@ export class TareasController {
       }
       if (e instanceof ForbiddenError) {
         res.status(403).json({ error: e.message, code: 'FORBIDDEN' })
+        return
+      }
+      next(e)
+    }
+  }
+
+  createTarea = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const parseResult = CreateTareaSchema.safeParse(req.body)
+      if (!parseResult.success) {
+        const issues = parseResult.error.issues
+        const firstError = issues && issues.length > 0 ? issues[0] : { message: 'Validation failed', path: [] as string[] }
+        res.status(400).json({
+          error: 'VALIDATION_ERROR',
+          message: firstError.message,
+          field: firstError.path.join('.'),
+        })
+        return
+      }
+
+      const { uid: userUid, role: userRole } = getAuthUser(req)
+
+      const dto: CreateTareaDto = parseResult.data
+      const tarea = await this.service.createTarea(dto, userUid, userRole)
+
+      res.status(201).json({ data: tarea })
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        res.status(400).json({ error: 'VALIDATION_ERROR', message: e.message, field: e.field })
+        return
+      }
+      if (e instanceof ResidenteNotFoundError) {
+        res.status(400).json({ error: 'RESIDENTE_NOT_FOUND', message: e.message, field: e.field })
+        return
+      }
+      if (e instanceof UsuarioNotFoundError) {
+        res.status(400).json({ error: 'USUARIO_NOT_FOUND', message: e.message, field: e.field })
+        return
+      }
+      if (e instanceof AccessDeniedError) {
+        res.status(400).json({ error: 'ACCESS_DENIED', message: e.message, field: e.field })
         return
       }
       next(e)

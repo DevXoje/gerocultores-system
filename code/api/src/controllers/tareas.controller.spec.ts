@@ -56,7 +56,14 @@ vi.mock('../middleware/verifyAuth', () => ({
   },
 }))
 
-import { TareasService, NotFoundError, ForbiddenError } from '../services/tareas.service'
+import {
+  TareasService,
+  NotFoundError,
+  ForbiddenError,
+  ResidenteNotFoundError,
+  UsuarioNotFoundError,
+  AccessDeniedError,
+} from '../services/tareas.service'
 import app from '../app'
 
 // ─── Mocked service methods ────────────────────────────────────────────────────
@@ -64,6 +71,7 @@ import app from '../app'
 const mockGetTareas = vi.mocked(TareasService.prototype.getTareas)
 const mockGetTareaById = vi.mocked(TareasService.prototype.getTareaById)
 const mockUpdateEstado = vi.mocked(TareasService.prototype.updateEstado)
+const mockCreateTarea = vi.mocked(TareasService.prototype.createTarea)
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -334,6 +342,151 @@ describe('PATCH /api/tareas/:id/estado — patchEstado', () => {
       .patch('/api/tareas/tarea-001/estado')
       .set('Authorization', AUTH_HEADER)
       .send({ estado: 'en_curso' })
+
+    expect(res.status).toBe(500)
+  })
+})
+
+// ─── POST /api/tareas — createTarea ─────────────────────────────────────────
+
+describe('POST /api/tareas — createTarea', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  const validBody = {
+    titulo: 'Baño matutino',
+    tipo: 'higiene',
+    fechaHora: '2026-04-20T08:00:00Z',
+    residenteId: '550e8400-e29b-41d4-a716-446655440001',
+    usuarioId: 'uid-123',
+    notas: 'Evitar agua muy caliente',
+  }
+
+  const createdTarea = {
+    id: 'tasks/new-uuid-001',
+    titulo: 'Baño matutino',
+    tipo: 'higiene',
+    fechaHora: '2026-04-20T08:00:00Z',
+    estado: 'pendiente',
+    notas: 'Evitar agua muy caliente',
+    residenteId: '550e8400-e29b-41d4-a716-446655440001',
+    usuarioId: 'uid-123',
+    creadoEn: '2026-04-20T07:00:00Z',
+    actualizadEn: '2026-04-20T07:00:00Z',
+    completadaEn: null,
+  }
+
+  it('returns 201 with the created tarea when body is valid', async () => {
+    mockCreateTarea.mockResolvedValueOnce(createdTarea)
+
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .send(validBody)
+
+    expect(res.status).toBe(201)
+    expect(res.body).toEqual({ data: createdTarea })
+    expect(mockCreateTarea).toHaveBeenCalledOnce()
+  })
+
+  it('returns 400 when titulo is missing', async () => {
+    const { titulo: _titulo, ...body } = validBody
+
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .send(body)
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('VALIDATION_ERROR')
+    expect(res.body.field).toBe('titulo')
+    expect(mockCreateTarea).not.toHaveBeenCalled()
+  })
+
+  it('returns 400 when tipo is invalid enum', async () => {
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .send({ ...validBody, tipo: 'invalid' })
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('VALIDATION_ERROR')
+    expect(res.body.field).toBe('tipo')
+  })
+
+  it('returns 400 when fechaHora is not ISO8601', async () => {
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .send({ ...validBody, fechaHora: 'not-a-date' })
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('VALIDATION_ERROR')
+    expect(res.body.field).toBe('fechaHora')
+  })
+
+  it('returns 400 when service throws ResidenteNotFoundError', async () => {
+    mockCreateTarea.mockRejectedValueOnce(new ResidenteNotFoundError())
+
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .send(validBody)
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('RESIDENTE_NOT_FOUND')
+  })
+
+  it('returns 400 when service throws UsuarioNotFoundError', async () => {
+    mockCreateTarea.mockRejectedValueOnce(new UsuarioNotFoundError())
+
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .send(validBody)
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('USUARIO_NOT_FOUND')
+  })
+
+  it('returns 400 when service throws AccessDeniedError', async () => {
+    mockCreateTarea.mockRejectedValueOnce(new AccessDeniedError())
+
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .send(validBody)
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('ACCESS_DENIED')
+  })
+
+  it('returns 401 when no Authorization header is provided', async () => {
+    const res = await request(app).post('/api/tareas').send(validBody)
+
+    expect(res.status).toBe(401)
+    expect(mockCreateTarea).not.toHaveBeenCalled()
+  })
+
+  it('returns 403 when x-test-role is not admin or gerocultor', async () => {
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .set('x-test-role', 'coordinador')
+      .send(validBody)
+
+    expect(res.status).toBe(403)
+    expect(mockCreateTarea).not.toHaveBeenCalled()
+  })
+
+  it('passes error to errorHandler (returns 500) when service throws unexpectedly', async () => {
+    mockCreateTarea.mockRejectedValueOnce(new Error('Firestore unavailable'))
+
+    const res = await request(app)
+      .post('/api/tareas')
+      .set('Authorization', AUTH_HEADER)
+      .send(validBody)
 
     expect(res.status).toBe(500)
   })

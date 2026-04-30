@@ -1,7 +1,13 @@
 import { adminDb } from './firebase'
 import { COLLECTIONS } from './collections'
-import type { TareaDoc, TareaEstado, TareaResponse, ListTareasQuery } from '../types/tarea.types'
-import { TareaDocSchema } from '../types/tarea.types'
+import type {
+  TareaDoc,
+  TareaEstado,
+  TareaResponse,
+  ListTareasQuery,
+  CreateTareaDto,
+} from '../types/tarea.types'
+import { TareaDocSchema, CreateTareaSchema } from '../types/tarea.types'
 import type { UserRole } from '../types/user.types'
 
 export class NotFoundError extends Error {
@@ -17,6 +23,41 @@ export class ForbiddenError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'ForbiddenError'
+  }
+}
+
+export class ValidationError extends Error {
+  readonly statusCode = 400
+  constructor(message: string, readonly field?: string) {
+    super(message)
+    this.name = 'ValidationError'
+  }
+}
+
+export class ResidenteNotFoundError extends Error {
+  readonly statusCode = 400
+  readonly field = 'residenteId'
+  constructor(message = 'El residente especificado no existe o no está activo') {
+    super(message)
+    this.name = 'ResidenteNotFoundError'
+  }
+}
+
+export class UsuarioNotFoundError extends Error {
+  readonly statusCode = 400
+  readonly field = 'usuarioId'
+  constructor(message = 'El usuario especificado no existe o está desactivado') {
+    super(message)
+    this.name = 'UsuarioNotFoundError'
+  }
+}
+
+export class AccessDeniedError extends Error {
+  readonly statusCode = 400
+  readonly field = 'residenteId'
+  constructor(message = 'No tienes acceso a este residente') {
+    super(message)
+    this.name = 'AccessDeniedError'
   }
 }
 
@@ -105,5 +146,70 @@ export class TareasService {
     })
 
     return this.getTareaById(id)
+  }
+
+  async createTarea(
+    dto: CreateTareaDto,
+    requestingUid: string,
+    requestingRole: UserRole,
+  ): Promise<TareaResponse> {
+    // 1. Validate with Zod — forward Zod errors as 400
+    const parseResult = CreateTareaSchema.safeParse(dto)
+    if (!parseResult.success) {
+      const issues = parseResult.error.issues
+      const firstError = issues && issues.length > 0 ? issues[0] : { message: 'Validation failed', path: [] as string[] }
+      throw new ValidationError(firstError.message, firstError.path.join('.'))
+    }
+
+    const data = parseResult.data
+
+    // 2. Fetch and validate Residente exists and is active
+    const residenteSnap = await adminDb.collection(COLLECTIONS.residentes).doc(data.residenteId).get()
+    if (!residenteSnap.exists || residenteSnap.data()?.['archivado'] === true) {
+      throw new ResidenteNotFoundError()
+    }
+
+    // 3. Authorization: gerocultor can only create tasks for assigned residents
+    if (requestingRole === 'gerocultor') {
+      const gerocultoresAsignados: string[] = residenteSnap.data()?.['gerocultoresAsignados'] ?? []
+      if (!gerocultoresAsignados.includes(requestingUid)) {
+        throw new AccessDeniedError()
+      }
+    }
+
+    // 4. Validate usuarioId exists and is not disabled
+    const usuarioSnap = await adminDb.collection(COLLECTIONS.usuarios).doc(data.usuarioId).get()
+    if (!usuarioSnap.exists || usuarioSnap.data()?.['disabled'] === true) {
+      throw new UsuarioNotFoundError()
+    }
+
+    // 5. Generate UUID and write to Firestore subcollection
+    const uuid = crypto.randomUUID()
+    const now = new Date().toISOString()
+    const tareaRef = adminDb
+      .collection(COLLECTIONS.residentes)
+      .doc(data.residenteId)
+      .collection(COLLECTIONS.tareas)
+      .doc(uuid)
+
+    const docData: TareaDoc = {
+      titulo: data.titulo,
+      tipo: data.tipo,
+      fechaHora: data.fechaHora,
+      estado: 'pendiente',
+      notas: data.notas ?? null,
+      residenteId: data.residenteId,
+      usuarioId: data.usuarioId,
+      creadoEn: now,
+      actualizadoEn: now,
+      completadaEn: null,
+    }
+
+    await tareaRef.set(docData)
+
+    return {
+      id: `${COLLECTIONS.tareas}/${uuid}`,
+      ...docData,
+    }
   }
 }

@@ -233,10 +233,30 @@ Design (Stitch): projects/16168255182252500555/screens/9ef30860ae9e4a3fa1487d82e
 - [ ] CA-4: El timestamp reflejado es generado en el servidor (no en el cliente).
 - [ ] CA-5: El endpoint responde en menos de 200 ms bajo condiciones normales.
 
-**Requisitos relacionados**: RF-infra-01 (infraestructura — no funcional)  
-**Prioridad**: Must  
-**Estado**: Done  
+**Requisitos relacionados**: RF-infra-01 (infraestructura — no funcional)
+**Prioridad**: Must
+**Estado**: Done
 **Notas**: El handler está implementado en `code/api/src/routes/index.ts`. Esta user story documenta el comportamiento existente y habilita el guardrail G03.
+
+---
+
+### US-14 — Crear tarea
+**Como** gerocultor o administrador, **quiero** crear una tarea en la agenda indicando título, tipo, fecha/hora, residente y notas opcionales, **para** planificar las actividades de atención de forma estructurada.
+
+**Criterios de aceptación**:
+- [ ] CA-1: El formulario de creación pide: título (texto libre), tipo (select: higiene/medicación/alimentación/actividad/revisión/otro), fecha y hora (datetime), residente (select de residentes asignados), usuario (autocompletado desde sesión actual).
+- [ ] CA-2: Los campos título, tipo, fechaHora, residenteId y usuarioId son obligatorios; si falta alguno, el API devuelve 400 con mensaje descriptivo.
+- [ ] CA-3: Si `residenteId` no existe o no pertenece a un residente activo, el API devuelve 400.
+- [ ] CA-4: Si `usuarioId` no corresponde a un usuario activo en el sistema, el API devuelve 400.
+- [ ] CA-5: La tarea se crea con `estado = pendiente` (nunca `en_curso`, `completada` ni `con_incidencia`).
+- [ ] CA-6: `creadoEn` y `actualizadoEn` son generados por el servidor (no aceptados del cliente).
+- [ ] CA-7: El API responde con 201 y el recurso creado completo (incluido `id` generado) en menos de 500 ms.
+- [ ] CA-8: El gerocultor solo puede crear tareas para residentes que tiene asignados (validación de acceso).
+
+**Requisitos relacionados**: RF-03, RF-12
+**Prioridad**: Must
+**Estado**: In Progress
+**Design (Stitch)**: Task Creation Form — `OUTPUTS/technical-docs/design-source.md` (US-14)
 
 ---
 

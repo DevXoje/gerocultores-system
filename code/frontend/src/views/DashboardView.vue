@@ -19,6 +19,7 @@ import { useAuthStore } from '../business/auth/useAuthStore'
 import { AUTH_ROUTES } from '../business/auth/route-names'
 import { useAgendaHoy } from '../business/agenda/application/useAgendaHoy'
 import TaskCard from '../business/agenda/presentation/components/TaskCard.vue'
+import CreateTareaModal from '../business/agenda/presentation/components/CreateTareaModal.vue'
 import type { EstadoTarea } from '@/services/tareas.api'
 import { INCIDENTS_ROUTES } from '../business/incidents/route-names'
 import {
@@ -26,6 +27,7 @@ import {
   CloudIcon,
   CalendarDaysIcon,
   ExclamationCircleIcon,
+  PlusIcon,
 } from '@heroicons/vue/24/outline'
 
 // ─── Router ─────────────────────────────────────────────────────────────────
@@ -43,6 +45,8 @@ function signOut() {
 // ─── Agenda ────────────────────────────────────────────────────────────────
 const { tareas, isLoading, isServerReachable, error, cargarTareas, retry, actualizarEstado } =
   useAgendaHoy()
+
+const showCreateModal = ref(false)
 
 const toastMsg = ref<string | null>(null)
 let toastTimer: ReturnType<typeof setTimeout> | null = null
@@ -121,7 +125,18 @@ onMounted(() => {
 
       <!-- Agenda section -->
       <section class="dashboard-page__agenda" aria-label="Agenda de hoy">
-        <h2 class="dashboard-page__agenda-title">Tareas de hoy</h2>
+        <div class="dashboard-page__agenda-header">
+          <h2 class="dashboard-page__agenda-title">Tareas de hoy</h2>
+          <!-- FAB: create new task (US-14) -->
+          <button
+            type="button"
+            class="dashboard-page__fab"
+            aria-label="Crear nueva tarea"
+            @click="showCreateModal = true"
+          >
+            <PlusIcon class="dashboard-page__fab-icon" aria-hidden="true" />
+          </button>
+        </div>
 
         <!-- Loading state -->
         <div v-if="isLoading" class="dashboard-page__loading" aria-live="polite" aria-busy="true">
@@ -167,6 +182,9 @@ onMounted(() => {
         {{ toastMsg }}
       </div>
     </transition>
+
+    <!-- ─── Create Tarea Modal (US-14) ───────────────────────────────────── -->
+    <CreateTareaModal v-if="showCreateModal" @close="showCreateModal = false" />
   </div>
 </template>
 
@@ -250,6 +268,27 @@ onMounted(() => {
   @apply text-base font-semibold;
   font-family: var(--font-headline);
   color: var(--color-on-surface);
+}
+
+.dashboard-page__agenda-header {
+  @apply flex items-center justify-between;
+}
+
+/* ─── FAB (create tarea — US-14) ─────────────────────────────────────────── */
+.dashboard-page__fab {
+  @apply w-10 h-10 rounded-full flex items-center justify-center cursor-pointer border-none;
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.15s ease;
+}
+
+.dashboard-page__fab:hover {
+  opacity: 0.85;
+}
+
+.dashboard-page__fab-icon {
+  @apply w-5 h-5;
 }
 
 /* ─── Loading ───────────────────────────────────────────────────────────── */

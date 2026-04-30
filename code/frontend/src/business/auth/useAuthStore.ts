@@ -1,10 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import {
-  signOut as firebaseSignOut,
-  onIdTokenChanged,
-  type User,
-} from 'firebase/auth'
+import { signOut as firebaseSignOut, onIdTokenChanged, type User } from 'firebase/auth'
 import { auth } from '@/services/firebase'
 
 /**
