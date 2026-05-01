@@ -152,11 +152,11 @@ describe('DashboardWidgetGrid', () => {
     const { useNotificacion } = vi.mocked(
       await import('@/business/notification/presentation/composables/useNotificacion')
     )
-    useNotificacion.mockReturnValueOnce({
+    useNotificacion.mockImplementation(() => ({
       unreadCount: computed(() => 0),
       isLoading: computed(() => false),
       fetchNotificaciones: vi.fn(),
-    })
+    }))
 
     const wrapper = mount(AlertsPreviewWidget, {
       global: { plugins: [router] },
