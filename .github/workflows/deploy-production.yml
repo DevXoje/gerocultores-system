@@ -101,6 +101,9 @@ jobs:
         working-directory: code/api
         run: npm ci
 
+      - name: Install firebase-tools
+        run: npm install -g firebase-tools
+
       - name: Build API (TypeScript → dist/)
         working-directory: code/api
         run: npm run build
