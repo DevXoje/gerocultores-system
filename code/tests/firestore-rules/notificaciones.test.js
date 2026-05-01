@@ -2,6 +2,7 @@
  * Firestore Security Rules — Notificaciones collection tests
  * US-08: Recibir notificaciones de alertas críticas
  *
+ * ALL OPERATIONS ARE DENIED — rules set to allow read, write: if false
  * Requires Firebase Emulator running on localhost:18080
  * Set FIRESTORE_EMULATOR_HOST=localhost:18080 before running.
  */
@@ -9,7 +10,6 @@
 import {
   initializeTestEnvironment,
   assertFails,
-  assertSucceeds,
 } from '@firebase/rules-unit-testing';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -74,9 +74,9 @@ describe('Colección /notificaciones', () => {
 
   // ─── READ ─────────────────────────────────────────────────────────────────
 
-  test('gerocultor puede leer su propia notificación', async () => {
+  test('gerocultor NO puede leer su propia notificación', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc(`notificaciones/${NOTIF_ID}`).get());
+    await assertFails(db.doc(`notificaciones/${NOTIF_ID}`).get());
   });
 
   test('gerocultor NO puede leer notificación de otro usuario', async () => {
@@ -84,9 +84,9 @@ describe('Colección /notificaciones', () => {
     await assertFails(db.doc(`notificaciones/${NOTIF_ID}`).get());
   });
 
-  test('admin puede leer cualquier notificación', async () => {
+  test('admin NO puede leer cualquier notificación', async () => {
     const db = authedDb(ADMIN_UID, 'admin');
-    await assertSucceeds(db.doc(`notificaciones/${NOTIF_ID}`).get());
+    await assertFails(db.doc(`notificaciones/${NOTIF_ID}`).get());
   });
 
   test('usuario no autenticado NO puede leer notificaciones', async () => {
@@ -96,22 +96,29 @@ describe('Colección /notificaciones', () => {
 
   // ─── UPDATE ───────────────────────────────────────────────────────────────
 
-  test('gerocultor puede marcar su propia notificación como leída (sólo campo leida)', async () => {
+  test('gerocultor NO puede marcar su propia notificación como leída', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(
+    await assertFails(
       db.doc(`notificaciones/${NOTIF_ID}`).update({ leida: true }),
     );
   });
 
-  test('gerocultor NO puede actualizar campo distinto a leida', async () => {
-    const db = authedDb(OWNER_UID, 'gerocultor');
+  test('gerocultor NO puede actualizar notificación de otro usuario', async () => {
+    const db = authedDb(OTHER_UID, 'gerocultor');
     await assertFails(
-      db.doc(`notificaciones/${NOTIF_ID}`).update({ mensaje: 'Modificado' }),
+      db.doc(`notificaciones/${NOTIF_ID}`).update({ leida: true }),
     );
   });
 
-  test('gerocultor NO puede marcar notificación de otro usuario como leída', async () => {
-    const db = authedDb(OTHER_UID, 'gerocultor');
+  test('admin NO puede actualizar notificación', async () => {
+    const db = authedDb(ADMIN_UID, 'admin');
+    await assertFails(
+      db.doc(`notificaciones/${NOTIF_ID}`).update({ leida: true }),
+    );
+  });
+
+  test('usuario no autenticado NO puede actualizar notificación', async () => {
+    const db = unauthDb();
     await assertFails(
       db.doc(`notificaciones/${NOTIF_ID}`).update({ leida: true }),
     );
@@ -119,7 +126,7 @@ describe('Colección /notificaciones', () => {
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
 
-  test('gerocultor NO puede crear notificaciones (sólo servidor)', async () => {
+  test('gerocultor NO puede crear notificación', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
     await assertFails(
       db.doc('notificaciones/nueva-notif').set({
@@ -133,7 +140,7 @@ describe('Colección /notificaciones', () => {
     );
   });
 
-  test('admin NO puede crear notificaciones desde cliente (sólo servidor)', async () => {
+  test('admin NO puede crear notificación', async () => {
     const db = authedDb(ADMIN_UID, 'admin');
     await assertFails(
       db.doc('notificaciones/admin-notif').set({
@@ -147,10 +154,34 @@ describe('Colección /notificaciones', () => {
     );
   });
 
+  test('usuario no autenticado NO puede crear notificación', async () => {
+    const db = unauthDb();
+    await assertFails(
+      db.doc('notificaciones/unauth-notif').set({
+        usuarioId: 'anyone',
+        tipo: 'alerta_critica',
+        titulo: 'Test',
+        mensaje: 'Test message',
+        leida: false,
+        creadaEn: '2026-04-25T09:00:00Z',
+      }),
+    );
+  });
+
   // ─── DELETE ───────────────────────────────────────────────────────────────
 
-  test('nadie puede eliminar notificaciones', async () => {
+  test('gerocultor NO puede eliminar su notificación', async () => {
+    const db = authedDb(OWNER_UID, 'gerocultor');
+    await assertFails(db.doc(`notificaciones/${NOTIF_ID}`).delete());
+  });
+
+  test('admin NO puede eliminar notificación', async () => {
     const db = authedDb(ADMIN_UID, 'admin');
+    await assertFails(db.doc(`notificaciones/${NOTIF_ID}`).delete());
+  });
+
+  test('usuario no autenticado NO puede eliminar notificación', async () => {
+    const db = unauthDb();
     await assertFails(db.doc(`notificaciones/${NOTIF_ID}`).delete());
   });
 });

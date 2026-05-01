@@ -2,6 +2,7 @@
  * Firestore Security Rules Unit Tests
  * US-02: Role-based access control
  *
+ * ALL OPERATIONS ARE DENIED — rules set to allow read, write: if false
  * Requires Firebase Emulator running on localhost:18080
  * Set FIRESTORE_EMULATOR_HOST=localhost:18080 before running.
  */
@@ -9,11 +10,10 @@
 import {
   initializeTestEnvironment,
   assertFails,
-  assertSucceeds,
 } from '@firebase/rules-unit-testing';
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, test, beforeAll, afterAll, afterEach, beforeEach } from 'vitest';
+import { describe, test, beforeAll, afterAll, afterEach } from 'vitest';
 
 const PROJECT_ID = 'demo-test';
 const RULES_PATH = path.resolve(__dirname, '../../firestore.rules');
@@ -60,28 +60,33 @@ describe('Colección /users', () => {
     });
   });
 
-  test('owner puede leer su propio documento', async () => {
-    const db = authedDb(UID, 'gerocultor');
-    await assertSucceeds(db.doc(`users/${UID}`).get());
-  });
-
-  test('otro usuario NO puede leer el documento de un tercero', async () => {
-    const db = authedDb('other-user', 'gerocultor');
+  test('admin NO puede leer documento de usuario', async () => {
+    const db = authedDb('admin-uid', 'admin');
     await assertFails(db.doc(`users/${UID}`).get());
   });
 
-  test('usuario no autenticado NO puede leer', async () => {
+  test('gerocultor NO puede leer documento de usuario', async () => {
+    const db = authedDb(UID, 'gerocultor');
+    await assertFails(db.doc(`users/${UID}`).get());
+  });
+
+  test('usuario no autenticado NO puede leer documento de usuario', async () => {
     const db = unauthDb();
     await assertFails(db.doc(`users/${UID}`).get());
   });
 
-  test('admin puede escribir un documento de usuario', async () => {
+  test('admin NO puede escribir documento de usuario', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`users/${UID}`).set({ nombre: 'María', rol: 'gerocultor' }));
+    await assertFails(db.doc(`users/${UID}`).set({ nombre: 'María', rol: 'gerocultor' }));
   });
 
-  test('gerocultor NO puede escribir documentos de usuario', async () => {
+  test('gerocultor NO puede escribir documento de usuario', async () => {
     const db = authedDb(UID, 'gerocultor');
+    await assertFails(db.doc(`users/${UID}`).set({ nombre: 'Hack' }));
+  });
+
+  test('usuario no autenticado NO puede escribir documento de usuario', async () => {
+    const db = unauthDb();
     await assertFails(db.doc(`users/${UID}`).set({ nombre: 'Hack' }));
   });
 });
@@ -101,19 +106,14 @@ describe('Colección /tasks', () => {
     });
   });
 
-  test('gerocultor owner puede leer su tarea', async () => {
+  test('gerocultor NO puede leer su propia tarea', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).get());
   });
 
-  test('admin puede leer cualquier tarea', async () => {
+  test('admin NO puede leer tarea', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
-  });
-
-  test('admin puede leer cualquier tarea', async () => {
-    const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).get());
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).get());
   });
 
   test('otro gerocultor NO puede leer tarea ajena', async () => {
@@ -121,9 +121,19 @@ describe('Colección /tasks', () => {
     await assertFails(db.doc(`tasks/${TAREA_ID}`).get());
   });
 
-  test('gerocultor puede crear una tarea', async () => {
+  test('usuario no autenticado NO puede leer tarea', async () => {
+    const db = unauthDb();
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).get());
+  });
+
+  test('gerocultor NO puede crear tarea', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc('tasks/nueva-tarea').set({ titulo: 'Nueva', usuarioId: OWNER_UID }));
+    await assertFails(db.doc('tasks/nueva-tarea').set({ titulo: 'Nueva', usuarioId: OWNER_UID }));
+  });
+
+  test('admin NO puede crear tarea', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertFails(db.doc('tasks/nueva-tarea').set({ titulo: 'Nueva', usuarioId: OWNER_UID }));
   });
 
   test('usuario no autenticado NO puede crear tarea', async () => {
@@ -131,9 +141,24 @@ describe('Colección /tasks', () => {
     await assertFails(db.doc('tasks/hack-tarea').set({ titulo: 'Hack' }));
   });
 
-  test('gerocultor owner puede actualizar su tarea', async () => {
+  test('gerocultor NO puede actualizar su tarea', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc(`tasks/${TAREA_ID}`).update({ completada: true }));
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).update({ completada: true }));
+  });
+
+  test('admin NO puede actualizar tarea', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).update({ completada: true }));
+  });
+
+  test('gerocultor NO puede eliminar tarea', async () => {
+    const db = authedDb(OWNER_UID, 'gerocultor');
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).delete());
+  });
+
+  test('admin NO puede eliminar tarea', async () => {
+    const db = authedDb('admin-uid', 'admin');
+    await assertFails(db.doc(`tasks/${TAREA_ID}`).delete());
   });
 });
 
@@ -151,18 +176,18 @@ describe('Colección /residents', () => {
     });
   });
 
-  test('admin puede leer residente', async () => {
+  test('admin NO puede leer residente', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`residents/${RES_ID}`).get());
+    await assertFails(db.doc(`residents/${RES_ID}`).get());
   });
 
-  test('admin puede leer residente', async () => {
-    const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`residents/${RES_ID}`).get());
-  });
-
-  test('gerocultor NO puede leer residente', async () => {
+  test('gerocultor owner NO puede leer residente', async () => {
     const db = authedDb('gero-uid', 'gerocultor');
+    await assertFails(db.doc(`residents/${RES_ID}`).get());
+  });
+
+  test('otro gerocultor NO puede leer residente', async () => {
+    const db = authedDb('other-gero', 'gerocultor');
     await assertFails(db.doc(`residents/${RES_ID}`).get());
   });
 
@@ -171,13 +196,18 @@ describe('Colección /residents', () => {
     await assertFails(db.doc(`residents/${RES_ID}`).get());
   });
 
-  test('admin puede escribir residente', async () => {
+  test('admin NO puede escribir residente', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`residents/${RES_ID}`).set({ nombre: 'Ana López Actualizada' }));
+    await assertFails(db.doc(`residents/${RES_ID}`).set({ nombre: 'Ana López Actualizada' }));
   });
 
   test('gerocultor NO puede escribir residente', async () => {
     const db = authedDb('gero-uid', 'gerocultor');
+    await assertFails(db.doc(`residents/${RES_ID}`).set({ nombre: 'Hack' }));
+  });
+
+  test('usuario no autenticado NO puede escribir residente', async () => {
+    const db = unauthDb();
     await assertFails(db.doc(`residents/${RES_ID}`).set({ nombre: 'Hack' }));
   });
 });
@@ -196,14 +226,14 @@ describe('Colección /incidencias', () => {
     });
   });
 
-  test('gerocultor autenticado puede leer incidencias', async () => {
+  test('gerocultor NO puede leer incidencias', async () => {
     const db = authedDb('gero-uid', 'gerocultor');
-    await assertSucceeds(db.doc(`incidencias/${INC_ID}`).get());
+    await assertFails(db.doc(`incidencias/${INC_ID}`).get());
   });
 
-  test('admin puede leer incidencias', async () => {
+  test('admin NO puede leer incidencias', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(db.doc(`incidencias/${INC_ID}`).get());
+    await assertFails(db.doc(`incidencias/${INC_ID}`).get());
   });
 
   test('usuario no autenticado NO puede leer incidencias', async () => {
@@ -211,33 +241,43 @@ describe('Colección /incidencias', () => {
     await assertFails(db.doc(`incidencias/${INC_ID}`).get());
   });
 
-  test('gerocultor puede crear una incidencia', async () => {
+  test('gerocultor NO puede crear incidencia', async () => {
     const db = authedDb('gero-uid', 'gerocultor');
-    await assertSucceeds(
+    await assertFails(
       db.doc('incidencias/nueva-inc').set({ descripcion: 'Nueva', usuarioId: 'gero-uid' }),
     );
   });
 
-  test('admin puede crear una incidencia', async () => {
+  test('admin NO puede crear incidencia', async () => {
     const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(
-      db.doc('incidencias/inc-coord').set({ descripcion: 'Coord inc', usuarioId: 'coord-uid' }),
-    );
-  });
-
-  test('admin puede crear una incidencia', async () => {
-    const db = authedDb('admin-uid', 'admin');
-    await assertSucceeds(
+    await assertFails(
       db.doc('incidencias/inc-admin').set({ descripcion: 'Admin inc', usuarioId: 'admin-uid' }),
     );
   });
 
-  test('NO se puede actualizar una incidencia (inmutable)', async () => {
+  test('usuario no autenticado NO puede crear incidencia', async () => {
+    const db = unauthDb();
+    await assertFails(
+      db.doc('incidencias/inc-unauth').set({ descripcion: 'Unauth inc' }),
+    );
+  });
+
+  test('gerocultor NO puede actualizar incidencia', async () => {
+    const db = authedDb('gero-uid', 'gerocultor');
+    await assertFails(db.doc(`incidencias/${INC_ID}`).update({ descripcion: 'Modificada' }));
+  });
+
+  test('admin NO puede actualizar incidencia', async () => {
     const db = authedDb('admin-uid', 'admin');
     await assertFails(db.doc(`incidencias/${INC_ID}`).update({ descripcion: 'Modificada' }));
   });
 
-  test('NO se puede eliminar una incidencia (inmutable)', async () => {
+  test('gerocultor NO puede eliminar incidencia', async () => {
+    const db = authedDb('gero-uid', 'gerocultor');
+    await assertFails(db.doc(`incidencias/${INC_ID}`).delete());
+  });
+
+  test('admin NO puede eliminar incidencia', async () => {
     const db = authedDb('admin-uid', 'admin');
     await assertFails(db.doc(`incidencias/${INC_ID}`).delete());
   });

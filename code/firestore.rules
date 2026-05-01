@@ -36,65 +36,32 @@ service cloud.firestore {
 
     // --- Usuarios ---
     match /users/{userId} {
-      allow read: if isAccountOwner(userId);
-      allow write: if isAdmin();
+      allow read, write: if false;
     }
 
     // --- Tareas ---
     match /tasks/{tareaId} {
-      // Create: cualquier gerocultor autenticado
-      allow create: if isAuthenticated();
-      // Read/Update: solo el owner (usuarioId == auth.uid)
-      allow read: if isAuthenticated() && get('usuarioId') == request.auth.uid;
-      allow update: if isAuthenticated() && get('usuarioId') == request.auth.uid;
+      allow read, write: if false;
     }
 
     // --- Residentes ---
-    // Campo gerocultoresAsignados: array de UIDs de gerocultores asignados.
-    // Campo archivado: boolean — si true, el residente no aparece en agendas activas.
-    function isGerocultorAssignedTo(residenteId) {
-      return isAuthenticated() &&
-        get('gerocultoresAsignados') != null &&
-        request.auth.uid in get('gerocultoresAsignados');
-    }
-
     match /residents/{residenteId} {
-      // Modelo descentralizado: cada gerocultor es dueño de los residentes que crea.
-      // Create: cualquier gerocultor autenticado (el service asigna usuarioId = requestingUid)
-      allow create: if isAuthenticated();
-      // Read/Update/Archive: solo el owner (usuarioId == auth.uid)
-      allow read: if isAuthenticated() && get('usuarioId') == request.auth.uid;
-      allow update: if isAuthenticated() && get('usuarioId') == request.auth.uid;
-      // No delete — el archivo es un update que setea archivado=true
+      allow read, write: if false;
     }
 
     // --- Incidencias ---
     match /incidencias/{incidenciaId} {
-      // Create: cualquier gerocultor autenticado
-      allow create: if isAuthenticated();
-      // Read: solo el owner (usuarioId == auth.uid)
-      allow read: if isAuthenticated() && get('usuarioId') == request.auth.uid;
-      allow update, delete: if false;
+      allow read, write: if false;
     }
 
     // --- Notificaciones ---
     match /notificaciones/{notifId} {
-      allow read: if isAuthenticated() && (get('usuarioId') == request.auth.uid || isAdmin());
-      allow update: if isAuthenticated()
-        && get('usuarioId') == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['leida']);
-      allow create, delete: if false;
+      allow read, write: if false;
     }
 
     // --- Turnos (colección: 'shifts') ---
     match /shifts/{turnoId} {
-      allow read: if isAuthenticated() && (get('usuarioId') == request.auth.uid || isAdmin());
-      allow create: if isAuthenticated()
-        && request.resource.data.usuarioId == request.auth.uid;
-      allow update: if isAuthenticated()
-        && get('usuarioId') == request.auth.uid
-        && !resource.data.keys().hasAll(['fin']);
-      allow delete: if false;
+      allow read, write: if false;
     }
   }
 }
