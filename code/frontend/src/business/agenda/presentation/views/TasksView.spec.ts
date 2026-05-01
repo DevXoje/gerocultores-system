@@ -210,7 +210,7 @@ describe('TasksView — error state', () => {
     const { useAllTareas } = vi.mocked(await import('@/business/agenda/application/useAllTareas'))
     useAllTareas.mockReturnValueOnce({
       allTareas: ref([]),
-      isLoading: false,
+      isLoading: ref(false),
       error: ref('Servidor no disponible'),
       cargarTodas: vi.fn(),
     })

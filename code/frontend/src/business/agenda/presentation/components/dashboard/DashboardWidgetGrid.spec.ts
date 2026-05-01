@@ -121,8 +121,8 @@ describe('DashboardWidgetGrid', () => {
   it('TasksSummaryWidget shows "No hay tareas" when no tasks', async () => {
     const { useAgendaHoy } = vi.mocked(await import('@/business/agenda/application/useAgendaHoy'))
     useAgendaHoy.mockReturnValueOnce({
-      tareas: [],
-      isLoading: false,
+      tareas: ref([]),
+      isLoading: ref(false),
       cargarTareas: vi.fn(),
     })
 
@@ -148,8 +148,8 @@ describe('DashboardWidgetGrid', () => {
       await import('@/business/notification/presentation/composables/useNotificacion')
     )
     useNotificacion.mockReturnValueOnce({
-      unreadCount: 0,
-      isLoading: false,
+      unreadCount: ref(0),
+      isLoading: ref(false),
       fetchNotificaciones: vi.fn(),
     })
 

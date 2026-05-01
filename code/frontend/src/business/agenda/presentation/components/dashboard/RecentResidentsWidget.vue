@@ -19,13 +19,13 @@ onMounted(() => {
 })
 
 // Top 3 most recently created residents (sorted by creadoEn desc)
+function toDate(value: string | Date): Date {
+  return value instanceof Date ? value : new Date(value)
+}
+
 const recentResidents = computed(() =>
   [...residentes.value]
-    .sort((a, b) => {
-      const dateA = a.creadoEn instanceof Date ? a.creadoEn : new Date(a.creadoEn)
-      const dateB = b.creadoEn instanceof Date ? b.creadoEn : new Date(b.creadoEn)
-      return dateB.getTime() - dateA.getTime()
-    })
+    .sort((a, b) => toDate(b.creadoEn).getTime() - toDate(a.creadoEn).getTime())
     .slice(0, 3)
 )
 

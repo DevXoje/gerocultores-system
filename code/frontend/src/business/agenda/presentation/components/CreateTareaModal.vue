@@ -61,9 +61,24 @@ function handleResidenteChange(): void {
   }
 }
 
-async function handleCreateResidente(data: CreateResidenteDto): Promise<void> {
-  const created = await createResidente(data)
-  residenteId.value = created.id
+async function handleCreateResidente(
+  data:
+    | CreateResidenteDto
+    | {
+        nombre?: string
+        apellidos?: string
+        fechaNacimiento?: string
+        habitacion?: string
+        foto?: string | null
+        diagnosticos?: string | null
+        alergias?: string | null
+        medicacion?: string | null
+        preferencias?: string | null
+      }
+): Promise<void> {
+  const dto = data as CreateResidenteDto
+  const { residente } = await createResidente(dto)
+  residenteId.value = residente.id
   showCreateResidente.value = false
   // Refresh list so the new resident appears
   await fetchResidentes('active')
