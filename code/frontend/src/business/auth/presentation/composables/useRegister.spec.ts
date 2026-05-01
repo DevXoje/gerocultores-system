@@ -26,10 +26,14 @@ vi.mock('vue-router', () => ({
 }))
 
 // ─── Mock useAuthStore ───────────────────────────────────────────────────────
-const mockSignIn = vi.fn()
+const mockSetUser = vi.fn()
+const mockSetRoleFromUser = vi.fn().mockResolvedValue(undefined)
 
 vi.mock('@/business/auth/useAuthStore', () => ({
-  useAuthStore: vi.fn(() => ({ signIn: mockSignIn })),
+  useAuthStore: vi.fn(() => ({
+    setUser: mockSetUser,
+    setRoleFromUser: mockSetRoleFromUser,
+  })),
 }))
 
 // ─── Mock fetch ──────────────────────────────────────────────────────────────
@@ -43,9 +47,10 @@ describe('useRegister', () => {
     mockCreateUser.mockReset()
     mockSignInPopup.mockReset()
     mockUpdateProfile.mockReset()
-    mockSignIn.mockReset()
     mockPush.mockReset()
     mockFetch.mockReset()
+    mockSetUser.mockReset()
+    mockSetRoleFromUser.mockReset()
   })
 
   // ─── TC: Happy path — email/password registration ─────────────────────────
@@ -60,7 +65,6 @@ describe('useRegister', () => {
     })
     mockUpdateProfile.mockResolvedValue(undefined)
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({}) })
-    mockSignIn.mockResolvedValue(undefined)
     mockPush.mockResolvedValue(undefined)
 
     const { state, handleEmailPasswordSubmit, email, passwordInput, confirmPasswordInput } =
@@ -84,7 +88,6 @@ describe('useRegister', () => {
     })
     mockUpdateProfile.mockResolvedValue(undefined)
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({}) })
-    mockSignIn.mockResolvedValue(undefined)
     mockPush.mockResolvedValue(undefined)
 
     const { handleEmailPasswordSubmit, email, passwordInput, confirmPasswordInput } = useRegister()
@@ -110,7 +113,6 @@ describe('useRegister', () => {
     mockCreateUser.mockResolvedValue({ user: mockUser })
     mockUpdateProfile.mockResolvedValue(undefined)
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({}) })
-    mockSignIn.mockResolvedValue(undefined)
     mockPush.mockResolvedValue(undefined)
 
     const { handleEmailPasswordSubmit, email, passwordInput, confirmPasswordInput } = useRegister()
@@ -129,7 +131,6 @@ describe('useRegister', () => {
     })
     mockUpdateProfile.mockResolvedValue(undefined)
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({}) })
-    mockSignIn.mockResolvedValue(undefined)
     mockPush.mockResolvedValue(undefined)
 
     const { handleEmailPasswordSubmit, email, passwordInput, confirmPasswordInput } = useRegister()
