@@ -13,7 +13,7 @@ import {
 } from '@firebase/rules-unit-testing';
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, test, beforeAll, afterAll, afterEach } from 'vitest';
+import { describe, test, beforeAll, afterAll, afterEach, beforeEach } from 'vitest';
 
 const PROJECT_ID = 'demo-test';
 const RULES_PATH = path.resolve(__dirname, '../../firestore.rules');
