@@ -17,8 +17,8 @@
  *   - cancelled: user dismissed the form
  */
 import { ref, computed } from 'vue'
-import type { CreateResidenteDto, UpdateResidenteDto } from '../../domain/Residente'
-import { CreateResidenteDtoSchema } from '../../domain/Residente'
+import type { CreateResidenteDto, UpdateResidenteDto } from '@/business/residents/domain/Residente'
+import { CreateResidenteDtoSchema } from '@/business/residents/domain/Residente'
 
 // ── Props / Emit ─────────────────────────────────────────────────────────────
 

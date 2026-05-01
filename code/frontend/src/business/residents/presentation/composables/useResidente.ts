@@ -10,8 +10,8 @@
  */
 
 import { ref } from 'vue'
-import { getResidente } from '../../infrastructure/residentes.api'
-import type { ResidenteDTO } from '../../domain/entities/residente.types'
+import { getResidente } from '@/business/residents/infrastructure/residentes.api'
+import type { ResidenteDTO } from '@/business/residents/domain/entities/residente.types'
 
 function toErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message

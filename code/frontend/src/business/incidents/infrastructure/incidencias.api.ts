@@ -11,7 +11,7 @@ import {
   IncidenciaResponseSchema,
   type CreateIncidenciaDTO,
   type IncidenciaResponse,
-} from '../domain/entities/incidencia.types'
+} from '@/business/incidents/domain/entities/incidencia.types'
 
 /** API wrapper response envelope */
 export interface ApiResponse<T> {

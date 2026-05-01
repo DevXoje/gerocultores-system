@@ -6,7 +6,7 @@
  */
 import { signInWithEmailAndPassword, signInWithRedirect, getRedirectResult } from 'firebase/auth'
 import { auth, googleProvider } from '@/services/firebase'
-import type { AuthResult, IAuthRepository } from '../domain/interfaces/IAuthRepository'
+import type { AuthResult, IAuthRepository } from '@/business/auth/domain/interfaces/IAuthRepository'
 
 export class AuthRepository implements IAuthRepository {
   async signInWithEmail(email: string, password: string): Promise<AuthResult> {

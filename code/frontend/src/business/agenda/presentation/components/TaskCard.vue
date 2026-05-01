@@ -13,7 +13,7 @@
  *   - BEM class names, Tailwind via @apply in <style scoped>
  */
 import { computed } from 'vue'
-import { useTaskCard } from '../composables/useTaskCard'
+import { useTaskCard } from '@/business/agenda/presentation/composables/useTaskCard'
 import type { TareaDTO, EstadoTarea } from '@/services/tareas.api'
 import {
   BeakerIcon,

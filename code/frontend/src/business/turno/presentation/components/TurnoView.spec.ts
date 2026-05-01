@@ -15,7 +15,7 @@ vi.mock('@/services/apiClient', () => ({
   apiClient: { get: vi.fn(), post: vi.fn(), patch: vi.fn() },
   isServerHealthy: vi.fn(),
 }))
-vi.mock('../../infrastructure/api/turnoApi', () => ({
+vi.mock('@/business/turno/infrastructure/api/turnoApi', () => ({
   turnoApi: {
     getTurnoActivo: vi.fn().mockResolvedValue(null),
     iniciarTurno: vi.fn().mockResolvedValue({
@@ -33,7 +33,7 @@ vi.mock('../../infrastructure/api/turnoApi', () => ({
 }))
 
 import TurnoView from './TurnoView.vue'
-import { useTurnoStore } from '../stores/turno.store'
+import { useTurnoStore } from '@/business/turno/presentation/stores/turno.store'
 
 function makeTurno(overrides = {}) {
   return {

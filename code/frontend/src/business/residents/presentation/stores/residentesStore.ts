@@ -17,11 +17,11 @@ import type {
   CreateResidenteDto,
   UpdateResidenteDto,
   ResidenteFilter,
-} from '../../domain/Residente'
-import { listResidentes } from '../../domain/ListResidentesUseCase'
-import { createResidente as createResidenteUC } from '../../domain/CreateResidenteUseCase'
-import { updateResidente as updateResidenteUC } from '../../domain/UpdateResidenteUseCase'
-import { archiveResidente as archiveResidenteUC } from '../../domain/ArchiveResidenteUseCase'
+} from '@/business/residents/domain/Residente'
+import { listResidentes } from '@/business/residents/domain/ListResidentesUseCase'
+import { createResidente as createResidenteUC } from '@/business/residents/domain/CreateResidenteUseCase'
+import { updateResidente as updateResidenteUC } from '@/business/residents/domain/UpdateResidenteUseCase'
+import { archiveResidente as archiveResidenteUC } from '@/business/residents/domain/ArchiveResidenteUseCase'
 
 export const useResidentesStore = defineStore('residentes', () => {
   // ── State ────────────────────────────────────────────────────────────────

@@ -11,9 +11,9 @@
  * All data-fetching and mutations are delegated to useUsers().
  */
 import { onMounted, computed } from 'vue'
-import { useUsers } from '../composables/useUsers'
+import { useUsers } from '@/business/users/presentation/composables/useUsers'
 import { useAuthStore } from '@/business/auth/useAuthStore'
-import type { UserRole } from '../../domain/entities/user.types'
+import type { UserRole } from '@/business/users/domain/entities/user.types'
 
 const { users, loading, error, fetchUsers, updateRole, disableUser } = useUsers()
 const authStore = useAuthStore()

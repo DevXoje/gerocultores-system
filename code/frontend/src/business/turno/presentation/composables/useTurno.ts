@@ -9,13 +9,13 @@
  *   - Components import ONLY from this composable — never stores directly.
  */
 import { computed, readonly, ref } from 'vue'
-import { useTurnoStore } from '../stores/turno.store'
-import { getTurnoActivo } from '../../application/use-cases/getTurnoActivo'
-import { iniciarTurno as iniciarTurnoUseCase } from '../../application/use-cases/iniciarTurno'
-import { finalizarTurno as finalizarTurnoUseCase } from '../../application/use-cases/finalizarTurno'
-import { getResumenTurno } from '../../application/use-cases/getResumenTurno'
-import type { TipoTurno } from '../../domain/entities/Turno'
-import type { TurnoResumen } from '../../infrastructure/api/turnoApi'
+import { useTurnoStore } from '@/business/turno/presentation/stores/turno.store'
+import { getTurnoActivo } from '@/business/turno/application/use-cases/getTurnoActivo'
+import { iniciarTurno as iniciarTurnoUseCase } from '@/business/turno/application/use-cases/iniciarTurno'
+import { finalizarTurno as finalizarTurnoUseCase } from '@/business/turno/application/use-cases/finalizarTurno'
+import { getResumenTurno } from '@/business/turno/application/use-cases/getResumenTurno'
+import type { TipoTurno } from '@/business/turno/domain/entities/Turno'
+import type { TurnoResumen } from '@/business/turno/infrastructure/api/turnoApi'
 
 export function useTurno() {
   const store = useTurnoStore()

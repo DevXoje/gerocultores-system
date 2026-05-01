@@ -7,14 +7,14 @@
  * Does NOT import Firebase or Axios directly — delegates to infrastructure layer.
  */
 import { ref, reactive } from 'vue'
-import { CreateIncidenciaSchema } from '../../domain/entities/incidencia.types'
+import { CreateIncidenciaSchema } from '@/business/incidents/domain/entities/incidencia.types'
 import type {
   CreateIncidenciaDTO,
   IncidenciaTipo,
   IncidenciaSeveridad,
   IncidenciaResponse,
-} from '../../domain/entities/incidencia.types'
-import { createIncidencia } from '../../infrastructure/incidencias.api'
+} from '@/business/incidents/domain/entities/incidencia.types'
+import { createIncidencia } from '@/business/incidents/infrastructure/incidencias.api'
 import { ZodError } from 'zod'
 
 // ── Types ─────────────────────────────────────────────────────────────────────

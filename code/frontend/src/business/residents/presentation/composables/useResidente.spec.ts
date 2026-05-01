@@ -8,7 +8,7 @@
  * The infrastructure layer (residentes.api) is mocked — no real HTTP traffic.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { ResidenteDTO } from '../../domain/entities/residente.types'
+import type { ResidenteDTO } from '@/business/residents/domain/entities/residente.types'
 
 // ── Mock firebase/auth (required transitively via apiClient) ─────────────────
 vi.mock('firebase/auth', () => ({
@@ -19,7 +19,7 @@ vi.mock('firebase/auth', () => ({
 // ── Mock the infrastructure layer ────────────────────────────────────────────
 const mockGetResidente = vi.fn()
 
-vi.mock('../../infrastructure/residentes.api', () => ({
+vi.mock('@/business/residents/infrastructure/residentes.api', () => ({
   getResidente: (...args: unknown[]) => mockGetResidente(...args),
 }))
 

@@ -16,7 +16,7 @@
  */
 import { z } from 'zod'
 import { apiClient } from '@/services/apiClient'
-import { TurnoSchema, type Turno, type TipoTurno } from '../../domain/entities/Turno'
+import { TurnoSchema, type Turno, type TipoTurno } from '@/business/turno/domain/entities/Turno'
 
 // ── TurnoResumen — aggregated end-of-shift summary ────────────────────────
 

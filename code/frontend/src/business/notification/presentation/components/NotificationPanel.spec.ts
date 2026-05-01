@@ -23,7 +23,7 @@ vi.mock('../../application/use-cases/markAsRead', () => ({
 }))
 
 import NotificationPanel from './NotificationPanel.vue'
-import { useNotificacionStore } from '../stores/notificacion.store'
+import { useNotificacionStore } from '@/business/notification/presentation/stores/notificacion.store'
 
 function makeNotification(overrides = {}) {
   return {

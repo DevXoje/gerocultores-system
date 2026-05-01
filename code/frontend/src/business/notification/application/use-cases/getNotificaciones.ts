@@ -7,8 +7,8 @@
  *   - Lives in application/use-cases/ — pure logic, no framework deps.
  *   - Delegates HTTP to notificacionApi (infrastructure layer).
  */
-import { notificacionApi } from '../../infrastructure/api/notificacionApi'
-import type { Notificacion } from '../../domain/entities/Notificacion'
+import { notificacionApi } from '@/business/notification/infrastructure/api/notificacionApi'
+import type { Notificacion } from '@/business/notification/domain/entities/Notificacion'
 
 export interface GetNotificacionesParams {
   leida?: boolean

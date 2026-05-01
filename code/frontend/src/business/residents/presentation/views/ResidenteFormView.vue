@@ -16,10 +16,10 @@
  */
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useResidents } from '../composables/useResidents'
-import ResidenteForm from '../components/ResidenteForm.vue'
-import type { CreateResidenteDto, UpdateResidenteDto } from '../../domain/Residente'
-import { RESIDENTS_ROUTES } from '../../route-names'
+import { useResidents } from '@/business/residents/presentation/composables/useResidents'
+import ResidenteForm from '@/business/residents/presentation/components/ResidenteForm.vue'
+import type { CreateResidenteDto, UpdateResidenteDto } from '@/business/residents/domain/Residente'
+import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
 
 const route = useRoute()
 const router = useRouter()

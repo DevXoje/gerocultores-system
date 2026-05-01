@@ -12,7 +12,7 @@
  *   - Pure logic, no framework deps.
  */
 import { tareasApi } from '@/services/tareas.api'
-import type { TareaResponse } from '../domain/entities/tarea.types'
+import type { TareaResponse } from '@/business/agenda/domain/entities/tarea.types'
 
 export interface GetTareasProximasParams {
   /** How many minutes ahead to look for upcoming tasks (default: 30) */

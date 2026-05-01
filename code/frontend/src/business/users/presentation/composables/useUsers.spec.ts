@@ -44,7 +44,7 @@ vi.mock('@/business/auth/useAuthStore', () => ({
 }))
 
 import { useUsers } from './useUsers'
-import type { UserResponse } from '../../domain/entities/user.types'
+import type { UserResponse } from '@/business/users/domain/entities/user.types'
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 

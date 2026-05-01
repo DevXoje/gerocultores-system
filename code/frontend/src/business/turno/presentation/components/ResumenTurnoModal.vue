@@ -15,7 +15,7 @@
  */
 import { ref, watch } from 'vue'
 import AppDialog from '@/components/dialogs/AppDialog.vue'
-import type { TurnoResumen } from '../../infrastructure/api/turnoApi'
+import type { TurnoResumen } from '@/business/turno/infrastructure/api/turnoApi'
 
 interface Props {
   isLoading: boolean

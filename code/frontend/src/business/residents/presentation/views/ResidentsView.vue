@@ -17,10 +17,10 @@
  */
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useResidents } from '../composables/useResidents'
-import ResidenteList from '../components/ResidenteList.vue'
-import type { Residente } from '../../domain/Residente'
-import { RESIDENTS_ROUTES } from '../../route-names'
+import { useResidents } from '@/business/residents/presentation/composables/useResidents'
+import ResidenteList from '@/business/residents/presentation/components/ResidenteList.vue'
+import type { Residente } from '@/business/residents/domain/Residente'
+import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
 
 // ── Router & Composable ───────────────────────────────────────────────────
 const router = useRouter()

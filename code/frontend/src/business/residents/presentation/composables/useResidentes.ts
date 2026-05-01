@@ -10,13 +10,13 @@
  *   - This composable delegates to the Pinia store.
  */
 import { storeToRefs } from 'pinia'
-import { useResidentesStore } from '../stores/residentesStore'
+import { useResidentesStore } from '@/business/residents/presentation/stores/residentesStore'
 import type {
   CreateResidenteDto,
   UpdateResidenteDto,
   ResidenteFilter,
-} from '../../domain/Residente'
-import type { Residente } from '../../domain/Residente'
+} from '@/business/residents/domain/Residente'
+import type { Residente } from '@/business/residents/domain/Residente'
 
 export function useResidentes() {
   const store = useResidentesStore()

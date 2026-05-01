@@ -9,7 +9,7 @@
  * Zod validation runs for real (no mocking of CreateIncidenciaSchema).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { IncidenciaResponse } from '../../domain/entities/incidencia.types'
+import type { IncidenciaResponse } from '@/business/incidents/domain/entities/incidencia.types'
 
 // ── Mock firebase/auth (required transitively via apiClient) ─────────────────
 vi.mock('firebase/auth', () => ({

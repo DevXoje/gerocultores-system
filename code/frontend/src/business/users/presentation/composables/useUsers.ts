@@ -10,7 +10,7 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/business/auth/useAuthStore'
 import { auth } from '@/services/firebase'
-import type { UserResponse, UserRole } from '../../domain/entities/user.types'
+import type { UserResponse, UserRole } from '@/business/users/domain/entities/user.types'
 
 const API_BASE = import.meta.env.VITE_API_URL as string
 

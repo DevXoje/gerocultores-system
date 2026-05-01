@@ -13,10 +13,9 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
 import { onMounted, ref } from 'vue'
-import { useTurno } from '../composables/useTurno'
-import ResumenTurnoModal from '../components/ResumenTurnoModal.vue'
-import { ClockIcon } from '@heroicons/vue/24/outline'
-import type { TipoTurno } from '../../domain/entities/Turno'
+import { useTurno } from '@/business/turno/presentation/composables/useTurno'
+import ResumenTurnoModal from '@/business/turno/presentation/components/ResumenTurnoModal.vue'
+import type { TipoTurno } from '@/business/turno/domain/entities/Turno'
 
 const {
   turnoActivo,

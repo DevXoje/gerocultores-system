@@ -10,7 +10,7 @@
  */
 
 import { apiClient } from '@/services/apiClient'
-import type { ResidenteDTO } from '../domain/entities/residente.types'
+import type { ResidenteDTO } from '@/business/residents/domain/entities/residente.types'
 
 export interface ApiResponse<T> {
   data: T

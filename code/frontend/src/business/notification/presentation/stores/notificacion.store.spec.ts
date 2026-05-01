@@ -9,7 +9,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useNotificacionStore } from './notificacion.store'
-import type { Notificacion } from '../../domain/entities/Notificacion'
+import type { Notificacion } from '@/business/notification/domain/entities/Notificacion'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 

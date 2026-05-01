@@ -10,7 +10,7 @@
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { Notificacion } from '../../domain/entities/Notificacion'
+import type { Notificacion } from '@/business/notification/domain/entities/Notificacion'
 
 export const useNotificacionStore = defineStore('notificacion', () => {
   // ── State ────────────────────────────────────────────────────────────────

@@ -18,7 +18,7 @@
  *   - archive(residente: Residente): user clicked archive
  */
 import { computed } from 'vue'
-import type { Residente } from '../../domain/Residente'
+import type { Residente } from '@/business/residents/domain/Residente'
 
 const props = withDefaults(
   defineProps<{

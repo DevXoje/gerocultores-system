@@ -11,13 +11,13 @@
  */
 
 import { computed } from 'vue'
-import { useResidentesStore } from '../stores/residentesStore'
+import { useResidentesStore } from '@/business/residents/presentation/stores/residentesStore'
 import type {
   Residente,
   CreateResidenteDto,
   UpdateResidenteDto,
   ResidenteFilter,
-} from '../../domain/Residente'
+} from '@/business/residents/domain/Residente'
 
 export function useResidents() {
   const store = useResidentesStore()

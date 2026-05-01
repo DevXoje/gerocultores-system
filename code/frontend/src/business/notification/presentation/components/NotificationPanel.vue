@@ -13,8 +13,8 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
 import { onMounted } from 'vue'
-import { useNotificacion } from '../composables/useNotificacion'
-import type { Notificacion } from '../../domain/entities/Notificacion'
+import { useNotificacion } from '@/business/notification/presentation/composables/useNotificacion'
+import type { Notificacion } from '@/business/notification/domain/entities/Notificacion'
 import { XMarkIcon, BellSlashIcon } from '@heroicons/vue/24/outline'
 
 defineProps<{

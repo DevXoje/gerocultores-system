@@ -299,10 +299,11 @@ describe('ResidentesService.listResidentes', () => {
 
   it('admin with filter=active → returns only active residents', async () => {
     const { collectionRef, docRef } = getMocks()
+    // Simulate Firestore query chain: where().get()
+    // Only res-1 matches archivado=false
     const mockGet = vi.fn().mockResolvedValueOnce({
       docs: [
         { id: 'res-1', data: () => ({ ...sampleResidenteData, archivado: false }) },
-        { id: 'res-2', data: () => ({ ...sampleResidenteData, archivado: true }) },
       ],
     })
     collectionRef.get = mockGet

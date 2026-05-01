@@ -16,12 +16,12 @@
  *   - cancelled: user dismissed the form
  */
 import { computed, onMounted, watch } from 'vue'
-import { useIncidencias } from '../composables/useIncidencias'
+import { useIncidencias } from '@/business/incidents/presentation/composables/useIncidencias'
 import type {
   IncidenciaResponse,
   IncidenciaTipo,
   IncidenciaSeveridad,
-} from '../../domain/entities/incidencia.types'
+} from '@/business/incidents/domain/entities/incidencia.types'
 
 // ── Prop / Emit types ─────────────────────────────────────────────────────────
 

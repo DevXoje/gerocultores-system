@@ -9,8 +9,8 @@
  * Stitch reference: screen e5e3e7eea6e249929b0deef401bf083b
  * (design-source.md row: Login screen — same visual style, adapted for registration)
  */
-import { useRegister } from '../composables/useRegister'
-import { AUTH_ROUTES } from '../../route-names'
+import { useRegister } from '@/business/auth/presentation/composables/useRegister'
+import { AUTH_ROUTES } from '@/business/auth/route-names'
 import {
   SparklesIcon,
   EyeIcon,

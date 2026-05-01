@@ -12,7 +12,7 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  *   - No store imports — component is driven by props only.
  */
-import type { Notificacion } from '../../domain/entities/Notificacion'
+import type { Notificacion } from '@/business/notification/domain/entities/Notificacion'
 import {
   ExclamationTriangleIcon,
   ClockIcon,

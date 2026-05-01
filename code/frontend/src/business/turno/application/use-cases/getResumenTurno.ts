@@ -7,7 +7,7 @@
  *   - Application layer — orchestrates infrastructure, no framework deps.
  *   - Calls turnoApi.getResumen(id) and returns the parsed TurnoResumen.
  */
-import { turnoApi, type TurnoResumen } from '../../infrastructure/api/turnoApi'
+import { turnoApi, type TurnoResumen } from '@/business/turno/infrastructure/api/turnoApi'
 
 /**
  * Fetches the aggregated resumen for a closed turno.

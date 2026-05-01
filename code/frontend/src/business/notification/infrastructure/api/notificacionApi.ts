@@ -10,8 +10,11 @@
  */
 import { z } from 'zod'
 import { apiClient } from '@/services/apiClient'
-import { NotificacionSchema, type Notificacion } from '../../domain/entities/Notificacion'
-import type { GetNotificacionesParams } from '../../application/use-cases/getNotificaciones'
+import {
+  NotificacionSchema,
+  type Notificacion,
+} from '@/business/notification/domain/entities/Notificacion'
+import type { GetNotificacionesParams } from '@/business/notification/application/use-cases/getNotificaciones'
 
 // ── Response envelopes ─────────────────────────────────────────────────────
 

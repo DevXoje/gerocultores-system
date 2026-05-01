@@ -12,7 +12,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { ref } from 'vue'
 import { createRouter, createMemoryHistory } from 'vue-router'
-import type { ResidenteDTO } from '../../domain/entities/residente.types'
+import type { ResidenteDTO } from '@/business/residents/domain/entities/residente.types'
 
 // ── Mock firebase/auth (transitive dep) ───────────────────────────────────────
 vi.mock('firebase/auth', () => ({
@@ -26,7 +26,7 @@ let mockLoading = ref(false)
 let mockError = ref<string | null>(null)
 let mockFetchResidente = vi.fn()
 
-vi.mock('../composables/useResidente', () => ({
+vi.mock('@/business/residents/presentation/composables/useResidente', () => ({
   useResidente: () => ({
     residente: mockResidente,
     loading: mockLoading,

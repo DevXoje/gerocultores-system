@@ -10,9 +10,9 @@
  *   - Polling every 30s as per design decision.
  */
 import { computed, onUnmounted, readonly, ref } from 'vue'
-import { useNotificacionStore } from '../stores/notificacion.store'
-import { getNotificaciones } from '../../application/use-cases/getNotificaciones'
-import { markAsRead as markAsReadUseCase } from '../../application/use-cases/markAsRead'
+import { useNotificacionStore } from '@/business/notification/presentation/stores/notificacion.store'
+import { getNotificaciones } from '@/business/notification/application/use-cases/getNotificaciones'
+import { markAsRead as markAsReadUseCase } from '@/business/notification/application/use-cases/markAsRead'
 
 const POLL_INTERVAL_MS = 30_000
 

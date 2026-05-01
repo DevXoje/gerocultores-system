@@ -15,14 +15,14 @@
  */
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../business/auth/useAuthStore'
-import { AUTH_ROUTES } from '../business/auth/route-names'
-import { RESIDENTS_ROUTES } from '../business/residents/route-names'
-import { useAgendaHoy } from '../business/agenda/application/useAgendaHoy'
-import TaskCard from '../business/agenda/presentation/components/TaskCard.vue'
-import CreateTareaModal from '../business/agenda/presentation/components/CreateTareaModal.vue'
+import { useAuthStore } from '@/business/auth/useAuthStore'
+import { AUTH_ROUTES } from '@/business/auth/route-names'
+import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
+import { useAgendaHoy } from '@/business/agenda/application/useAgendaHoy'
+import TaskCard from '@/business/agenda/presentation/components/TaskCard.vue'
+import CreateTareaModal from '@/business/agenda/presentation/components/CreateTareaModal.vue'
 import type { EstadoTarea } from '@/services/tareas.api'
-import { INCIDENTS_ROUTES } from '../business/incidents/route-names'
+import { INCIDENTS_ROUTES } from '@/business/incidents/route-names'
 import {
   SparklesIcon,
   CloudIcon,

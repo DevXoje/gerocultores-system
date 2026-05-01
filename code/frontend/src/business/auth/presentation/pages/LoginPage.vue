@@ -9,8 +9,8 @@
  * Stitch reference: screen e5e3e7eea6e249929b0deef401bf083b
  * (design-source.md row: Login screen — Care & Serenity portal)
  */
-import { useLogin } from '../composables/useLogin'
-import { AUTH_ROUTES } from '../../route-names'
+import { useLogin } from '@/business/auth/presentation/composables/useLogin'
+import { AUTH_ROUTES } from '@/business/auth/route-names'
 import {
   SparklesIcon,
   EyeIcon,
