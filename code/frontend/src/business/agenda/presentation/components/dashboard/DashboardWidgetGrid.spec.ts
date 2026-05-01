@@ -124,6 +124,11 @@ describe('DashboardWidgetGrid', () => {
       tareas: ref([]),
       isLoading: ref(false),
       cargarTareas: vi.fn(),
+      isServerReachable: ref(true),
+      error: ref(null),
+      retry: vi.fn(),
+      actualizarEstado: vi.fn(),
+      toggleComplete: vi.fn(),
     })
 
     const wrapper = mount(TasksSummaryWidget, {
@@ -148,8 +153,8 @@ describe('DashboardWidgetGrid', () => {
       await import('@/business/notification/presentation/composables/useNotificacion')
     )
     useNotificacion.mockReturnValueOnce({
-      unreadCount: ref(0),
-      isLoading: ref(false),
+      unreadCount: 0 as unknown as ComputedRef<number>,
+      isLoading: false as unknown as ComputedRef<boolean>,
       fetchNotificaciones: vi.fn(),
     })
 
@@ -178,7 +183,7 @@ describe('DashboardWidgetGrid', () => {
     )
     useResidentes.mockReturnValueOnce({
       residentes: ref([]),
-      isLoading: false,
+      isLoading: ref(false),
       fetchResidentes: vi.fn(),
     })
 

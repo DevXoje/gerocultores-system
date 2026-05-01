@@ -16,6 +16,7 @@ import type { TareaTipo } from '@/business/agenda/domain/entities/tarea.types'
 import { useAuthStore } from '@/business/auth/useAuthStore'
 import type { CreateTareaDTO } from '@/business/agenda/domain/entities/tarea.types'
 import { useResidents } from '@/business/residents/presentation/composables/useResidents'
+import { createResidente as createResidenteUC } from '@/business/residents/domain/CreateResidenteUseCase'
 import type { CreateResidenteDto } from '@/business/residents/domain/Residente'
 import ResidenteForm from '@/business/residents/presentation/components/ResidenteForm.vue'
 import AppDialog from '@/ui/molecules/dialogs/AppDialog.vue'
@@ -45,7 +46,7 @@ const fieldErrors = ref<Record<string, string>>({})
 
 // ─── Residentes ──────────────────────────────────────────────────────────────
 
-const { activeResidentes, fetchResidentes, createResidente } = useResidents()
+const { activeResidentes, fetchResidentes } = useResidents()
 
 const showCreateResidente = ref(false)
 
@@ -77,7 +78,7 @@ async function handleCreateResidente(
       }
 ): Promise<void> {
   const dto = data as CreateResidenteDto
-  const { residente } = await createResidente(dto)
+  const { residente } = await createResidenteUC(dto)
   residenteId.value = residente.id
   showCreateResidente.value = false
   // Refresh list so the new resident appears
