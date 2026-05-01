@@ -152,7 +152,8 @@ describe('DashboardWidgetGrid', () => {
     const { useNotificacion } = vi.mocked(
       await import('@/business/notification/presentation/composables/useNotificacion')
     )
-    useNotificacion.mockImplementation(() => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(useNotificacion as any).mockImplementation(() => ({
       unreadCount: computed(() => 0),
       isLoading: computed(() => false),
       fetchNotificaciones: vi.fn(),
