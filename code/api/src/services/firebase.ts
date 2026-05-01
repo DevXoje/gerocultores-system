@@ -9,16 +9,18 @@ if (shouldUseEmulators) {
   console.log(`[firebase] Firestore Emulator: ${firestoreEmulatorHost ?? 'Not set'}`)
   console.log(`[firebase] Auth Emulator: ${authEmulatorHost ?? 'Not set'}`)
 }
+const hasApps = admin.apps?.length > 0
 
-if (!admin.apps.length) {
+if (!hasApps) {
   if (shouldUseEmulators) {
     const projectId = process.env['FIREBASE_PROJECT_ID'];
     if (!projectId) {
       throw new Error('FIREBASE_PROJECT_ID must be set when using emulators')
     }
+    const credential = admin.credential?.applicationDefault()
     admin.initializeApp({
       projectId,
-      credential: admin.credential.applicationDefault(),
+      credential,
     })
   } else {
     const projectId = process.env['FIREBASE_PROJECT_ID']
