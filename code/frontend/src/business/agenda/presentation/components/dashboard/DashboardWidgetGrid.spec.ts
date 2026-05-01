@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 // ── Mock composables ───────────────────────────────────────────────────────────
 vi.mock('@/business/agenda/application/useAgendaHoy', () => ({
@@ -153,8 +153,8 @@ describe('DashboardWidgetGrid', () => {
       await import('@/business/notification/presentation/composables/useNotificacion')
     )
     useNotificacion.mockReturnValueOnce({
-      unreadCount: 0 as unknown as ComputedRef<number>,
-      isLoading: false as unknown as ComputedRef<boolean>,
+      unreadCount: computed(() => 0),
+      isLoading: computed(() => false),
       fetchNotificaciones: vi.fn(),
     })
 
@@ -183,9 +183,9 @@ describe('DashboardWidgetGrid', () => {
     )
     useResidentes.mockReturnValueOnce({
       residentes: ref([]),
-      isLoading: ref(false),
+      isLoading: false,
       fetchResidentes: vi.fn(),
-    })
+    } as unknown as ReturnType<typeof useResidentes>)
 
     const wrapper = mount(RecentResidentsWidget, {
       global: { plugins: [router] },
