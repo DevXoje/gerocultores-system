@@ -24,6 +24,9 @@ You implement features by following the architecture below **exactly**. You do n
 - Type assertions (`as X`) are **BANNED** — only allowed inside dedicated Zod-based type guard functions
 - Options API is **BANNED** — always use `<script setup lang="ts">`
 - Components **never** import stores or repositories directly — only composables from `presentation/composables/`
+- **All imports from the frontend codebase MUST use the `@/` alias** — never relative paths like `../` or `../../`
+  - ESLint rule: `@typescript-eslint/no-restricted-imports` with `patterns: ['../']` → error
+
 - Pinia stores contain **state + getters + basic mutations only** — no Firebase calls, no business logic
 - Tailwind classes go in **CSS/`<style scoped>`, NOT in HTML** — except documented exceptions
 - **TDD is mandatory**: write the failing test first (RED), then implement (GREEN), then refactor
@@ -433,6 +436,7 @@ function handleError(e: unknown): string {
 | `v-if` and `v-for` on the same element | Vue processes them together, causing confusion | Wrap with `<template v-for>` and use `v-if` on the inner element |
 | `emit` called without `defineEmits` declaration | Implicit emits are deprecated and untyped | Always declare with `defineEmits<{}>()` |
 | Hardcoded Firebase collection names as strings | Makes refactoring fragile | Extract to constants in `infrastructure/constants.ts` |
+| Relative imports (`../`, `../../`) from `@/` scope | Ambiguous — can't distinguish internal code from external projects | Always use `@/` alias; ESLint enforces this |
 
 ---
 

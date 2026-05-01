@@ -1,21 +1,16 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import {
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  type User,
-} from 'firebase/auth'
-import { auth } from '@/services/firebase'
+import { signOut as firebaseSignOut, onIdTokenChanged, type User } from 'firebase/auth'
+import { auth } from '@/infrastructure/firebase/firebase'
 
 /**
  * AuthStore — global authentication state.
  *
  * Architecture note (frontend-specialist.md §4):
  * - State + basic mutations live here (Pinia composable store)
- * - Firebase calls are kept minimal: signIn/signOut/onAuthStateChanged only
+ * - Firebase calls are kept minimal: signIn/signOut/onIdTokenChanged only
  * - The `role` claim is sourced from Firebase ID token custom claims
- * - init() must be called once from main.ts before app.mount()
+ * - initAuth() must be called from the router guard before checking auth state
  *
  * Placed in business/auth/ as the auth domain's canonical store.
  * Pages/composables access this via useAuthStore() — never import Firebase directly.
@@ -36,23 +31,20 @@ export const useAuthStore = defineStore('auth', () => {
   // ─── Public actions ─────────────────────────────────────────────────────
 
   /**
-   * Authenticate with email and password.
-   * Sets `user` and `role` on success. Throws on failure.
-   * Callers (composables/components) must catch and display a generic error.
+   * Set user and role from external auth flow (Google OAuth via composable).
+   * Store is state-only — Firebase calls live in application composables.
    */
-  async function signIn(email: string, password: string): Promise<void> {
-    isLoading.value = true
-    try {
-      const credential = await signInWithEmailAndPassword(auth, email, password)
-      await loadRoleFromToken(credential.user)
-      user.value = credential.user
-    } finally {
-      isLoading.value = false
-    }
+  function setUser(firebaseUser: User): void {
+    user.value = firebaseUser
+  }
+
+  async function setRoleFromUser(firebaseUser: User): Promise<void> {
+    await loadRoleFromToken(firebaseUser)
   }
 
   /**
    * Sign out the current user and clear local state.
+   * Note: caller is responsible for redirecting to login (keeps store router-agnostic).
    */
   async function signOut(): Promise<void> {
     await firebaseSignOut(auth)
@@ -61,17 +53,33 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Set up the Firebase Auth state listener.
-   * Call this ONCE from main.ts before app.mount() so that
-   * the auth state is restored on page reload (TC-06).
+   * Set up the Firebase ID token listener with a timeout.
+   * Call this from the router guard before checking auth state — NOT from main.ts.
+   * The 3-second timeout prevents the navigation from being blocked indefinitely
+   * when Firebase is slow (e.g., emulator cold start, network latency).
+   *
+   * Uses onIdTokenChanged (instead of onAuthStateChanged) so that token refreshes
+   * and custom claims changes also trigger a role reload — enabling real-time
+   * detection of privilege changes (e.g., admin revokes a user's role).
+   *
+   * Pattern adapted from ride-on-workshop-v2 (router/index.ts initAuth).
    */
-  async function init(): Promise<void> {
+  function initAuth(): Promise<void> {
     return new Promise((resolve) => {
-      // Use an object container so the callback can reference the unsubscribe
-      // function even when the mock invokes the callback synchronously (TDZ-safe).
+      // Short-circuit: if a user is already cached, resolve immediately.
+      // This avoids waiting for onIdTokenChanged when Firebase already has the session.
+      if (auth.currentUser !== null) {
+        user.value = auth.currentUser
+        loadRoleFromToken(auth.currentUser).catch(() => {
+          // Non-fatal: role may be null but user is still valid
+        })
+        resolve()
+        return
+      }
+
       const holder: { unsubscribe?: () => void } = {}
 
-      holder.unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      holder.unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           await loadRoleFromToken(firebaseUser)
           user.value = firebaseUser
@@ -82,8 +90,18 @@ export const useAuthStore = defineStore('auth', () => {
         if (holder.unsubscribe) holder.unsubscribe()
         resolve()
       })
+
+      // Timeout: do not block navigation for more than 3 seconds.
+      // This prevents a white screen on slow Firebase responses (e.g., Edge with
+      // storage blocked, emulator cold start, or network latency).
+      setTimeout(() => {
+        if (holder.unsubscribe) {
+          holder.unsubscribe()
+        }
+        resolve()
+      }, 3000)
     })
   }
 
-  return { user, role, isLoading, signIn, signOut, init }
+  return { user, role, isLoading, setUser, setRoleFromUser, signOut, initAuth }
 })

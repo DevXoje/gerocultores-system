@@ -87,8 +87,12 @@ src/
 ├── style.css                # Estilos globales (Tailwind base + clases BEM compartidas)
 ├── assets/                  # Imagenes, iconos estaticos
 ├── router/                  # Definicion de rutas (Vue Router)
-├── services/
-│   └── firebase.ts          # Inicializacion de Firebase + conexion a emuladores en DEV
+├── infrastructure/
+│   ├── firebase/
+│   │   └── firebase.ts    # Inicializacion Firebase + conexion a emuladores en DEV
+│   ├── apiClient.ts       # Cliente Axios con interceptor de token Firebase
+│   └── tareas/
+│       └── tareas.api.ts  # API client para el modulo de tareas
 └── business/
     └── {modulo}/
         ├── domain/          # Entidades, value objects, interfaces de repositorio
@@ -165,7 +169,7 @@ Los tests de dominio y aplicacion son TDD: se escribe el test antes que la imple
 
 ## Emulador Firebase
 
-En modo desarrollo (`import.meta.env.DEV === true`), `src/services/firebase.ts` conecta automaticamente a los emuladores locales:
+En modo desarrollo (`import.meta.env.DEV === true`), `src/infrastructure/firebase/firebase.ts` conecta automaticamente a los emuladores locales:
 
 | Servicio | Puerto local |
 |---|---|

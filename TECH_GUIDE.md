@@ -4,7 +4,7 @@
 > El Reviewer Agent lo usa para validar que el código generado es consistente.
 >
 > **Stack activo**: Vue 3 + Vite + TypeScript + Tailwind CSS + Pinia (frontend) | Express.js + Firebase Admin SDK + Firestore (backend)
-> **ADRs de referencia**: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05
+> **ADRs de referencia**: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05, ADR-09
 
 ---
 
@@ -26,7 +26,7 @@
 
 ### 1.2 Estructura de carpetas
 
-> **Frontend** sigue una arquitectura DDD (Domain-Driven Design). Ver sección 10 para la descripción detallada de cada capa.
+> **Frontend** sigue una arquitectura DDD (Domain-Driven Design) + Atomic Design (capa UI compartida). Ver secciones 3 y 10 para la descripción detallada de cada capa.
 
 ```
 code/
@@ -34,39 +34,37 @@ code/
 ├── .firebaserc             # Alias del proyecto Firebase
 ├── frontend/
 │   ├── src/
-│   │   ├── assets/
-│   │   │   └── styles/         # Resets globales, variables CSS, tokens de diseño
-│   │   ├── business/           # ← Arquitectura DDD por módulo de dominio
-│   │   │   ├── residents/      #   Módulo de residentes
-│   │   │   ├── schedule/       #   Módulo de agenda/tareas
-│   │   │   ├── incidents/      #   Módulo de incidencias
+│   │   ├── ui/                    # ← Componentes UI genéricos (Atomic Design)
+│   │   │   ├── atoms/              #   Primitivas: OfflineBanner, Button, Badge
+│   │   │   ├── molecules/          #   Composiciones: AppDialog, SearchBar
+│   │   │   └── organisms/          #   Composiciones complejas de atoms+molecules
+│   │   ├── business/               # ← Arquitectura DDD por módulo de dominio
+│   │   │   ├── residents/          #   Módulo de residentes
+│   │   │   ├── agenda/             #   Módulo de agenda/tareas
+│   │   │   ├── incidents/          #   Módulo de incidencias
 │   │   │   └── {module}/
 │   │   │       ├── domain/
 │   │   │       │   ├── entities/       # TypeScript interfaces + Zod schemas
 │   │   │       │   ├── value-objects/  # Primitivos de dominio inmutables
-│   │   │       │   └── repositories/  # Interfaces de repositorio (puertos)
+│   │   │       │   └── repositories/   # Interfaces de repositorio (puertos)
 │   │   │       ├── application/        # Casos de uso (sin dependencias de framework)
 │   │   │       ├── infrastructure/
-│   │   │       │   ├── repositories/  # Implementaciones Firebase
-│   │   │       │   └── mappers/       # Datos Firebase → entidad de dominio
+│   │   │       │   ├── repositories/   # Implementaciones Firebase
+│   │   │       │   └── mappers/        # Datos Firebase → entidad de dominio
 │   │   │       └── presentation/
-│   │   │           ├── atoms/         # Button, Input, Badge...
-│   │   │           ├── molecules/     # ResidentCard, IncidentRow...
-│   │   │           ├── pages/         # Vistas completas (una por ruta)
-│   │   │           └── composables/   # Puente componentes ↔ stores/repos
-│   │   ├── shared/
-│   │   │   ├── ui/             # Atoms/molecules verdaderamente cross-módulo
-│   │   │   ├── composables/    # Composables verdaderamente compartidos
-│   │   │   ├── types/          # Tipos TypeScript compartidos
-│   │   │   └── utils/          # Funciones utilitarias puras
-│   │   ├── stores/             # Solo estado global (ej: auth). Estado de módulo va en business/{module}/
-│   │   ├── router/             # Vue Router 4 — index.ts + guards.ts
+│   │   │           ├── components/     # Componentes DE dominio específico
+│   │   │           ├── composables/    # Puente componentes ↔ stores/repos
+│   │   │           └── stores/         # Estado del módulo (Pinia)
+│   │   ├── composables/           # Composables verdaderamente compartidos
+│   │   ├── views/                  # Vistas completas (una por ruta)
+│   │   ├── infrastructure/         # API client, Firebase config
+│   │   ├── router/                 # Vue Router 5 — index.ts + guards.ts
+│   │   ├── assets/                 # Global CSS, variables, tokens
 │   │   ├── App.vue
 │   │   └── main.ts
 │   ├── public/
 │   ├── index.html
 │   ├── vite.config.ts
-│   ├── tailwind.config.ts
 │   └── tsconfig.json
 └── api/
     ├── src/
@@ -80,6 +78,8 @@ code/
     ├── package.json
     └── tsconfig.json
 ```
+
+> **Regla de clasificación de componentes:** si un componente depende de entidades de dominio (`TareaResponse`, `Residente`, etc.) → vive en `business/{module}/presentation/components/`. Si es UI genérica reutilizable sin acoplamiento de dominio → vive en `ui/atoms` o `ui/molecules`.
 
 ### 1.3 Convenciones de imports
 
@@ -200,9 +200,9 @@ export const useResidentsStore = defineStore('residents', () => {
 Un único cliente Axios configurado con el token Firebase Auth:
 
 ```typescript
-// services/apiClient.ts
+// infrastructure/apiClient.ts
 import axios from 'axios'
-import { auth } from '@/firebase'
+import { auth } from '@/infrastructure/firebase/firebase'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -222,24 +222,24 @@ apiClient.interceptors.request.use(async (config) => {
 export default apiClient
 ```
 
-### 3.2 Estructura de services
+### 3.2 Estructura de infrastructure
 
-Los services encapsulan las llamadas HTTP. **Solo** los stores los llaman directamente.
+Los módulos de infrastructure encapsulan las llamadas HTTP y acceso a Firebase. **Solo** los composables de application los llaman directamente — nunca stores ni componentes Vue directamente.
 
 ```typescript
-// services/tareaService.ts
-import apiClient from './apiClient'
+// infrastructure/tareas/tareas.api.ts
+import apiClient from '@/infrastructure/apiClient'
 import type { Tarea, ActualizarTareaDto } from '@/types/tarea.types'
 
-export const tareaService = {
+export const tareasApi = {
   async getTareasHoy(): Promise<Tarea[]> {
     const { data } = await apiClient.get<Tarea[]>('/tareas/hoy')
-    return data
+    return data.data
   },
 
   async actualizarEstado(id: string, dto: ActualizarTareaDto): Promise<Tarea> {
     const { data } = await apiClient.patch<Tarea>(`/tareas/${id}`, dto)
-    return data
+    return data.data
   }
 }
 ```
@@ -355,26 +355,78 @@ cd code/api && npm run test
 
 ### 5.2 Variables de entorno
 
-    **Frontend** (`code/frontend/.env.local`):
+#### Canonical sources
+
+Cada paquete tiene su propio `.env.example` — esa es la lista canónica de vars requeridas para ese paquete:
+
+| Paquete | Archivo canonical | Vars |
+|---------|------------------|------|
+| Frontend | `code/frontend/.env.example` | `VITE_FIREBASE_*`, `VITE_API_URL` |
+| API | `code/api/.env.example` | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `PORT`, `NODE_ENV`, `CORS_ORIGIN`, vars de emuladores |
+
+> El archivo `.env.example` en la raíz del proyecto (`/.env.example`) ha sido eliminado para evitar duplicación y confusión. Usar siempre el `.env.example` correspondiente al paquete.
+
+#### Archivos y precedencia
+
 ```
-VITE_API_URL=http://localhost:3000
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_APP_ID=...
+# Frontend (Vite — vars en tiempo de build)
+code/frontend/.env.example        # template documented (committed)
+code/frontend/.env                # gitignored, valores reales (NO commit)
+code/frontend/.env.local          # gitignored, overrides locales (NO commit)
+code/frontend/.env.test           # gitignored, vars para tests E2E
+
+# API (Node.js — vars en tiempo de ejecución)
+code/api/.env.example             # template documentado (committed)
+code/api/.env                     # gitignored, valores reales (NO commit)
+code/api/.env.local               # gitignored, overrides locales (NO commit)
+```
+
+**Precedencia** (Vite y dotenv):
+- Later files override earlier ones: `.env` → `.env.local` → `.env.{MODE}`
+- Modo por defecto en `npm run dev` es `development`
+
+#### G05 — No hardcoded secrets
+
+> Ninguna variable de entorno aparece en el código fuente. Los archivos `.env` y `.env.local` están en `.gitignore` en ambos paquetes.
+
+Vars sensibles (API keys, passwords, credenciales Firebase):
+- **Jamás** hardcodearlas en el código
+- Usar siempre `import.meta.env.VITE_*` (frontend) o `process.env.*` (api)
+- `.env` con valores reales **nunca se comitea**
+
+#### Vars de build vs runtime
+
+| Prefijo | Cuándo se resuelve | Ejemplo |
+|---------|-------------------|---------|
+| `VITE_*` | Build-time (Vite) | `VITE_FIREBASE_API_KEY`, `VITE_API_URL` |
+| `FIREBASE_*` | Runtime (Node.js) | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` |
+
+#### Ejemplo de configuración local
+
+**Frontend** (`code/frontend/.env.local`):
+```
+VITE_API_URL=http://localhost:3000/api
+VITE_FIREBASE_API_KEY=AIzaSy...
+VITE_FIREBASE_AUTH_DOMAIN=gerocultores.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=gerocultores
+VITE_FIREBASE_APP_ID=1:...:web:...
 ```
 
 **API** (`code/api/.env`):
 ```
-FIREBASE_PROJECT_ID=...
-FIREBASE_CLIENT_EMAIL=...
-FIREBASE_PRIVATE_KEY=...
+FIREBASE_PROJECT_ID=gerocultores
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-...@gerocultores.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...
 PORT=3000
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:5173
+FIRESTORE_EMULATOR_HOST=localhost:18080
+FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
 ```
 
-> **G05**: Ninguna de estas variables aparece en el código fuente. Los archivos `.env` están en `.gitignore`.
+#### Credenciales E2E (Playwright)
+
+Las vars de test E2E (`E2E_USER`, `E2E_PASS`, `PLAYWRIGHT_TEST_BASE_URL`) **no van en `.env` ni `.env.local`**. Se suministran via secrets de CI o archivo `.env.test` gitignored. Ver `playwright.config.ts` para la configuración completa.
 
 ### 5.3 RGPD
 
@@ -622,7 +674,7 @@ const resident = rawData as Resident
 
 ---
 
-*Última actualización: 2026-04-06 — Actualizado al stack Vue 3 + Firebase + DDD frontend (ADR-01b, ADR-02b, ADR-03b)*
+*Última actualización: 2026-05-01 — Actualizado al stack Vue 3 + Firebase + DDD frontend + ADR-09 (ui/Atomic Design)*
 
 ---
 
@@ -661,7 +713,8 @@ domain/ (entities, value-objects, repo interfaces)
 | `infrastructure/repositories/` | Implementa repos con Firebase/Firestore | Contener lógica de negocio |
 | `infrastructure/mappers/` | Convierte datos Firebase ↔ entidades de dominio | Llamar Firebase directamente |
 | `presentation/composables/` | Puente componentes ↔ stores/repos | Contener markup o ser importado por capas inferiores |
-| `presentation/atoms/` y `molecules/` | Renderiza UI — puramente presentacional | Importar stores, repos o composables |
+| `ui/atoms/` y `ui/molecules/` | UI genérica cross-módulo — puramente presentacional | Importar stores, repos o entidades de dominio |
+| `business/{bc}/presentation/components/` | Componentes DE dominio específico | Importar de otros bounded contexts |
 | `presentation/pages/` | Vistas de ruta — conecta composables a template | Acceder a stores o repos directamente |
 | `stores/` (Pinia) | Estado reactivo + getters + mutaciones | Llamar Firebase, contener lógica de negocio |
 

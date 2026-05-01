@@ -44,6 +44,12 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: ['../'],
+        },
+      ],
       'vue/multi-word-component-names': 'off',
     },
   },

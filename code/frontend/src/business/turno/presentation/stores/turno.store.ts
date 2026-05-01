@@ -10,7 +10,7 @@
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { Turno } from '../../domain/entities/Turno'
+import type { Turno } from '@/business/turno/domain/entities/Turno'
 
 export const useTurnoStore = defineStore('turno', () => {
   // ── State ────────────────────────────────────────────────────────────────

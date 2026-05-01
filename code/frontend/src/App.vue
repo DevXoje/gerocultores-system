@@ -16,7 +16,7 @@
  */
 import { onMounted, ref } from 'vue'
 import { BellIcon } from '@heroicons/vue/24/outline'
-import OfflineBanner from '@/components/OfflineBanner.vue'
+import OfflineBanner from '@/ui/atoms/OfflineBanner.vue'
 import NotificationPanel from '@/business/notification/presentation/components/NotificationPanel.vue'
 import NotificationToast from '@/business/notification/presentation/components/NotificationToast.vue'
 import { useNotificacion } from '@/business/notification/presentation/composables/useNotificacion'
@@ -28,6 +28,18 @@ const { startPolling, items } = useNotificacion()
 onMounted(() => {
   startPolling()
 })
+
+function handleOpenPanel(): void {
+  isPanelOpen.value = true
+}
+
+function handleDismissPanel(): void {
+  isPanelOpen.value = false
+}
+
+function handleClosePanel(): void {
+  isPanelOpen.value = false
+}
 </script>
 
 <template>
@@ -39,7 +51,7 @@ onMounted(() => {
     class="app-shell__notification-bell"
     data-testid="notification-bell"
     aria-label="Abrir panel de notificaciones"
-    @click="isPanelOpen = true"
+    @click="handleOpenPanel"
   >
     <BellIcon class="app-shell__notification-bell-icon" aria-hidden="true" />
   </button>
@@ -49,16 +61,16 @@ onMounted(() => {
     v-if="items.length > 0 && !items[0].leida"
     :notification="items[0]"
     data-testid="notification-toast"
-    @dismiss="isPanelOpen = false"
+    @dismiss="handleDismissPanel"
   />
 
-  <NotificationPanel :open="isPanelOpen" @close="isPanelOpen = false" />
+  <NotificationPanel :open="isPanelOpen" @close="handleClosePanel" />
   <RouterView />
 </template>
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "./style.css";
+@reference "#/style.css";
 
 .app-shell__notification-bell {
   @apply fixed top-4 right-4 z-40 flex items-center justify-center;

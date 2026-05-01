@@ -34,6 +34,10 @@ Before starting any implementation task, confirm you have:
 - **`verifyAuth` is applied at the router level**, not on individual route handlers
 - All **Firestore collection names** come from `src/services/collections.ts` constants — never hardcoded strings
 - All **environment variables** accessed via `process.env['VAR_NAME']` with runtime validation — no fallback to sensitive values
+- **All imports from the backend codebase MUST use the `@/` alias** — never relative paths like `../` or `../../`
+  - ESLint rule: `@typescript-eslint/no-restricted-imports` with `patterns: ['../']` → error
+  - Configured in `eslint.config.mjs`; tsconfig alias: `"@/*": ["./src/*"]`
+  - Reason: relative imports are easily confused with external packages
 - **TDD is mandatory**: write the failing test first (RED), then implement (GREEN), then refactor
 - Never use `console.log` in production-path code — use `console.error` only in `errorHandler`
 - Every `feat` commit **MUST** reference a `US-XX` scope: `feat(US-XX): description` (G08)
@@ -590,6 +594,7 @@ FOR EACH FEATURE:
 | Role check inline in controller (`if req.user?.rol === 'admin'`) | Logic scattered, untestable | Use `requireRole(...)` middleware in the route file |
 | Skipping `next(e)` in async catch blocks | Unhandled promise rejections crash the process | Always `catch (e) { next(e) }` in every async handler |
 | Using `as SomeType` outside a dedicated type guard | Bypasses TypeScript; hides bugs | Use `unknown` + narrowing or Zod `parse()` |
+| Relative imports (`../`, `../../`) from `@/` scope | Ambiguous — can't distinguish internal code from external packages | Always use `@/` alias; ESLint enforces this |
 
 ---
 

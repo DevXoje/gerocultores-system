@@ -11,7 +11,7 @@ vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(),
   onAuthStateChanged: vi.fn(),
 }))
-vi.mock('@/services/apiClient', () => ({
+vi.mock('@/infrastructure/apiClient', () => ({
   apiClient: { get: vi.fn(), post: vi.fn(), patch: vi.fn() },
   isServerHealthy: vi.fn(),
 }))
@@ -23,7 +23,7 @@ vi.mock('../../application/use-cases/markAsRead', () => ({
 }))
 
 import NotificationPanel from './NotificationPanel.vue'
-import { useNotificacionStore } from '../stores/notificacion.store'
+import { useNotificacionStore } from '@/business/notification/presentation/stores/notificacion.store'
 
 function makeNotification(overrides = {}) {
   return {

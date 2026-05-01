@@ -14,11 +14,6 @@ api/.env.local
 frontend/dist/
 api/dist/
 
-# Academic memory generated outputs (regenerate with scripts/build-academic-docx.sh)
-OUTPUTS/academic/dist/*.docx
-OUTPUTS/academic/dist/*.pdf
-OUTPUTS/academic/dist/*.html
-
 # Firebase
 .firebase/
 
@@ -45,3 +40,5 @@ npm-debug.log*
 # Temporary files
 tmp/
 .tmp
+
+.playwright-cli/

@@ -1,6 +1,6 @@
 # Skill Registry — gerocultores-system
 
-> Generated: 2026-04-25 | Mode: engram
+> Generated: 2026-04-29 | Updated: memory-cleanup skill added
 > Project-level skills win over user-level. Deduplicated by name.
 
 ## SDD Skills (from user-level ~/.claude/skills/)
@@ -45,8 +45,14 @@
 | AGENTS/backend-specialist.md | Backend architecture (Express, Firebase Admin) |
 | AGENTS/engram-conventions.md | Topic key naming conventions |
 
+## Project-Level Skills (.agents/skills/)
+
+| Skill | Path | Trigger |
+|-------|------|---------|
+| memory-cleanup | .agents/skills/memory-cleanup/SKILL.md | Limpiar memoria académica para entrega |
+
 ## Notes
 - sdd-* skills: use when working on SDD phases (propose, spec, design, tasks, apply, verify, archive)
 - branch-pr: use when creating GitHub PRs
 - judgment-day: use when user asks for adversarial review
-- No project-level skills detected (.atl/skills/ does not exist yet)
+- memory-cleanup: use when user says "cleanup", "generar entregable", "memoria limpia", or needs to run the cleanup pipeline

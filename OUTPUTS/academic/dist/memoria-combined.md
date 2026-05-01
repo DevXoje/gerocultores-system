@@ -568,24 +568,55 @@ El sistema define seis flujos de usuario (FL-01 a FL-06) que cubren las operacio
 
 Las pantallas principales del sistema se diseñaron usando Stitch (Google), una herramienta de prototipado que permite generar propuestas visuales rápidas. Los prototipos sirvieron para validar la distribución de elementos antes de empezar la implementación y para verificar que los flujos definidos en la especificación eran realizables en la interfaz.
 
-Las pantallas principales prototipadas son:
+A continuación se muestran las capturas de las pantallas más representativas del sistema:
 
-| Pantalla | Descripción | US relacionada |
-|----------|-------------|----------------|
-| Login | Formulario de acceso con email y contraseña | US-01 |
-| Dashboard / Agenda diaria | Lista de tareas del día con estados y colores | US-03 |
-| Detalle de tarea | Panel de acción: completar, añadir nota, incidencia | US-04 |
-| Ficha de residente | Datos identificativos y campos clínicos sensibles | US-05 |
-| Formulario de incidencia | Selector de tipo, severidad y descripción libre | US-06 |
-| Historial de incidencias | Lista filtrable con paginación | US-07 |
-| Alertas críticas | Notificaciones de incidencias críticas en tiempo real | US-08 |
-| Gestión de residentes | Alta, edición y archivo de fichas (coordinador) | US-09 |
-| Panel del coordinador | Vista global de agenda y residentes | US-10 |
-| Agenda semanal | Vista de siete días con tareas por día | US-12 |
+**Figura 1 — Pantalla de inicio de sesión (US-01)**
 
-> **Nota de revisión**: Incluir aquí capturas de pantalla de los prototipos Stitch cuando estén disponibles. Añadir pie de imagen con número y descripción según la norma del centro: *Figura N — Descripción. Fuente: Elaboración propia / Stitch.*
+![Pantalla de inicio de sesión](https://lh3.googleusercontent.com/aida/ADBb0ugiYoh_Ad7aV_MI_FWOSMnZLFnX4CpwuiO2juiNaLBw7UKGLuf01ouu4G2WCUl0OK3jiIkEEnVZ22NxIJCbl0LwHvuEplr5osSOt_huxaWEsLi2cMDdeFDuCI70yRLsBKxa15LgaVGLuQAzM9Djxmo-LYuo2kByRwztM0C6lxBBPN0Q1YP9Hl_NvOfIjxSuuh9BFqok51KdPNA3Zs4ur-oS53rcugUg07ApWpLFYYtFPNAqzGdYlusbAUQb)
+
+*Figura 1 — Pantalla de inicio de sesión. Muestra el formulario con email y contraseña y el botón de acceso. El diseño es limpio y centrado, optimizado para pantallas de tablet. Fuente: Elaboración propia / Stitch.*
 
 ---
+
+**Figura 2 — Dashboard del gerocultor (US-03)**
+
+![Dashboard del gerocultor](../../design-exports/US-03-agenda-home__caregiver-dashboard__20260328.png)
+
+*Figura 2 — Dashboard del gerocultor. Lista de tareas del día ordenadas por hora con código de colores (verde = completada, naranja = en curso, rojo = vencida). Fuente: Elaboración propia / Stitch.*
+
+---
+
+**Figura 3 — Detalle de tarea: ronda de medicación (US-04)**
+
+![Detalle de tarea](../../design-exports/US-04-task-detail__task-detail-medication-round__20260328.png)
+
+*Figura 3 — Panel de detalle de tarea. Permite al gerocultor completar la tarea, añadir una nota o registrar una incidencia asociada. Fuente: Elaboración propia / Stitch.*
+
+---
+
+**Figura 4 — Ficha de residente (US-05)**
+
+![Ficha de residente](../../design-exports/US-05-resident-detail__resident-detail-eleanor-vance__20260328.png)
+
+*Figura 4 — Ficha de residente con datos identificativos, fotografía, información de contacto de familiares y notas clínicas relevantes. Fuente: Elaboración propia / Stitch.*
+
+---
+
+**Figura 5 — Formulario de registro de incidencia (US-06)**
+
+![Formulario de incidencia](../../design-exports/US-06-incident__new-incident-form-serenity-care__20260328.png)
+
+*Figura 5 — Formulario de registro de incidencia con selector de tipo, nivel de severidad y descripción libre. Optimizado para completarse en cinco pasos táctiles o menos. Fuente: Elaboración propia / Stitch.*
+
+---
+
+**Figura 6 — Alertas críticas en tiempo real (US-08)**
+
+![Alertas críticas](../../design-exports/US-08-alerts__critical-alerts-serenity-care__20260328.png)
+
+*Figura 6 — Panel de alertas críticas. Notificaciones en tiempo real de incidencias clasificadas como críticas con acceso directo a la ficha del residente afectado. Fuente: Elaboración propia / Stitch.*
+
+El resto de pantallas diseñadas (historial de incidencias, gestión de residentes, panel del coordinador y agenda semanal) siguen la misma línea visual y cumplen los criterios de diseño definidos en la sección siguiente.
 
 ## 5.8 Sistema de diseño y componentes
 

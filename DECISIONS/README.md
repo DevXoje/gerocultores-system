@@ -28,6 +28,7 @@ saber si la decisión sigue siendo válida o si fue un compromiso temporal.
 | ADR-06  | CI Tooling (ESLint, Prettier, Playwright, Vitest)| ACCEPTED | 2026-04-12 |
 | ADR-07  | Testing Strategy (Vitest, Playwright, Firestore Rules) | ACCEPTED | 2026-04-18 |
 | ADR-08  | API Response Format (Zod, errorHandler)          | ACCEPTED | 2026-04-18 |
+| ADR-09  | UI Architecture: components → ui + Atomic Design | ACCEPTED | 2026-05-01 |
 
 > **Histórico**: ADR-01..04 (originales, React/Supabase) fueron eliminados el 2026-04-25 al piventar el stack a Vue/Firebase.
 

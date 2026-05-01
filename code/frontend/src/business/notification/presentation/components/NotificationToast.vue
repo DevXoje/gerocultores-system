@@ -12,7 +12,7 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  *   - No store imports — component is driven by props only.
  */
-import type { Notificacion } from '../../domain/entities/Notificacion'
+import type { Notificacion } from '@/business/notification/domain/entities/Notificacion'
 import {
   ExclamationTriangleIcon,
   ClockIcon,
@@ -69,7 +69,7 @@ const IconComponent = iconMap[props.notification.tipo]
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 .notification-toast {
   @apply flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium;

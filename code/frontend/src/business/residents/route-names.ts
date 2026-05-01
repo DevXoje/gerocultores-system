@@ -3,6 +3,7 @@
  *
  * US-05: Consulta de ficha de residente
  * US-07: Historial de incidencias de un residente
+ * US-09: Alta y gestión de residentes
  */
 export const RESIDENTS_ROUTES = {
   RESIDENTE_DETAIL: {
@@ -12,5 +13,18 @@ export const RESIDENTS_ROUTES = {
   RESIDENTE_INCIDENCIAS: {
     name: 'residente-incidencias',
     path: '/residentes/:id/incidencias',
+  },
+  // US-09: Gerocultor crea/gestiona sus propios residentes
+  RESIDENTS_LIST: {
+    name: 'residents-list',
+    path: '/residentes',
+  },
+  RESIDENTE_NUEVO: {
+    name: 'residente-nuevo',
+    path: '/residentes/nuevo',
+  },
+  RESIDENTE_EDITAR: {
+    name: 'residente-editar',
+    path: '/residentes/:id/editar',
   },
 } as const

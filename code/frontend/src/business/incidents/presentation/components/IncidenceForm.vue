@@ -16,12 +16,12 @@
  *   - cancelled: user dismissed the form
  */
 import { computed, onMounted, watch } from 'vue'
-import { useIncidencias } from '../composables/useIncidencias'
+import { useIncidencias } from '@/business/incidents/presentation/composables/useIncidencias'
 import type {
   IncidenciaResponse,
   IncidenciaTipo,
   IncidenciaSeveridad,
-} from '../../domain/entities/incidencia.types'
+} from '@/business/incidents/domain/entities/incidencia.types'
 
 // ── Prop / Emit types ─────────────────────────────────────────────────────────
 
@@ -104,6 +104,10 @@ function handleCancel(): void {
   resetForm()
   emit('cancelled')
 }
+
+function handleSeveritySelect(value: IncidenciaSeveridad): void {
+  form.severidad = value
+}
 </script>
 
 <template>
@@ -184,7 +188,7 @@ function handleCancel(): void {
 
       <!-- Severity toggle group -->
       <div class="incidence-form__field">
-        <p class="incidence-form__label" id="incidence-severidad-label">Nivel de Gravedad</p>
+        <p id="incidence-severidad-label" class="incidence-form__label">Nivel de Gravedad</p>
         <div
           class="incidence-form__severity-group"
           role="group"
@@ -199,7 +203,7 @@ function handleCancel(): void {
                 'incidence-form__severity-btn--active': form.severidad === opt.value,
               }"
               :aria-pressed="form.severidad === opt.value"
-              @click="form.severidad = opt.value"
+              @click="handleSeveritySelect(opt.value)"
             >
               {{ opt.label }}
             </button>

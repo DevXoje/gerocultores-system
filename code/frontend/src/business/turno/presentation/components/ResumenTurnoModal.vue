@@ -13,27 +13,28 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  *   - No store imports — all state flows via composable in parent.
  */
+import { ref, watch } from 'vue'
+import AppDialog from '@/ui/molecules/dialogs/AppDialog.vue'
+import type { TurnoResumen } from '@/business/turno/infrastructure/api/turnoApi'
 
-const props = defineProps<{
-  open: boolean
+interface Props {
   isLoading: boolean
   initialResumen?: string | null
   /** Populated after finalizarTurno — shows aggregated stats */
-  resumenData?: {
-    readonly tareasCompletadas: number
-    readonly tareasPendientes: number
-    readonly incidenciasRegistradas: number
-    readonly residentesAtendidos: readonly string[]
-    readonly textoResumen: string
-  } | null
-}>()
+  resumenData?: TurnoResumen | null
+}
+
+const modelValue = defineModel<boolean>()
+
+const props = withDefaults(defineProps<Props>(), {
+  initialResumen: null,
+  resumenData: null,
+})
 
 const emit = defineEmits<{
   confirm: [resumen: string]
   cancel: []
 }>()
-
-import { ref, watch } from 'vue'
 
 const resumen = ref(props.initialResumen ?? '')
 
@@ -47,114 +48,118 @@ watch(
 function handleConfirm(): void {
   emit('confirm', resumen.value.trim())
 }
+
+function handleCancel(): void {
+  modelValue.value = false
+  emit('cancel')
+}
+
+defineExpose({
+  handleCancel,
+  handleConfirm,
+  resumen,
+})
 </script>
 
 <template>
-  <transition name="modal-fade">
-    <div
-      v-if="open"
-      class="resumen-modal__backdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="resumen-modal-title"
-    >
-      <div class="resumen-modal__card">
-        <!-- Header -->
-        <header class="resumen-modal__header">
-          <h2 id="resumen-modal-title" class="resumen-modal__title">Resumen de fin de turno</h2>
-        </header>
-
-        <!-- Aggregated stats — shown after shift is closed (resumenData populated) -->
-        <div v-if="resumenData" class="resumen-modal__stats" aria-label="Estadísticas del turno">
-          <dl class="resumen-modal__stats-grid">
-            <div class="resumen-modal__stat">
-              <dt class="resumen-modal__stat-label">Tareas completadas</dt>
-              <dd class="resumen-modal__stat-value">{{ resumenData.tareasCompletadas }}</dd>
-            </div>
-            <div class="resumen-modal__stat">
-              <dt class="resumen-modal__stat-label">Tareas pendientes</dt>
-              <dd class="resumen-modal__stat-value">{{ resumenData.tareasPendientes }}</dd>
-            </div>
-            <div class="resumen-modal__stat">
-              <dt class="resumen-modal__stat-label">Incidencias</dt>
-              <dd class="resumen-modal__stat-value">{{ resumenData.incidenciasRegistradas }}</dd>
-            </div>
-            <div class="resumen-modal__stat">
-              <dt class="resumen-modal__stat-label">Residentes atendidos</dt>
-              <dd class="resumen-modal__stat-value">
-                {{ resumenData.residentesAtendidos.length }}
-              </dd>
-            </div>
-          </dl>
-          <p class="resumen-modal__texto">{{ resumenData.textoResumen }}</p>
+  <AppDialog v-model="modelValue" title="Resumen de fin de turno" size="md" @close="handleCancel">
+    <!-- Aggregated stats — shown after shift is closed (resumenData populated) -->
+    <div v-if="resumenData" class="resumen-modal__stats" aria-label="Estadísticas del turno">
+      <dl class="resumen-modal__stats-grid">
+        <div class="resumen-modal__stat">
+          <dt class="resumen-modal__stat-label">Tareas completadas</dt>
+          <dd class="resumen-modal__stat-value">{{ resumenData.tareasCompletadas }}</dd>
         </div>
-
-        <!-- Body — textarea for handover notes (shown when shift not yet closed) -->
-        <div v-if="!resumenData" class="resumen-modal__body">
-          <label for="resumen-textarea" class="resumen-modal__label"> Notas de traspaso </label>
-          <textarea
-            id="resumen-textarea"
-            v-model="resumen"
-            class="resumen-modal__textarea"
-            rows="6"
-            placeholder="Describe el estado de los residentes, incidencias relevantes y cualquier información para el siguiente turno…"
-            :disabled="isLoading"
-          />
+        <div class="resumen-modal__stat">
+          <dt class="resumen-modal__stat-label">Tareas pendientes</dt>
+          <dd class="resumen-modal__stat-value">{{ resumenData.tareasPendientes }}</dd>
         </div>
-
-        <!-- Footer -->
-        <footer class="resumen-modal__footer">
-          <button
-            type="button"
-            class="resumen-modal__btn resumen-modal__btn--secondary"
-            :disabled="isLoading"
-            @click="emit('cancel')"
-          >
-            Cancelar
-          </button>
-          <button
-            v-if="!resumenData"
-            type="button"
-            class="resumen-modal__btn resumen-modal__btn--primary"
-            :disabled="isLoading || resumen.trim().length === 0"
-            @click="handleConfirm"
-          >
-            <span v-if="isLoading" class="resumen-modal__spinner" aria-hidden="true" />
-            <span v-else>Finalizar turno</span>
-          </button>
-        </footer>
-      </div>
+        <div class="resumen-modal__stat">
+          <dt class="resumen-modal__stat-label">Incidencias</dt>
+          <dd class="resumen-modal__stat-value">{{ resumenData.incidenciasRegistradas }}</dd>
+        </div>
+        <div class="resumen-modal__stat">
+          <dt class="resumen-modal__stat-label">Residentes atendidos</dt>
+          <dd class="resumen-modal__stat-value">
+            {{ resumenData.residentesAtendidos.length }}
+          </dd>
+        </div>
+      </dl>
+      <p class="resumen-modal__texto">{{ resumenData.textoResumen }}</p>
     </div>
-  </transition>
+
+    <!-- Body — textarea for handover notes (shown when shift not yet closed) -->
+    <div v-if="!resumenData" class="resumen-modal__body">
+      <label for="resumen-textarea" class="resumen-modal__label"> Notas de traspaso </label>
+      <textarea
+        id="resumen-textarea"
+        v-model="resumen"
+        class="resumen-modal__textarea"
+        rows="6"
+        placeholder="Describe el estado de los residentes, incidencias relevantes y cualquier información para el siguiente turno…"
+        :disabled="isLoading"
+      />
+    </div>
+
+    <template #footer>
+      <button
+        type="button"
+        class="resumen-modal__btn resumen-modal__btn--secondary"
+        :disabled="isLoading"
+        @click="handleCancel"
+      >
+        Cancelar
+      </button>
+      <button
+        v-if="!resumenData"
+        type="button"
+        class="resumen-modal__btn resumen-modal__btn--primary"
+        :disabled="isLoading || resumen.trim().length === 0"
+        @click="handleConfirm"
+      >
+        <span v-if="isLoading" class="resumen-modal__spinner" aria-hidden="true" />
+        <span v-else>Finalizar turno</span>
+      </button>
+    </template>
+  </AppDialog>
 </template>
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "../../../../style.css";
+@reference "#/style.css";
 
-.resumen-modal__backdrop {
-  @apply fixed inset-0 z-50 flex items-center justify-center p-4;
-  background-color: rgba(0, 0, 0, 0.4);
+/* ─── Stats ──────────────────────────────────────────────────────────────── */
+.resumen-modal__stats {
+  @apply flex flex-col gap-4;
 }
 
-.resumen-modal__card {
-  @apply w-full max-w-lg rounded-2xl shadow-xl flex flex-col;
-  background-color: var(--color-surface);
-  max-height: 90vh;
+.resumen-modal__stats-grid {
+  @apply grid grid-cols-2 gap-4;
 }
 
-.resumen-modal__header {
-  @apply px-6 pt-6 pb-4;
+.resumen-modal__stat {
+  @apply flex flex-col gap-1 rounded-xl p-4;
+  background-color: var(--color-surface-container-low);
 }
 
-.resumen-modal__title {
-  @apply text-lg font-semibold;
-  font-family: var(--font-headline);
+.resumen-modal__stat-label {
+  @apply text-xs font-medium;
+  color: var(--color-on-surface-variant);
+}
+
+.resumen-modal__stat-value {
+  @apply text-2xl font-semibold;
   color: var(--color-on-surface);
 }
 
+.resumen-modal__texto {
+  @apply text-sm;
+  color: var(--color-on-surface-variant);
+}
+
+/* ─── Body ──────────────────────────────────────────────────────────────── */
 .resumen-modal__body {
-  @apply px-6 pb-4 flex flex-col gap-2 flex-1;
+  @apply flex flex-col gap-2 flex-1;
 }
 
 .resumen-modal__label {
@@ -177,13 +182,9 @@ function handleConfirm(): void {
   opacity: 0.6;
 }
 
-.resumen-modal__footer {
-  @apply flex justify-end gap-3 px-6 py-4 border-t;
-  border-color: var(--color-outline-variant);
-}
-
+/* ─── Footer buttons ─────────────────────────────────────────────────────── */
 .resumen-modal__btn {
-  @apply px-5 py-2 rounded-full text-sm font-semibold cursor-pointer border-none;
+  @apply px-5 py-2 rounded-full text-sm font-semibold cursor-pointer border-none transition-opacity;
   transition: opacity 0.15s ease;
 }
 
@@ -214,14 +215,5 @@ function handleConfirm(): void {
   to {
     transform: rotate(360deg);
   }
-}
-
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
 }
 </style>

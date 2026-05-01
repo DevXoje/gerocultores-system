@@ -16,7 +16,7 @@ vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(),
   onAuthStateChanged: vi.fn(),
 }))
-vi.mock('@/services/apiClient', () => ({
+vi.mock('@/infrastructure/apiClient', () => ({
   apiClient: { get: vi.fn(), post: vi.fn(), patch: vi.fn() },
   isServerHealthy: vi.fn(),
 }))
@@ -25,7 +25,7 @@ vi.mock('@/services/apiClient', () => ({
 vi.mock('@/business/notification/presentation/components/NotificationPanel.vue', () => ({
   default: { template: '<div data-testid="notification-panel" />' },
 }))
-vi.mock('@/components/OfflineBanner.vue', () => ({
+vi.mock('@/ui/atoms/OfflineBanner.vue', () => ({
   default: { template: '<div data-testid="offline-banner" />' },
 }))
 vi.mock('@/business/notification/presentation/components/NotificationToast.vue', () => ({

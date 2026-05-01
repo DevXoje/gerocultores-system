@@ -11,7 +11,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { ref, reactive } from 'vue'
-import type { IncidenciaResponse } from '../../domain/entities/incidencia.types'
+import type { IncidenciaResponse } from '@/business/incidents/domain/entities/incidencia.types'
 
 // ── Mock firebase/auth (transitive dep) ───────────────────────────────────────
 vi.mock('firebase/auth', () => ({

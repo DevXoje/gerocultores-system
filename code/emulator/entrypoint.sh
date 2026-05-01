@@ -35,9 +35,9 @@ else
   echo "[entrypoint] No snapshot found — starting with empty state"
 fi
 
-firebase emulators:start \
+  firebase emulators:start \
   --only firestore,auth \
-  --project gerocultores-system \
+  --project gero-care \
   ${IMPORT_FLAG} &
 
 FIREBASE_PID=$!

@@ -1,4 +1,31 @@
 #!/bin/sh
-# pre-push: run full test suite (frontend + API) before pushing
-# Falls if any test fails — prevents broken code from reaching remote.
-npm --prefix code/frontend run test && npm --prefix code/api run test
+# pre-push: run the same checks as CI to prevent broken code from reaching remote.
+# Order: fast checks first (lint, format, type-check) so failures surface quickly.
+
+set -e
+
+echo "[pre-push] Linting frontend..."
+npm --prefix code/frontend run lint
+
+echo "[pre-push] Checking format..."
+npm --prefix code/frontend run format:check
+
+echo "[pre-push] Type-checking frontend..."
+npm --prefix code/frontend run type-check
+
+echo "[pre-push] Type-checking frontend vitest types..."
+(cd code/frontend && npx vue-tsc --noEmit -p tsconfig.vitest.json)
+
+echo "[pre-push] Running frontend unit tests..."
+npm --prefix code/frontend run test
+
+echo "[pre-push] Building frontend..."
+npm --prefix code/frontend run build
+
+echo "[pre-push] Type-checking API..."
+npm --prefix code/api run type-check
+
+echo "[pre-push] Running API unit tests..."
+npm --prefix code/api run test
+
+echo "[pre-push] All checks passed ✓"

@@ -18,16 +18,22 @@ if (typeof globalThis.Temporal === 'undefined') {
 }
 
 // Mock firebase/auth before any imports that depend on it
+const mockSignInWithEmailAndPassword = vi.fn()
+const mockSignInWithRedirect = vi.fn()
+
 vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({})),
-  signInWithEmailAndPassword: vi.fn(),
+  signInWithEmailAndPassword: (...args: unknown[]) => mockSignInWithEmailAndPassword(...args),
+  signInWithRedirect: (...args: unknown[]) => mockSignInWithRedirect(...args),
+  getRedirectResult: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChanged: vi.fn(),
   connectAuthEmulator: vi.fn(),
 }))
 
-vi.mock('@/services/firebase', () => ({
+vi.mock('@/infrastructure/firebase/firebase', () => ({
   auth: {},
+  googleProvider: {},
 }))
 
 import LoginPage from './LoginPage.vue'
@@ -40,6 +46,11 @@ function createTestRouter() {
       { path: ROUTES.HOME.path, component: { template: '<div />' } },
       { path: ROUTES.AUTH.LOGIN.path, name: ROUTES.AUTH.LOGIN.name, component: LoginPage },
       {
+        path: ROUTES.AUTH.REGISTER.path,
+        name: ROUTES.AUTH.REGISTER.name,
+        component: { template: '<div>Register</div>' },
+      },
+      {
         path: ROUTES.DASHBOARD.path,
         name: ROUTES.DASHBOARD.name,
         component: { template: '<div>Dashboard</div>' },
@@ -49,10 +60,8 @@ function createTestRouter() {
 }
 
 /**
- * Creates a testing pinia and returns the auth store with all actions auto-spied.
- *
- * @pinia/testing stubs all store actions as vi.fn() returning undefined by default.
- * Configure signIn / signOut return values per test via vi.fn().mockResolvedValue(...)
+ * Creates a testing pinia and returns the auth store with actions stubbed.
+ * setUser and setRoleFromUser are the composable-facing store methods.
  */
 function createTestPinia(initialState?: { auth?: { isLoading?: boolean } }) {
   const pinia = createTestingPinia({
@@ -60,9 +69,8 @@ function createTestPinia(initialState?: { auth?: { isLoading?: boolean } }) {
     initialState,
   })
   const store = useAuthStore(pinia)
-  // Ensure signIn and signOut are proper async spies (return Promises)
-  store.signIn = vi.fn().mockResolvedValue(undefined)
-  store.signOut = vi.fn().mockResolvedValue(undefined)
+  store.setUser = vi.fn()
+  store.setRoleFromUser = vi.fn().mockResolvedValue(undefined)
   return { pinia, store }
 }
 
@@ -102,35 +110,39 @@ describe('LoginPage', () => {
     expect(labels.length).toBeGreaterThanOrEqual(2)
   })
 
-  // ─── TC: Calls store.signIn with correct credentials on submit ────────────
+  // ─── TC: Calls signInWithEmailAndPassword and updates store on form submit ─
 
-  it('should call store.signIn with email and password on form submit', async () => {
+  it('should call signInWithEmailAndPassword and update store on form submit', async () => {
     const { pinia, store } = createTestPinia()
-    const signInMock = vi.fn().mockResolvedValue(undefined)
-    store.signIn = signInMock
-
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
       global: { plugins: [pinia, router] },
     })
 
+    mockSignInWithEmailAndPassword.mockResolvedValueOnce({
+      user: { email: 'test@example.com', uid: 'uid-1' },
+    })
+
     await wrapper.find('input[type="email"]').setValue('test.gerocultor@example.com')
     await wrapper.find('input[type="password"]').setValue('Test1234!')
     await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
 
-    expect(signInMock).toHaveBeenCalledWith('test.gerocultor@example.com', 'Test1234!')
+    expect(mockSignInWithEmailAndPassword).toHaveBeenCalledWith(
+      expect.anything(),
+      'test.gerocultor@example.com',
+      'Test1234!'
+    )
+    expect(store.setUser).toHaveBeenCalled()
   })
 
   // ─── TC: Shows error message when login fails ─────────────────────────────
 
-  it('should show generic error message when signIn fails', async () => {
-    const { pinia, store } = createTestPinia()
-    store.signIn = vi
-      .fn()
-      .mockRejectedValue(
-        Object.assign(new Error('auth/wrong-password'), { code: 'auth/wrong-password' })
-      )
-
+  it('should show generic error message when email+password sign-in fails', async () => {
+    mockSignInWithEmailAndPassword.mockRejectedValueOnce(
+      Object.assign(new Error('auth/wrong-password'), { code: 'auth/wrong-password' })
+    )
+    const { pinia } = createTestPinia()
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
       global: { plugins: [pinia, router] },
@@ -139,8 +151,6 @@ describe('LoginPage', () => {
     await wrapper.find('input[type="email"]').setValue('test@example.com')
     await wrapper.find('input[type="password"]').setValue('wrongpass')
     await wrapper.find('form').trigger('submit.prevent')
-
-    // Wait for async rejection to be handled
     await flushPromises()
 
     const errorEl = wrapper.find('[data-testid="error-message"]')
@@ -173,7 +183,6 @@ describe('LoginPage', () => {
       global: { plugins: [pinia, router] },
     })
 
-    // Either a spinner element or loading text must be visible
     const hasSpinner = wrapper.find('[data-testid="loading-spinner"]').exists()
     const hasLoadingText =
       wrapper.text().toLowerCase().includes('cargando') ||
@@ -195,13 +204,15 @@ describe('LoginPage', () => {
 
   // ─── TC: Redirects to /dashboard on success ───────────────────────────────
 
-  it('should redirect to /dashboard on successful login', async () => {
+  it('should redirect to /dashboard after successful email+password login', async () => {
     const router = createTestRouter()
     await router.push(ROUTES.AUTH.LOGIN.path)
     await router.isReady()
 
     const { pinia, store } = createTestPinia()
-    store.signIn = vi.fn().mockResolvedValue(undefined)
+    mockSignInWithEmailAndPassword.mockResolvedValueOnce({
+      user: { email: 'test@example.com', uid: 'uid-1' },
+    })
 
     const wrapper = mount(LoginPage, {
       global: { plugins: [pinia, router] },
@@ -210,20 +221,16 @@ describe('LoginPage', () => {
     await wrapper.find('input[type="email"]').setValue('test@example.com')
     await wrapper.find('input[type="password"]').setValue('Test1234!')
     await wrapper.find('form').trigger('submit.prevent')
-
-    // Wait for all pending promises (async signIn + router.push) to resolve
     await flushPromises()
 
+    expect(store.setUser).toHaveBeenCalled()
     expect(router.currentRoute.value.path).toBe(ROUTES.DASHBOARD.path)
   })
 
   // ─── TC: Does not submit when fields are empty ────────────────────────────
 
-  it('should not call store.signIn when email is empty', async () => {
-    const { pinia, store } = createTestPinia()
-    const signInMock = vi.fn()
-    store.signIn = signInMock
-
+  it('should not call signInWithEmailAndPassword when email is empty', async () => {
+    const { pinia } = createTestPinia()
     const router = createTestRouter()
     const wrapper = mount(LoginPage, {
       global: { plugins: [pinia, router] },
@@ -234,6 +241,71 @@ describe('LoginPage', () => {
     await wrapper.find('form').trigger('submit.prevent')
     await wrapper.vm.$nextTick()
 
-    expect(signInMock).not.toHaveBeenCalled()
+    expect(mockSignInWithEmailAndPassword).not.toHaveBeenCalled()
+  })
+
+  // ─── Google OAuth sign-in ──────────────────────────────────────────────────
+
+  it('should render Google sign-in button', () => {
+    const { pinia } = createTestPinia()
+    const router = createTestRouter()
+    const wrapper = mount(LoginPage, {
+      global: { plugins: [pinia, router] },
+    })
+
+    const googleBtn = wrapper.find('[data-testid="google-button"]')
+    expect(googleBtn.exists()).toBe(true)
+  })
+
+  it('should call signInWithRedirect on Google button click', async () => {
+    const { pinia } = createTestPinia()
+    const router = createTestRouter()
+    const wrapper = mount(LoginPage, {
+      global: { plugins: [pinia, router] },
+    })
+
+    mockSignInWithRedirect.mockRejectedValueOnce(new Error('AUTH_REDIRECT_INITIATED'))
+
+    await wrapper.find('[data-testid="google-button"]').trigger('click')
+    await flushPromises()
+
+    expect(mockSignInWithRedirect).toHaveBeenCalled()
+  })
+
+  it('should not redirect immediately after Google redirect is initiated', async () => {
+    const router = createTestRouter()
+    await router.push(ROUTES.AUTH.LOGIN.path)
+    await router.isReady()
+
+    const { pinia } = createTestPinia()
+    mockSignInWithRedirect.mockRejectedValueOnce(new Error('AUTH_REDIRECT_INITIATED'))
+
+    const wrapper = mount(LoginPage, {
+      global: { plugins: [pinia, router] },
+    })
+
+    await wrapper.find('[data-testid="google-button"]').trigger('click')
+    await flushPromises()
+
+    // User stays on login page while redirect is in flight
+    expect(router.currentRoute.value.path).toBe(ROUTES.AUTH.LOGIN.path)
+  })
+
+  it('should show generic error when Google sign-in fails', async () => {
+    mockSignInWithRedirect.mockRejectedValueOnce(
+      Object.assign(new Error('auth/popup-closed-by-user'), { code: 'auth/popup-closed-by-user' })
+    )
+
+    const { pinia } = createTestPinia()
+    const router = createTestRouter()
+    const wrapper = mount(LoginPage, {
+      global: { plugins: [pinia, router] },
+    })
+
+    await wrapper.find('[data-testid="google-button"]').trigger('click')
+    await flushPromises()
+
+    const errorEl = wrapper.find('[data-testid="error-message"]')
+    expect(errorEl.exists()).toBe(true)
   })
 })

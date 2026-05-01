@@ -15,9 +15,9 @@
  */
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import IncidenceForm from '../components/IncidenceForm.vue'
-import { getResidentes } from '../../../residents/infrastructure/residentes.api'
-import type { ResidenteDTO } from '../../../residents/domain/entities/residente.types'
+import IncidenceForm from '@/business/incidents/presentation/components/IncidenceForm.vue'
+import { getResidentes } from '@/business/residents/infrastructure/residentes.api'
+import type { ResidenteDTO } from '@/business/residents/domain/entities/residente.types'
 import { ArrowLeftIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 import { DASHBOARD_ROUTES } from '@/views/route-names'
 
@@ -117,7 +117,7 @@ function onCancelled(): void {
 </template>
 
 <style scoped>
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ─── Page shell ────────────────────────────────────────────────────────────── */
 .incident-view {

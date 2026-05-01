@@ -1,8 +1,13 @@
 import { adminDb } from './firebase'
 import { COLLECTIONS } from './collections'
-import type { TareaDoc, TareaEstado, TareaResponse, ListTareasQuery } from '../types/tarea.types'
-import { TareaDocSchema } from '../types/tarea.types'
-import type { UserRole } from '../types/user.types'
+import type {
+  TareaDoc,
+  TareaEstado,
+  TareaResponse,
+  ListTareasQuery,
+  CreateTareaDto,
+} from '../types/tarea.types'
+import { TareaDocSchema, CreateTareaSchema } from '../types/tarea.types'
 
 export class NotFoundError extends Error {
   readonly statusCode = 404
@@ -17,6 +22,41 @@ export class ForbiddenError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'ForbiddenError'
+  }
+}
+
+export class ValidationError extends Error {
+  readonly statusCode = 400
+  constructor(message: string, readonly field?: string) {
+    super(message)
+    this.name = 'ValidationError'
+  }
+}
+
+export class ResidenteNotFoundError extends Error {
+  readonly statusCode = 400
+  readonly field = 'residenteId'
+  constructor(message = 'El residente especificado no existe o no está activo') {
+    super(message)
+    this.name = 'ResidenteNotFoundError'
+  }
+}
+
+export class UsuarioNotFoundError extends Error {
+  readonly statusCode = 400
+  readonly field = 'usuarioId'
+  constructor(message = 'El usuario especificado no existe o está desactivado') {
+    super(message)
+    this.name = 'UsuarioNotFoundError'
+  }
+}
+
+export class AccessDeniedError extends Error {
+  readonly statusCode = 400
+  readonly field = 'residenteId'
+  constructor(message = 'No tienes acceso a este residente') {
+    super(message)
+    this.name = 'AccessDeniedError'
   }
 }
 
@@ -81,7 +121,6 @@ export class TareasService {
     id: string,
     estado: TareaEstado,
     requestingUid: string,
-    requestingRole: UserRole,
   ): Promise<TareaResponse> {
     await adminDb.runTransaction(async (tx) => {
       const ref = adminDb.collection(COLLECTIONS.tareas).doc(id)
@@ -89,8 +128,9 @@ export class TareasService {
 
       if (!snap.exists) throw new NotFoundError('Tarea not found')
 
-      if (requestingRole === 'gerocultor' && snap.data()!['usuarioId'] !== requestingUid) {
-        throw new ForbiddenError("Cannot update another user's task")
+      // Ownership check: only the assigned gerocultor can update
+      if (snap.data()!['usuarioId'] !== requestingUid) {
+        throw new ForbiddenError('No tienes acceso a esta tarea')
       }
 
       const updates: Partial<TareaDoc> = {
@@ -105,5 +145,62 @@ export class TareasService {
     })
 
     return this.getTareaById(id)
+  }
+
+  /**
+   * Creates a new task in the Firestore subcollection.
+   * Any authenticated gerocultor can create tasks for any resident.
+   * The `usuarioId` in the task must match the requester's uid.
+   * US-14: Task creation
+   */
+  async createTarea(
+    dto: CreateTareaDto,
+    requestingUid: string,
+  ): Promise<TareaResponse> {
+    // 1. Validate with Zod — forward Zod errors as 400
+    const parseResult = CreateTareaSchema.safeParse(dto)
+    if (!parseResult.success) {
+      const issues = parseResult.error.issues
+      const firstError = issues && issues.length > 0 ? issues[0] : { message: 'Validation failed', path: [] as string[] }
+      throw new ValidationError(firstError.message, firstError.path.join('.'))
+    }
+
+    const data = parseResult.data
+
+    // 2. Fetch and validate Residente exists and is active
+    const residenteSnap = await adminDb.collection(COLLECTIONS.residentes).doc(data.residenteId).get()
+    if (!residenteSnap.exists || residenteSnap.data()?.['archivado'] === true) {
+      throw new ResidenteNotFoundError()
+    }
+
+    // 3. Validate usuarioId matches the requester (self-assignment only)
+    if (data.usuarioId !== requestingUid) {
+      throw new AccessDeniedError('Solo puedes crear tareas para ti mismo')
+    }
+
+    // 3. Generate UUID and write to root tasks collection (consistent with reads)
+    const uuid = crypto.randomUUID()
+    const now = new Date().toISOString()
+    const tareaRef = adminDb.collection(COLLECTIONS.tareas).doc(uuid)
+
+    const docData: TareaDoc = {
+      titulo: data.titulo,
+      tipo: data.tipo,
+      fechaHora: data.fechaHora,
+      estado: 'pendiente',
+      notas: data.notas ?? null,
+      residenteId: data.residenteId,
+      usuarioId: data.usuarioId,
+      creadoEn: now,
+      actualizadoEn: now,
+      completadaEn: null,
+    }
+
+    await tareaRef.set(docData)
+
+    return {
+      id: uuid,
+      ...docData,
+    }
   }
 }

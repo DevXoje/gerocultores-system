@@ -3,8 +3,8 @@
  *
  * US-11: Resumen de fin de turno
  */
-import { turnoApi } from '../../infrastructure/api/turnoApi'
-import type { Turno } from '../../domain/entities/Turno'
+import { turnoApi } from '@/business/turno/infrastructure/api/turnoApi'
+import type { Turno } from '@/business/turno/domain/entities/Turno'
 
 export async function finalizarTurno(id: string, resumenTraspaso: string): Promise<Turno> {
   return turnoApi.finalizarTurno(id, resumenTraspaso)

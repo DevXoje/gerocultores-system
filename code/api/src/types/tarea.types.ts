@@ -51,3 +51,15 @@ export const ListTareasQuerySchema = z.object({
   status: TareaEstadoEnum.optional(),
 })
 export type ListTareasQuery = z.infer<typeof ListTareasQuerySchema>
+
+// ─── Create Tarea ─────────────────────────────────────────────────────────────
+
+export const CreateTareaSchema = z.object({
+  titulo: z.string().min(1, 'titulo es requerido').max(200).trim(),
+  tipo: TareaTipoEnum,
+  fechaHora: z.string().datetime({ message: 'fechaHora debe ser ISO8601 válido' }),
+  residenteId: z.string().uuid('residenteId debe ser UUID válido'),
+  usuarioId: z.string(),
+  notas: z.string().max(2000).nullable().optional(),
+})
+export type CreateTareaDto = z.infer<typeof CreateTareaSchema>

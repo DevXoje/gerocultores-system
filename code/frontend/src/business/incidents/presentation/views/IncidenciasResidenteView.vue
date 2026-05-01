@@ -44,7 +44,7 @@ function goBack(): void {
 </template>
 
 <style scoped>
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ── Root ───────────────────────────────────────────────────────────────── */
 .incidencias-residente-view {

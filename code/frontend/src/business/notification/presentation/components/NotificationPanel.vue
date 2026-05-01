@@ -13,8 +13,8 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
 import { onMounted } from 'vue'
-import { useNotificacion } from '../composables/useNotificacion'
-import type { Notificacion } from '../../domain/entities/Notificacion'
+import { useNotificacion } from '@/business/notification/presentation/composables/useNotificacion'
+import type { Notificacion } from '@/business/notification/domain/entities/Notificacion'
 import { XMarkIcon, BellSlashIcon } from '@heroicons/vue/24/outline'
 
 defineProps<{
@@ -33,6 +33,10 @@ async function handleMarkAsRead(notif: Notificacion): Promise<void> {
   if (notif.leida) return
   await markNotificacionAsRead(notif.id)
   emit('read', notif.id)
+}
+
+function handleClose(): void {
+  emit('close')
 }
 
 function formatDate(date: Date): string {
@@ -59,12 +63,7 @@ onMounted(() => {
 <template>
   <!-- Overlay -->
   <transition name="overlay">
-    <div
-      v-if="open"
-      class="notification-panel__overlay"
-      aria-hidden="true"
-      @click="emit('close')"
-    />
+    <div v-if="open" class="notification-panel__overlay" aria-hidden="true" @click="handleClose" />
   </transition>
 
   <!-- Panel -->
@@ -89,7 +88,7 @@ onMounted(() => {
           type="button"
           class="notification-panel__close"
           aria-label="Cerrar panel"
-          @click="emit('close')"
+          @click="handleClose"
         >
           <XMarkIcon class="notification-panel__close-icon" aria-hidden="true" />
         </button>
@@ -133,7 +132,7 @@ onMounted(() => {
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ─── Overlay ────────────────────────────────────────────────────────────── */
 .notification-panel__overlay {

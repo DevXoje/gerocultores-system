@@ -7,8 +7,11 @@
  * US-04: Actualizar estado de una tarea
  *
  * All calls to tareasApi are mocked — no real HTTP traffic.
+ * Uses createTestingPinia so the store is real and composable tests
+ * exercise the full state flow (store + infrastructure mocks).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
 import type { TareaResponse } from '@/business/agenda/domain/entities/tarea.types'
 
 // ── Mock firebase/auth (required because apiClient imports it) ─────────────────
@@ -18,7 +21,7 @@ vi.mock('firebase/auth', () => ({
 }))
 
 // ── Mock isServerHealthy (no real HTTP) ─────────────────────────────────────
-vi.mock('@/services/apiClient', () => ({
+vi.mock('@/infrastructure/apiClient', () => ({
   isServerHealthy: vi.fn(() => Promise.resolve(true)),
 }))
 
@@ -26,7 +29,7 @@ vi.mock('@/services/apiClient', () => ({
 const mockGetTareas = vi.fn()
 const mockUpdateTareaStatus = vi.fn()
 
-vi.mock('@/services/tareas.api', () => ({
+vi.mock('@/infrastructure/tareas/tareas.api', () => ({
   tareasApi: {
     getTareas: (...args: unknown[]) => mockGetTareas(...args),
     updateTareaStatus: (...args: unknown[]) => mockUpdateTareaStatus(...args),
@@ -57,6 +60,7 @@ function makeTarea(overrides: Partial<TareaResponse> = {}): TareaResponse {
 describe('useAgendaHoy', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    setActivePinia(createPinia())
   })
 
   // ── cargarTareas ─────────────────────────────────────────────────────────────

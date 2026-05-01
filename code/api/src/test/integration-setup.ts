@@ -7,6 +7,6 @@
  */
 
 // Default to standard emulator ports. Override via env if needed.
-process.env['FIREBASE_PROJECT_ID'] ??= 'demo-gerocultores-system'
+process.env['FIREBASE_PROJECT_ID'] ??= 'gero-care'
 process.env['FIRESTORE_EMULATOR_HOST'] ??= 'localhost:8080'
 process.env['FIREBASE_AUTH_EMULATOR_HOST'] ??= 'localhost:9099'

@@ -11,8 +11,8 @@
  */
 import { onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useResidente } from '../composables/useResidente'
-import { RESIDENTS_ROUTES } from '../../route-names'
+import { useResidente } from '@/business/residents/presentation/composables/useResidente'
+import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
 
 const route = useRoute()
 const router = useRouter()
@@ -223,7 +223,7 @@ function formatFecha(iso: string): string {
 </template>
 
 <style scoped>
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ── Root ───────────────────────────────────────────────────────────────── */
 .residente-view {

@@ -6,10 +6,12 @@
  *     authentication state and actions.
  *   - Pages import ONLY this composable — never the store directly.
  *   - Owns: form state, loading, error, submit logic, visibility toggle.
+ *   - Firebase calls delegated to AuthRepository (infrastructure), not called directly.
  */
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/business/auth/useAuthStore'
+import { authRepository } from '@/business/auth/infrastructure/AuthRepository'
 import { DASHBOARD_ROUTES } from '@/views/route-names'
 
 export function useLogin() {
@@ -23,17 +25,43 @@ export function useLogin() {
 
   const isLoading = computed(() => store.isLoading)
 
+  /**
+   * On mount, check for a pending Google OAuth redirect result.
+   * When signInWithRedirect completes, the user returns to this page without
+   * a navigation event, so we must detect the credential here.
+   */
+  onMounted(async () => {
+    const result = await authRepository.getPendingRedirectResult()
+    if (result) {
+      store.setUser(result.user)
+      await store.setRoleFromUser(result.user)
+      await router.push({ name: DASHBOARD_ROUTES.name })
+    }
+  })
+
   async function handleSubmit(): Promise<void> {
-    // Basic client-side guard: HTML5 `required` attributes handle the native validation,
-    // but we also check here to avoid Firebase calls with empty credentials (TC-08).
     if (!email.value || !passwordInput.value) return
     errorMessage.value = null
     try {
-      await store.signIn(email.value, passwordInput.value)
+      const { user } = await authRepository.signInWithEmail(email.value, passwordInput.value)
+      store.setUser(user)
+      await store.setRoleFromUser(user)
       await router.push({ name: DASHBOARD_ROUTES.name })
     } catch {
-      // Generic error message — must NOT reveal which field failed (TC-04, TC-05).
       errorMessage.value = 'Credenciales incorrectas. Por favor intente de nuevo.'
+    }
+  }
+
+  async function handleGoogleSubmit(): Promise<void> {
+    errorMessage.value = null
+    try {
+      await authRepository.signInWithGoogle()
+      // signInWithRedirect triggers redirect; user will return to the app.
+      // getPendingRedirectResult() in onMounted will capture the credential.
+    } catch (err: unknown) {
+      const code = err instanceof Error ? err.message : String(err)
+      if (code === 'AUTH_REDIRECT_INITIATED') return
+      errorMessage.value = 'No se pudo iniciar sesión con Google. Intenta de nuevo.'
     }
   }
 
@@ -48,6 +76,7 @@ export function useLogin() {
     showPassword,
     isLoading,
     handleSubmit,
+    handleGoogleSubmit,
     togglePassword,
   }
 }

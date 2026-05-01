@@ -6,12 +6,12 @@
  * Uses centralized Axios client (apiClient) which attaches the Firebase
  * ID token via interceptor. All field names match SPEC/entities.md (G04).
  */
-import { apiClient } from '@/services/apiClient'
+import { apiClient } from '@/infrastructure/apiClient'
 import {
   IncidenciaResponseSchema,
   type CreateIncidenciaDTO,
   type IncidenciaResponse,
-} from '../domain/entities/incidencia.types'
+} from '@/business/incidents/domain/entities/incidencia.types'
 
 /** API wrapper response envelope */
 export interface ApiResponse<T> {

@@ -8,7 +8,7 @@
  */
 
 import { ref } from 'vue'
-import type { EstadoTarea } from '@/services/tareas.api'
+import type { EstadoTarea } from '@/infrastructure/tareas/tareas.api'
 
 export interface UseTaskCardOptions {
   tareaId: string

@@ -2,6 +2,7 @@
  * Firestore Security Rules — shifts (turnos) collection tests
  * US-11: Resumen de fin de turno
  *
+ * ALL OPERATIONS ARE DENIED — rules set to allow read, write: if false
  * Collection name in Firestore is 'shifts' (from collections.ts: turnos: 'shifts').
  * Requires Firebase Emulator running on localhost:18080.
  */
@@ -9,7 +10,6 @@
 import {
   initializeTestEnvironment,
   assertFails,
-  assertSucceeds,
 } from '@firebase/rules-unit-testing';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -57,10 +57,6 @@ describe('Colección /shifts (turnos)', () => {
   const ADMIN_UID = 'admin-uid-001';
   const TURNO_ID = 'shift-001';
 
-  // NOTE: fin and resumenTraspaso are intentionally omitted — in production these
-  // fields are absent (not null) until a shift is closed. Firestore returns null
-  // for missing fields, but JS null serializes as the string 'null' which causes
-  // Firestore rules v2 to throw Null value error on == null comparisons.
   const BASE_TURNO = {
     usuarioId: OWNER_UID,
     tipoTurno: 'manyana',
@@ -75,9 +71,9 @@ describe('Colección /shifts (turnos)', () => {
 
   // ─── READ ─────────────────────────────────────────────────────────────────
 
-  test('gerocultor puede leer su propio turno', async () => {
+  test('gerocultor NO puede leer su propio turno', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc(`shifts/${TURNO_ID}`).get());
+    await assertFails(db.doc(`shifts/${TURNO_ID}`).get());
   });
 
   test('gerocultor NO puede leer turno de otro usuario', async () => {
@@ -85,9 +81,9 @@ describe('Colección /shifts (turnos)', () => {
     await assertFails(db.doc(`shifts/${TURNO_ID}`).get());
   });
 
-  test('admin puede leer cualquier turno', async () => {
+  test('admin NO puede leer cualquier turno', async () => {
     const db = authedDb(ADMIN_UID, 'admin');
-    await assertSucceeds(db.doc(`shifts/${TURNO_ID}`).get());
+    await assertFails(db.doc(`shifts/${TURNO_ID}`).get());
   });
 
   test('usuario no autenticado NO puede leer turnos', async () => {
@@ -97,9 +93,9 @@ describe('Colección /shifts (turnos)', () => {
 
   // ─── CREATE ───────────────────────────────────────────────────────────────
 
-  test('gerocultor puede crear turno como propietario', async () => {
+  test('gerocultor NO puede crear turno', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(
+    await assertFails(
       db.doc('shifts/new-shift').set({
         usuarioId: OWNER_UID,
         tipoTurno: 'tarde',
@@ -108,13 +104,13 @@ describe('Colección /shifts (turnos)', () => {
     );
   });
 
-  test('gerocultor NO puede crear turno con usuarioId de otro usuario', async () => {
-    const db = authedDb(OTHER_UID, 'gerocultor');
+  test('admin NO puede crear turno', async () => {
+    const db = authedDb(ADMIN_UID, 'admin');
     await assertFails(
-      db.doc('shifts/spoofed-shift').set({
-        usuarioId: OWNER_UID, // trying to spoof as OWNER
-        tipoTurno: 'noche',
-        inicio: '2026-04-25T22:00:00Z',
+      db.doc('shifts/admin-shift').set({
+        usuarioId: ADMIN_UID,
+        tipoTurno: 'manyana',
+        inicio: '2026-04-25T06:00:00Z',
       }),
     );
   });
@@ -132,9 +128,9 @@ describe('Colección /shifts (turnos)', () => {
 
   // ─── UPDATE ───────────────────────────────────────────────────────────────
 
-  test('gerocultor puede cerrar (actualizar) su turno abierto', async () => {
+  test('gerocultor NO puede actualizar su turno abierto', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(
+    await assertFails(
       db.doc(`shifts/${TURNO_ID}`).update({
         fin: '2026-04-25T14:00:00Z',
         resumenTraspaso: 'Paciente 3 sin incidencias',
@@ -149,31 +145,34 @@ describe('Colección /shifts (turnos)', () => {
     );
   });
 
-  test('gerocultor NO puede actualizar un turno ya cerrado (fin != null)', async () => {
-    // Set up a CLOSED turno
-    await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await ctx.firestore().doc('shifts/closed-shift').set({
-        ...BASE_TURNO,
-        fin: '2026-04-25T14:00:00Z',
-        resumenTraspaso: 'Cerrado',
-      });
-    });
-
-    const db = authedDb(OWNER_UID, 'gerocultor');
+  test('admin NO puede actualizar turno', async () => {
+    const db = authedDb(ADMIN_UID, 'admin');
     await assertFails(
-      db.doc('shifts/closed-shift').update({ resumenTraspaso: 'Modificado' }),
+      db.doc(`shifts/${TURNO_ID}`).update({ fin: '2026-04-25T14:00:00Z' }),
+    );
+  });
+
+  test('usuario no autenticado NO puede actualizar turno', async () => {
+    const db = unauthDb();
+    await assertFails(
+      db.doc(`shifts/${TURNO_ID}`).update({ fin: '2026-04-25T14:00:00Z' }),
     );
   });
 
   // ─── DELETE ───────────────────────────────────────────────────────────────
 
-  test('nadie puede eliminar turnos', async () => {
+  test('gerocultor NO puede eliminar su propio turno', async () => {
+    const db = authedDb(OWNER_UID, 'gerocultor');
+    await assertFails(db.doc(`shifts/${TURNO_ID}`).delete());
+  });
+
+  test('admin NO puede eliminar turno', async () => {
     const db = authedDb(ADMIN_UID, 'admin');
     await assertFails(db.doc(`shifts/${TURNO_ID}`).delete());
   });
 
-  test('el propietario tampoco puede eliminar su turno', async () => {
-    const db = authedDb(OWNER_UID, 'gerocultor');
+  test('usuario no autenticado NO puede eliminar turno', async () => {
+    const db = unauthDb();
     await assertFails(db.doc(`shifts/${TURNO_ID}`).delete());
   });
 });

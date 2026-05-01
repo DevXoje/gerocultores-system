@@ -2,8 +2,9 @@
 
 > **Proyecto**: GeroCare — Sistema de Gestión para Gerocultores
 > **Sprint**: Sprint-3 (Residentes + Incidencias + Agenda con estado)
-> **Fechas planificadas**: 2026-04-19 → 2026-05-02
-> **Fecha de cierre real**: 2026-05-XX (en curso de documentación)
+> **Fechas**: 2026-04-19 → 2026-04-25 (ejecutado en paralelo con Sprint-4)
+> **Fecha de cierre**: 2026-04-25
+> **PR**: #55 — `Feature/sprint 3 close`
 > **Autor**: Jose Vilches
 
 ---
@@ -27,9 +28,9 @@ El Sprint-3 completó el núcleo funcional de GeroCare: la ficha de residente (U
 
 | US | Título | Estado | Notas |
 |----|--------|--------|-------|
-| US-04 | Actualizar estado de una tarea | ✅ Completada | Optimistic UI + PATCH /api/tareas/:id/estado |
-| US-05 | Consulta de ficha de residente | ✅ Completada | ResidenteView + GET /api/residentes/:id |
-| US-06 | Registro de incidencia | ✅ Completada | IncidenceForm + POST /api/incidencias |
+| US-04 | Actualizar estado de una tarea | ✅ Completada | Optimistic UI + PATCH /api/tareas/:id/estado + Transaction Firestore |
+| US-05 | Consulta de ficha de residente | ✅ Completada | ResidenteView + GET /api/residentes/:id + DDD module |
+| US-06 | Registro de incidencia | ✅ Completada | IncidenceForm + POST /api/incidencias + DDD module |
 
 ---
 
@@ -37,13 +38,15 @@ El Sprint-3 completó el núcleo funcional de GeroCare: la ficha de residente (U
 
 | Métrica | Valor |
 |---------|-------|
-| **Duración real** | 2026-04-19 → en curso |
+| **Duración real** | 2026-04-19 → 2026-04-25 (7 días, en paralelo con Sprint-4) |
 | **Desarrolladores** | 1 (Jose Vilches) |
-| **Commits desde último merge master** | 29 |
-| **PRs mergeadas a develop** | ~5 (US-03/US-04, US-05, US-06 + docs) |
+| **Commits mergeados a develop** | ~5 (US-03/US-04, US-05, US-06 + docs) |
+| **PRs mergeadas** | #49 (US-05), #50 (US-06), #48 (Stitch screens), #53 (sync) |
 | **Tests API** | 32+ tests, 0 fallos |
 | **Tests Frontend** | 43+ tests, 0 fallos |
-| **Cobertura global** | Mantenida >65% API / >80% Frontend |
+| **Cobertura global API** | 67.88% → mantenido tras integrate |
+| **Cobertura global Frontend** | 84.31% → mantenido tras integrate |
+| **Fallos en test suite** | 0 |
 
 ---
 
@@ -71,12 +74,12 @@ El Sprint-3 completó el núcleo funcional de GeroCare: la ficha de residente (U
 
 ---
 
-## 7. Arquitectura DDD — Estructura Frontend
+## 7. Arquitectura DDD — Módulos Entregados
 
 ```
 code/frontend/src/business/{module}/
 ├── domain/
-│   └── entities/        # Tipos + Zod schemas
+│   └── entities/        # Tipos + Zod schemas (G04-compliant)
 ├── services/            # Llamadas API (Axios)
 ├── stores/               # Pinia stores
 └── presentation/
@@ -84,10 +87,13 @@ code/frontend/src/business/{module}/
     └── views/            # Vistas de página
 ```
 
-Módulos implementados en Sprint-3:
-- `agenda/` — useAgendaHoy, TaskCard
-- `residentes/` — useResidente, ResidenteView
-- `incidencias/` — useIncidencias, IncidenceForm
+### Módulos implementados
+
+| Módulo | Componentes | Estado |
+|--------|-------------|--------|
+| `agenda/` | `useAgendaHoy`, `TaskCard` (con optimistic UI) | ✅ |
+| `residentes/` | `useResidente`, `ResidenteView` | ✅ |
+| `incidencias/` | `useIncidencias`, `IncidenceForm` | ✅ |
 
 ---
 
@@ -101,28 +107,29 @@ Módulos implementados en Sprint-3:
 | Firebase Auth interceptor en Axios | Token de Firebase inyectado automáticamente en todas las peticiones API |
 | `getAuthUser` helper extraído | Elimina duplicación en controllers — DRY |
 | UserRoleEnum en middleware | Tipado seguro en `requireRole.ts` — validación estática en vez de strings mágicos |
+| DDD module structure para residentes/incidencias | Arquitectura consistente con el resto del frontend — entities + services + stores + presentation |
 
 ---
 
-## 9. Deuda Técnica al Cierre
-
-| # | Descripción | Severidad | Sprint objetivo | Estado |
-|---|-------------|-----------|----------------|--------|
-| DT-07 | Smoke test automatizado post-deploy en CI | ✅ Resuelto | Playwright smoke test + job `smoke-test-staging` en `deploy-staging.yml` |
-
-> Toda la deuda técnica DT-01 a DT-06 y DT-08 a DT-14 fue resuelta en sprints anteriores (PRs #20-#48).
-
----
-
-## 10. Stickers de Diseño — G10
+## 9. Stitch Screens — G10 Compliance
 
 Las siguientes pantallas Stitch fueron registradas en `OUTPUTS/technical-docs/design-source.md` (PR #48):
 
 | Vista | Stitch Screen | Estado |
 |-------|--------------|--------|
 | DashboardView | Caregiver Dashboard | ✅ Implementada |
-| ResidenteView | Residente Detail (implica ficha) | ✅ Implementada |
-| IncidenceForm | Incident Report | ✅ Implementada |
+| ResidenteView | Residente Detail | ✅ Implementada |
+| IncidenceForm | Incident Report (New Incident Form - Serenity Care) | ✅ Implementada |
+
+---
+
+## 10. Deuda Técnica al Cierre
+
+| # | Descripción | Severidad | Sprint objetivo | Estado |
+|---|-------------|-----------|----------------|--------|
+| DT-07 | Smoke test automatizado post-deploy en CI | — | Sprint-4 | 🔲 Diferido |
+
+> Toda la deuda técnica DT-01 a DT-06 y DT-08 a DT-14 fue resuelta en sprints anteriores (PRs #20-#48).
 
 ---
 
@@ -151,12 +158,12 @@ Las siguientes pantallas Stitch fueron registradas en `OUTPUTS/technical-docs/de
 
 ## 12. Notas de la Sesión
 
-- **Commits ahead de develop**: 24 commits locales sin push (staging de la sesión actual)
-- **Stack en uso**: Vue 3 + Vite + TS + Tailwind + Pinia + Firebase Auth/Firestore + Express API
-- **Roles**: exactamente `admin` y `gerocultor` (sin coordinador)
-- **Commits**: Conventional Commits (`feat(US-XX): descripción`)
-- **PRs**: squash merge a master
+- El sprint se ejecutó en **paralelo** con Sprint-4 (2026-04-19 → 2026-04-25 para ambos)
+- Stack en uso: Vue 3 + Vite + TS + Tailwind + Pinia + Firebase Auth/Firestore + Express API
+- Roles: exactamente `admin` y `gerocultor` (sin `coordinador`)
+- Commits: Conventional Commits (`feat(US-XX): descripción`)
+- PRs: squash merge a `master`
 
 ---
 
-*Generado: 2026-05-XX | Autor: Jose Vilches | Sprint-3 cerrado pending push*
+*Generado: 2026-04-26 | Autor: Jose Vilches | Sprint-3 cerrado*

@@ -3,18 +3,23 @@
  *
  * US-06: Registro de incidencia
  *
- * Owns form state, validation (Zod), submission lifecycle, and toast feedback.
- * Does NOT import Firebase or Axios directly — delegates to infrastructure layer.
+ * Architecture (frontend-specialist.md §3):
+ *   - Lives in presentation/composables/ — ONLY layer touching Pinia store.
+ *   - Orchestrates use cases and updates the store.
+ *   - Owns form state and validation (form/fieldErrors stay local — they are UI state, not domain state).
+ *   - Components import ONLY from this composable — never stores directly.
  */
-import { ref, reactive } from 'vue'
-import { CreateIncidenciaSchema } from '../../domain/entities/incidencia.types'
+import { reactive, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { CreateIncidenciaSchema } from '@/business/incidents/domain/entities/incidencia.types'
 import type {
   CreateIncidenciaDTO,
   IncidenciaTipo,
   IncidenciaSeveridad,
   IncidenciaResponse,
-} from '../../domain/entities/incidencia.types'
-import { createIncidencia } from '../../infrastructure/incidencias.api'
+} from '@/business/incidents/domain/entities/incidencia.types'
+import { createIncidencia } from '@/business/incidents/infrastructure/incidencias.api'
+import { useIncidenciasStore } from '@/business/incidents/presentation/stores/incidenciasStore'
 import { ZodError } from 'zod'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -35,7 +40,10 @@ export interface FieldErrors {
 }
 
 export function useIncidencias() {
-  // ── Form state ──────────────────────────────────────────────────────────────
+  const store = useIncidenciasStore()
+  const { submitting, submitError } = storeToRefs(store)
+
+  // ── Form state (local — UI state, not domain state) ───────────────────────
   const form = reactive<IncidenciaFormState>({
     tipo: '',
     severidad: '',
@@ -45,8 +53,6 @@ export function useIncidencias() {
   })
 
   const fieldErrors = reactive<FieldErrors>({})
-  const submitting = ref(false)
-  const submitError = ref<string | null>(null)
   const lastCreated = ref<IncidenciaResponse | null>(null)
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -56,7 +62,7 @@ export function useIncidencias() {
     fieldErrors.severidad = undefined
     fieldErrors.residenteId = undefined
     fieldErrors.descripcion = undefined
-    submitError.value = null
+    store.clearSubmitError()
   }
 
   function resetForm(): void {
@@ -66,6 +72,7 @@ export function useIncidencias() {
     form.descripcion = ''
     form.tareaId = null
     clearErrors()
+    lastCreated.value = null
   }
 
   function toErrorMessage(e: unknown): string {
@@ -101,18 +108,19 @@ export function useIncidencias() {
     }
 
     const dto: CreateIncidenciaDTO = parseResult.data
-    submitting.value = true
+    store.setSubmitting(true)
 
     try {
       const created = await createIncidencia(dto)
+      store.setLastCreated(created)
       lastCreated.value = created
       resetForm()
       return created
     } catch (e: unknown) {
-      submitError.value = toErrorMessage(e)
+      store.setSubmitError(toErrorMessage(e))
       return null
     } finally {
-      submitting.value = false
+      store.setSubmitting(false)
     }
   }
 

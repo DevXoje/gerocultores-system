@@ -15,7 +15,7 @@
 ---
 
 ### US-01 — Inicio de sesión
-**Como** gerocultor o administrador, **quiero** iniciar sesión con mis credenciales, **para** acceder a mi agenda y los datos de los residentes de forma segura.
+**Como** gerocultor, **quiero** iniciar sesión con mis credenciales, **para** acceder a mi agenda y los datos de los residentes que he registrado de forma segura.
 
 **Criterios de aceptación**:
 - [ ] CA-1: El formulario de login muestra campos de usuario y contraseña.
@@ -32,14 +32,14 @@ Design (Stitch): projects/16168255182252500555/screens/51613e717e324fd2947120c78
 
 ---
 
-### US-02 — Control de acceso por rol
-**Como** administrador, **quiero** que cada usuario solo acceda a las funciones y datos que corresponden a su rol, **para** proteger la privacidad de los residentes y mantener la integridad del sistema.
+### US-02 — Control de acceso y aislamiento de datos
+**Como** gerocultor, **quiero** que mis datos y recursos estén aislados de los demás gerocultores, **para** proteger la privacidad de los residentes y mantener la integridad del sistema.
 
 **Criterios de aceptación**:
-- [ ] CA-1: Un gerocultor no puede acceder al panel de administración de usuarios.
-- [ ] CA-2: Un gerocultor solo ve los residentes que tiene asignados.
-- [ ] CA-3: Un administrador puede ver todos los residentes y agendas.
-- [ ] CA-4: Intentar acceder a una ruta no autorizada retorna HTTP 403.
+- [ ] CA-1: Un gerocultor no puede ver las tareas de otros gerocultores.
+- [ ] CA-2: Un gerocultor solo ve los residentes sobre los que ha registrado tareas o incidencias.
+- [ ] CA-3: Un gerocultor solo ve sus propias incidencias.
+- [ ] CA-4: Intentar acceder a recursos de otro gerocultor retorna HTTP 403 o datos vacíos.
 
 **Requisitos relacionados**: RF-02  
 **Prioridad**: Must  
@@ -86,12 +86,12 @@ Design (Stitch): projects/16168255182252500555/screens/fd70b595b29344339f770edc7
 ---
 
 ### US-05 — Consulta de ficha de residente
-**Como** gerocultor, **quiero** acceder a la ficha de un residente desde su tarea o desde una búsqueda, **para** recordar sus condiciones de salud, alergias y preferencias antes de atenderle.
+**Como** gerocultor, **quiero** acceder a la ficha de un residente sobre el que he registrado tareas o incidencias, **para** recordar sus condiciones de salud, alergias y preferencias antes de atenderle.
 
 **Criterios de aceptación**:
 - [ ] CA-1: La ficha muestra: nombre completo, fecha de nacimiento, foto (opcional), diagnósticos principales, alergias, medicación activa y preferencias de cuidado.
 - [ ] CA-2: La ficha es de solo lectura para el gerocultor (no puede editarla).
-- [ ] CA-3: El administrador puede editar la ficha.
+- [ ] CA-3: El gerocultor que creó el residente puede editar la ficha.
 - [ ] CA-4: Los campos de salud (diagnósticos, medicación, alergias) no son accesibles sin autenticación.
 - [ ] CA-5: La ficha incluye un enlace rápido al historial de incidencias del residente.
 
@@ -111,7 +111,7 @@ Design (Stitch): projects/16168255182252500555/screens/97b3ca0415b44f2eb58f515c1
 - [ ] CA-2: La fecha y hora se registran automáticamente (servidor, no cliente).
 - [ ] CA-3: El usuario que registra la incidencia queda identificado automáticamente.
 - [ ] CA-4: Al guardar, la incidencia aparece inmediatamente en el historial del residente.
-- [ ] CA-5: Si la severidad es "crítica", se dispara una notificación al administrador.
+- [ ] CA-5: Si la severidad es "crítica", el sistema notifica al gerocultor que registró la incidencia.
 - [ ] CA-6: El formulario se puede completar con 5 taps o menos en tablet.
 
 **Requisitos relacionados**: RF-06  
@@ -123,10 +123,10 @@ Design (Stitch): projects/16168255182252500555/screens/64976b271900435fbe1c86076
 ---
 
 ### US-07 — Historial de incidencias de un residente
-**Como** gerocultor o administrador, **quiero** consultar el historial de incidencias de un residente filtrado por fecha y tipo, **para** evaluar su evolución y detectar patrones.
+**Como** gerocultor, **quiero** consultar el historial de incidencias de un residente sobre el que he registrado incidencias, **para** evaluar su evolución y detectar patrones.
 
 **Criterios de aceptación**:
-- [ ] CA-1: El historial muestra todas las incidencias del residente, ordenadas de más reciente a más antigua.
+- [ ] CA-1: El historial muestra todas las incidencias del residente registradas por el gerocultor, ordenadas de más reciente a más antigua.
 - [ ] CA-2: Se puede filtrar por rango de fechas y por tipo de incidencia.
 - [ ] CA-3: Cada entrada muestra: fecha/hora, tipo, severidad, descripción, gerocultor que la registró.
 - [ ] CA-4: El historial es paginado o con scroll infinito (no más de 20 registros por carga).
@@ -158,12 +158,12 @@ Design (Stitch): projects/16168255182252500555/screens/6e70d605ff3c4b20acd4b3b40
 ---
 
 ### US-09 — Alta y gestión de residentes
-**Como** administrador, **quiero** dar de alta nuevos residentes y editar sus fichas, **para** mantener actualizado el registro de personas atendidas.
+**Como** gerocultor, **quiero** dar de alta nuevos residentes y editar mis propias fichas, **para** mantener actualizado el registro de personas que atiendo.
 
 **Criterios de aceptación**:
-- [ ] CA-1: El administrador puede crear un nuevo residente con los campos obligatorios: nombre, apellidos, fecha de nacimiento, habitación.
-- [ ] CA-2: Puede editar todos los campos de la ficha (diagnósticos, alergias, medicación, preferencias).
-- [ ] CA-3: Puede dar de baja (archivar) un residente sin eliminar su historial.
+- [ ] CA-1: El gerocultor puede crear un nuevo residente con los campos obligatorios: nombre, apellidos, fecha de nacimiento, habitación.
+- [ ] CA-2: Puede editar todos los campos de las fichas que él mismo ha creado.
+- [ ] CA-3: Puede archivar un residente sin eliminar su historial.
 - [ ] CA-4: Un residente archivado no aparece en las agendas activas pero su historial es consultable.
 
 **Requisitos relacionados**: RF-09  
@@ -174,14 +174,14 @@ Design (Stitch): projects/16168255182252500555/screens/b21c6314296342708a666893b
 
 ---
 
-### US-10 — Gestión de cuentas de usuarios
-**Como** administrador, **quiero** crear y desactivar cuentas de gerocultores, **para** controlar quién tiene acceso al sistema.
+### US-10 — Gestión de cuenta propia
+**Como** gerocultor, **quiero** ver y gestionar mi propia cuenta, **para** mantener mis datos actualizados y poder cerrar mi sesión o desactivar mi cuenta si lo necesito.
 
 **Criterios de aceptación**:
-- [ ] CA-1: El administrador puede crear una cuenta indicando nombre, rol y credenciales iniciales.
-- [ ] CA-2: El administrador puede asignar residentes a un gerocultor.
-- [ ] CA-3: El administrador puede desactivar una cuenta; el usuario desactivado no puede iniciar sesión.
-- [ ] CA-4: No se eliminan registros históricos al desactivar una cuenta.
+- [ ] CA-1: El gerocultor puede ver su perfil (nombre, email, rol).
+- [ ] CA-2: El gerocultor puede cerrar sesión correctamente.
+- [ ] CA-3: El gerocultor puede desactivar su propia cuenta (no se elimina el historial).
+- [ ] CA-4: No existe panel de administración de otros usuarios.
 
 **Requisitos relacionados**: RF-10  
 **Prioridad**: Should  
@@ -208,12 +208,12 @@ Design (Stitch): projects/16168255182252500555/screens/4fc0ca8a7f1b44a6a6f628be6
 ---
 
 ### US-12 — Vista de agenda semanal
-**Como** gerocultor o administrador, **quiero** ver la agenda de la semana en una vista de calendario, **para** planificar y revisar la distribución de tareas.
+**Como** gerocultor, **quiero** ver la agenda de la semana en una vista de calendario, **para** planificar y revisar la distribución de mis tareas.
 
 **Criterios de aceptación**:
 - [ ] CA-1: La vista semanal muestra los 7 días de la semana con las tareas de cada día.
 - [ ] CA-2: Al pulsar un día, se muestra el detalle de ese día (agenda diaria).
-- [ ] CA-3: El administrador puede añadir o modificar tareas desde la vista semanal.
+- [ ] CA-3: El gerocultor puede añadir o modificar sus propias tareas desde la vista semanal.
 
 **Requisitos relacionados**: RF-12  
 **Prioridad**: Could  
@@ -233,10 +233,30 @@ Design (Stitch): projects/16168255182252500555/screens/9ef30860ae9e4a3fa1487d82e
 - [ ] CA-4: El timestamp reflejado es generado en el servidor (no en el cliente).
 - [ ] CA-5: El endpoint responde en menos de 200 ms bajo condiciones normales.
 
-**Requisitos relacionados**: RF-infra-01 (infraestructura — no funcional)  
-**Prioridad**: Must  
-**Estado**: Done  
+**Requisitos relacionados**: RF-infra-01 (infraestructura — no funcional)
+**Prioridad**: Must
+**Estado**: Done
 **Notas**: El handler está implementado en `code/api/src/routes/index.ts`. Esta user story documenta el comportamiento existente y habilita el guardrail G03.
+
+---
+
+### US-14 — Crear tarea
+**Como** gerocultor o administrador, **quiero** crear una tarea en la agenda indicando título, tipo, fecha/hora, residente y notas opcionales, **para** planificar las actividades de atención de forma estructurada.
+
+**Criterios de aceptación**:
+- [ ] CA-1: El formulario de creación pide: título (texto libre), tipo (select: higiene/medicación/alimentación/actividad/revisión/otro), fecha y hora (datetime), residente (select de residentes asignados), usuario (autocompletado desde sesión actual).
+- [ ] CA-2: Los campos título, tipo, fechaHora, residenteId y usuarioId son obligatorios; si falta alguno, el API devuelve 400 con mensaje descriptivo.
+- [ ] CA-3: Si `residenteId` no existe o no pertenece a un residente activo, el API devuelve 400.
+- [ ] CA-4: Si `usuarioId` no corresponde a un usuario activo en el sistema, el API devuelve 400.
+- [ ] CA-5: La tarea se crea con `estado = pendiente` (nunca `en_curso`, `completada` ni `con_incidencia`).
+- [ ] CA-6: `creadoEn` y `actualizadoEn` son generados por el servidor (no aceptados del cliente).
+- [ ] CA-7: El API responde con 201 y el recurso creado completo (incluido `id` generado) en menos de 500 ms.
+- [ ] CA-8: El gerocultor solo puede crear tareas para residentes que tiene asignados (validación de acceso).
+
+**Requisitos relacionados**: RF-03, RF-12
+**Prioridad**: Must
+**Estado**: In Progress
+**Design (Stitch)**: Task Creation Form — `OUTPUTS/technical-docs/design-source.md` (US-14)
 
 ---
 
@@ -244,10 +264,21 @@ Design (Stitch): projects/16168255182252500555/screens/9ef30860ae9e4a3fa1487d82e
 ### Cambios en Criterios de Aceptación (Stack Firebase)
 - **US-01 (Inicio de sesión)**: 
   - *Modificado CA-4*: La sesión persiste utilizando el SDK de Firebase Auth, manejando el ciclo de vida del token de forma automática en lugar de cookies gestionadas manualmente.
-- **US-02 (Control de acceso por rol)**:
-  - *Añadido CA-5*: Las reglas de seguridad de Firestore (Firestore Rules) rechazan de forma nativa cualquier lectura/escritura en base de datos si el rol en el token (Custom Claims) no coincide con los permisos requeridos.
+- **US-02 (Control de acceso y aislamiento de datos)**:
+  - *Modificado completamente*: El modelo jerárquico admin/gerocultor se elimina. Se implanta un modelo descentralizado donde cada gerocultor es dueño de sus recursos (tareas, incidencias, residentes creados). Las Firestore Rules implementan aislamiento por `request.auth.uid == resource.data.usuarioId`. No existen permisos de administrador global.
 - **US-08 (Notificaciones y alertas)**:
   - *Modificado CA-4*: Las notificaciones push nativas en segundo plano (PWA / Service Workers) quedan fuera del alcance. Las notificaciones se mostrarán in-app únicamente cuando la aplicación esté en primer plano.
+  - *Modificado CA-5*: La notificación de incidencia crítica se envía al gerocultor que registró la incidencia, no a un administrador.
+- **US-09 (Alta y gestión de residentes)**:
+  - *Transferido*: La capacidad de crear y editar residentes pasa del administrador a cualquier gerocultor. El aislamiento se basa en `usuarioId` (owner).
+- **US-10 (Gestión de cuentas de usuarios)**:
+  - *Transferido*: De gestión admin de cuentas de terceros, a gestión propia (perfil, cierre de sesión, desactivación de cuenta propia).
+  - *Eliminado CA-1 (admin crea cuenta)*: Registro abierto (cualquiera puede registrarse).
+  - *Eliminado CA-2 (admin asigna residentes)*: Cada gerocultor opera sobre sus propios recursos.
+- **US-11 (Resumen de fin de turno)**:
+  - *Modificado CA-3*: El resumen queda guardado y es visible solo para el gerocultor que lo generó (no para administrador).
+- **US-12 (Agenda semanal)**:
+  - *Eliminado*: Referencia a administrador en CA-3.
 <!-- fin delta -->
 
 *Última actualización: 2026-03-29 — Fase sdd-spec*
