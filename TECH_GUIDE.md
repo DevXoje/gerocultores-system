@@ -4,7 +4,7 @@
 > El Reviewer Agent lo usa para validar que el código generado es consistente.
 >
 > **Stack activo**: Vue 3 + Vite + TypeScript + Tailwind CSS + Pinia (frontend) | Express.js + Firebase Admin SDK + Firestore (backend)
-> **ADRs de referencia**: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05
+> **ADRs de referencia**: ADR-01b, ADR-02b, ADR-03b, ADR-04b, ADR-05, ADR-09
 
 ---
 
@@ -26,7 +26,7 @@
 
 ### 1.2 Estructura de carpetas
 
-> **Frontend** sigue una arquitectura DDD (Domain-Driven Design). Ver sección 10 para la descripción detallada de cada capa.
+> **Frontend** sigue una arquitectura DDD (Domain-Driven Design) + Atomic Design (capa UI compartida). Ver secciones 3 y 10 para la descripción detallada de cada capa.
 
 ```
 code/
@@ -34,39 +34,37 @@ code/
 ├── .firebaserc             # Alias del proyecto Firebase
 ├── frontend/
 │   ├── src/
-│   │   ├── assets/
-│   │   │   └── styles/         # Resets globales, variables CSS, tokens de diseño
-│   │   ├── business/           # ← Arquitectura DDD por módulo de dominio
-│   │   │   ├── residents/      #   Módulo de residentes
-│   │   │   ├── schedule/       #   Módulo de agenda/tareas
-│   │   │   ├── incidents/      #   Módulo de incidencias
+│   │   ├── ui/                    # ← Componentes UI genéricos (Atomic Design)
+│   │   │   ├── atoms/              #   Primitivas: OfflineBanner, Button, Badge
+│   │   │   ├── molecules/          #   Composiciones: AppDialog, SearchBar
+│   │   │   └── organisms/          #   Composiciones complejas de atoms+molecules
+│   │   ├── business/               # ← Arquitectura DDD por módulo de dominio
+│   │   │   ├── residents/          #   Módulo de residentes
+│   │   │   ├── agenda/             #   Módulo de agenda/tareas
+│   │   │   ├── incidents/          #   Módulo de incidencias
 │   │   │   └── {module}/
 │   │   │       ├── domain/
 │   │   │       │   ├── entities/       # TypeScript interfaces + Zod schemas
 │   │   │       │   ├── value-objects/  # Primitivos de dominio inmutables
-│   │   │       │   └── repositories/  # Interfaces de repositorio (puertos)
+│   │   │       │   └── repositories/   # Interfaces de repositorio (puertos)
 │   │   │       ├── application/        # Casos de uso (sin dependencias de framework)
 │   │   │       ├── infrastructure/
-│   │   │       │   ├── repositories/  # Implementaciones Firebase
-│   │   │       │   └── mappers/       # Datos Firebase → entidad de dominio
+│   │   │       │   ├── repositories/   # Implementaciones Firebase
+│   │   │       │   └── mappers/        # Datos Firebase → entidad de dominio
 │   │   │       └── presentation/
-│   │   │           ├── atoms/         # Button, Input, Badge...
-│   │   │           ├── molecules/     # ResidentCard, IncidentRow...
-│   │   │           ├── pages/         # Vistas completas (una por ruta)
-│   │   │           └── composables/   # Puente componentes ↔ stores/repos
-│   │   ├── shared/
-│   │   │   ├── ui/             # Atoms/molecules verdaderamente cross-módulo
-│   │   │   ├── composables/    # Composables verdaderamente compartidos
-│   │   │   ├── types/          # Tipos TypeScript compartidos
-│   │   │   └── utils/          # Funciones utilitarias puras
-│   │   ├── stores/             # Solo estado global (ej: auth). Estado de módulo va en business/{module}/
-│   │   ├── router/             # Vue Router 4 — index.ts + guards.ts
+│   │   │           ├── components/     # Componentes DE dominio específico
+│   │   │           ├── composables/    # Puente componentes ↔ stores/repos
+│   │   │           └── stores/         # Estado del módulo (Pinia)
+│   │   ├── composables/           # Composables verdaderamente compartidos
+│   │   ├── views/                  # Vistas completas (una por ruta)
+│   │   ├── infrastructure/         # API client, Firebase config
+│   │   ├── router/                 # Vue Router 5 — index.ts + guards.ts
+│   │   ├── assets/                 # Global CSS, variables, tokens
 │   │   ├── App.vue
 │   │   └── main.ts
 │   ├── public/
 │   ├── index.html
 │   ├── vite.config.ts
-│   ├── tailwind.config.ts
 │   └── tsconfig.json
 └── api/
     ├── src/
@@ -80,6 +78,8 @@ code/
     ├── package.json
     └── tsconfig.json
 ```
+
+> **Regla de clasificación de componentes:** si un componente depende de entidades de dominio (`TareaResponse`, `Residente`, etc.) → vive en `business/{module}/presentation/components/`. Si es UI genérica reutilizable sin acoplamiento de dominio → vive en `ui/atoms` o `ui/molecules`.
 
 ### 1.3 Convenciones de imports
 
@@ -200,9 +200,9 @@ export const useResidentsStore = defineStore('residents', () => {
 Un único cliente Axios configurado con el token Firebase Auth:
 
 ```typescript
-// services/apiClient.ts
+// infrastructure/apiClient.ts
 import axios from 'axios'
-import { auth } from '@/firebase'
+import { auth } from '@/infrastructure/firebase/firebase'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -222,24 +222,24 @@ apiClient.interceptors.request.use(async (config) => {
 export default apiClient
 ```
 
-### 3.2 Estructura de services
+### 3.2 Estructura de infrastructure
 
-Los services encapsulan las llamadas HTTP. **Solo** los stores los llaman directamente.
+Los módulos de infrastructure encapsulan las llamadas HTTP y acceso a Firebase. **Solo** los composables de application los llaman directamente — nunca stores ni componentes Vue directamente.
 
 ```typescript
-// services/tareaService.ts
-import apiClient from './apiClient'
+// infrastructure/tareas/tareas.api.ts
+import apiClient from '@/infrastructure/apiClient'
 import type { Tarea, ActualizarTareaDto } from '@/types/tarea.types'
 
-export const tareaService = {
+export const tareasApi = {
   async getTareasHoy(): Promise<Tarea[]> {
     const { data } = await apiClient.get<Tarea[]>('/tareas/hoy')
-    return data
+    return data.data
   },
 
   async actualizarEstado(id: string, dto: ActualizarTareaDto): Promise<Tarea> {
     const { data } = await apiClient.patch<Tarea>(`/tareas/${id}`, dto)
-    return data
+    return data.data
   }
 }
 ```
@@ -674,7 +674,7 @@ const resident = rawData as Resident
 
 ---
 
-*Última actualización: 2026-04-06 — Actualizado al stack Vue 3 + Firebase + DDD frontend (ADR-01b, ADR-02b, ADR-03b)*
+*Última actualización: 2026-05-01 — Actualizado al stack Vue 3 + Firebase + DDD frontend + ADR-09 (ui/Atomic Design)*
 
 ---
 
@@ -713,7 +713,8 @@ domain/ (entities, value-objects, repo interfaces)
 | `infrastructure/repositories/` | Implementa repos con Firebase/Firestore | Contener lógica de negocio |
 | `infrastructure/mappers/` | Convierte datos Firebase ↔ entidades de dominio | Llamar Firebase directamente |
 | `presentation/composables/` | Puente componentes ↔ stores/repos | Contener markup o ser importado por capas inferiores |
-| `presentation/atoms/` y `molecules/` | Renderiza UI — puramente presentacional | Importar stores, repos o composables |
+| `ui/atoms/` y `ui/molecules/` | UI genérica cross-módulo — puramente presentacional | Importar stores, repos o entidades de dominio |
+| `business/{bc}/presentation/components/` | Componentes DE dominio específico | Importar de otros bounded contexts |
 | `presentation/pages/` | Vistas de ruta — conecta composables a template | Acceder a stores o repos directamente |
 | `stores/` (Pinia) | Estado reactivo + getters + mutaciones | Llamar Firebase, contener lógica de negocio |
 

@@ -73,38 +73,3 @@ describe('verifyAuth middleware', () => {
     expect(mockVerifyIdToken).toHaveBeenCalledWith('valid-token')
   })
 })
-
-describe('requireRole factory (admin role)', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  it('should return 403 when user has role "gerocultor" and requireRole("admin") is applied', async () => {
-    const fakeDecoded = {
-      uid: 'uid-gerocultor-01',
-      email: 'gerocultor@example.com',
-      role: 'gerocultor',
-    }
-    mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
-
-    const res = await request(app)
-      .get('/api/admin/users')
-      .set('Authorization', 'Bearer valid-token')
-    expect(res.status).toBe(403)
-    expect(res.body).toMatchObject({ error: expect.any(String) })
-  })
-
-  it('should call next() when user has role "admin" and requireRole("admin") is applied', async () => {
-    const fakeDecoded = {
-      uid: 'uid-admin-01',
-      email: 'admin@example.com',
-      role: 'admin',
-    }
-    mockVerifyIdToken.mockResolvedValueOnce(fakeDecoded as never)
-
-    const res = await request(app)
-      .get('/api/admin/users')
-      .set('Authorization', 'Bearer valid-token')
-    expect(res.status).toBe(200)
-  })
-})

@@ -1,35 +1,30 @@
 <script setup lang="ts">
 /**
- * DashboardView — daily agenda for the logged-in caregiver.
+ * DashboardView — navigation hub for the logged-in caregiver.
  *
- * US-03: Consulta de agenda diaria
- * US-04: Actualizar estado de una tarea
+ * US-03: Dashboard hub (widgets + "Ver todas")
+ * US-08: Alerts preview
+ * US-09: Residents preview
+ * US-14: Quick task creation via FAB
  *
  * Stitch reference: Caregiver Dashboard
  * Export: OUTPUTS/design-exports/US-03-agenda-home__caregiver-dashboard__20260328.png
  *
  * Architecture (frontend-specialist.md §3):
  *   - Views import ONLY from composables — not stores or repos directly.
- *   - Async logic lives in useAgendaHoy (application/).
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/business/auth/useAuthStore'
 import { AUTH_ROUTES } from '@/business/auth/route-names'
 import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
-import { useAgendaHoy } from '@/business/agenda/application/useAgendaHoy'
-import TaskCard from '@/business/agenda/presentation/components/TaskCard.vue'
+import DashboardWidgetGrid from '@/business/agenda/presentation/components/dashboard/DashboardWidgetGrid.vue'
+import TasksSummaryWidget from '@/business/agenda/presentation/components/dashboard/TasksSummaryWidget.vue'
+import AlertsPreviewWidget from '@/business/agenda/presentation/components/dashboard/AlertsPreviewWidget.vue'
+import RecentResidentsWidget from '@/business/agenda/presentation/components/dashboard/RecentResidentsWidget.vue'
 import CreateTareaModal from '@/business/agenda/presentation/components/CreateTareaModal.vue'
-import type { EstadoTarea } from '@/services/tareas.api'
-import { INCIDENTS_ROUTES } from '@/business/incidents/route-names'
-import {
-  SparklesIcon,
-  CloudIcon,
-  CalendarDaysIcon,
-  ExclamationCircleIcon,
-  PlusIcon,
-} from '@heroicons/vue/24/outline'
+import { SparklesIcon, PlusIcon } from '@heroicons/vue/24/outline'
 
 // ─── Router ─────────────────────────────────────────────────────────────────
 const router = useRouter()
@@ -43,37 +38,8 @@ function signOut() {
   router.push({ name: AUTH_ROUTES.LOGIN.name })
 }
 
-// ─── Agenda ────────────────────────────────────────────────────────────────
-const { tareas, isLoading, isServerReachable, error, cargarTareas, retry, actualizarEstado } =
-  useAgendaHoy()
-
+// ─── Modal ─────────────────────────────────────────────────────────────────
 const showCreateModal = ref(false)
-
-const toastMsg = ref<string | null>(null)
-let toastTimer: ReturnType<typeof setTimeout> | null = null
-
-function showToast(msg: string): void {
-  toastMsg.value = msg
-  if (toastTimer) clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => {
-    toastMsg.value = null
-  }, 4000)
-}
-
-/**
- * Adapter: bridges useAgendaHoy's TareaEstado to the new TaskCard's
- * actualizarEstado prop signature (EstadoTarea — structurally identical).
- */
-function makeActualizarEstado(
-  id: string,
-  estado: EstadoTarea
-): Promise<{ success: boolean; errorMsg?: string }> {
-  return actualizarEstado(id, estado)
-}
-
-function onTaskError(msg: string): void {
-  showToast(msg)
-}
 
 function handleOpenCreateModal(): void {
   showCreateModal.value = true
@@ -83,28 +49,11 @@ function handleCloseCreateModal(): void {
   showCreateModal.value = false
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function onEstadoActualizado(_id: string, _estado: EstadoTarea): void {
-  // Future: e.g. analytics, audit log hook (US-04 extension point)
-}
-
-// ─── Incidents ───────────────────────────────────────────────────────────────
-function onReportIncident(tareaId: string): void {
-  router.push({
-    name: INCIDENTS_ROUTES.NUEVA_INCIDENCIA.name,
-    query: { tareaId },
-  })
-}
-
-// Today label
+// ─── Date ───────────────────────────────────────────────────────────────────
 const fechaHoy = new Date().toLocaleDateString('es-ES', {
   weekday: 'long',
   day: 'numeric',
   month: 'long',
-})
-
-onMounted(() => {
-  cargarTareas()
 })
 </script>
 
@@ -124,15 +73,14 @@ onMounted(() => {
       </div>
     </header>
 
-    <!-- ─── Admin quick-nav ──────────────────────────────────────────────── -->
-    <nav class="dashboard-page__admin-nav" aria-label="Navegación de administrador">
+    <!-- ─── Quick-nav ─────────────────────────────────────────────────────── -->
+    <nav class="dashboard-page__quick-nav" aria-label="Navegación rápida">
       <RouterLink
-        :to="{ name: RESIDENTS_ROUTES.RESIDENTS_ADMIN.name }"
-        class="dashboard-page__admin-link"
+        :to="{ name: RESIDENTS_ROUTES.RESIDENTS_LIST.name }"
+        class="dashboard-page__quick-link"
       >
         Residentes
       </RouterLink>
-      <RouterLink to="/admin/users" class="dashboard-page__admin-link"> Usuarios </RouterLink>
     </nav>
 
     <!-- ─── Main content ────────────────────────────────────────────────── -->
@@ -143,65 +91,25 @@ onMounted(() => {
         <p class="dashboard-page__fecha">{{ fechaHoy }}</p>
       </section>
 
-      <!-- Agenda section -->
-      <section class="dashboard-page__agenda" aria-label="Agenda de hoy">
-        <div class="dashboard-page__agenda-header">
-          <h2 class="dashboard-page__agenda-title">Tareas de hoy</h2>
-          <!-- FAB: create new task (US-14) -->
-          <button
-            type="button"
-            class="dashboard-page__fab"
-            aria-label="Crear nueva tarea"
-            @click="handleOpenCreateModal"
-          >
-            <PlusIcon class="dashboard-page__fab-icon" aria-hidden="true" />
-          </button>
-        </div>
+      <!-- Widget grid — Phase 5 -->
+      <DashboardWidgetGrid>
+        <TasksSummaryWidget />
+        <AlertsPreviewWidget />
+        <RecentResidentsWidget />
+      </DashboardWidgetGrid>
 
-        <!-- Loading state -->
-        <div v-if="isLoading" class="dashboard-page__loading" aria-live="polite" aria-busy="true">
-          <span class="dashboard-page__spinner" aria-hidden="true" />
-          <span>Cargando tareas...</span>
-        </div>
-
-        <!-- Error state -->
-        <div v-else-if="error" class="dashboard-page__error" role="alert">
-          <CloudIcon class="dashboard-page__error-icon" aria-hidden="true" />
-          <p class="dashboard-page__error-msg">{{ error }}</p>
-          <p v-if="!isServerReachable" class="dashboard-page__error-hint">
-            El servidor no responde. Comprueba tu conexión o intenta más tarde.
-          </p>
-          <button class="dashboard-page__retry" type="button" @click="retry">Reintentar</button>
-        </div>
-
-        <!-- Empty state -->
-        <div v-else-if="tareas.length === 0" class="dashboard-page__empty" aria-live="polite">
-          <CalendarDaysIcon class="dashboard-page__empty-icon" aria-hidden="true" />
-          <p class="dashboard-page__empty-msg">No hay tareas programadas para hoy.</p>
-        </div>
-
-        <!-- Task list — CA-2: updated state reflects immediately via optimistic update -->
-        <ul v-else class="dashboard-page__task-list" aria-label="Lista de tareas">
-          <li v-for="tarea in tareas" :key="tarea.id" class="dashboard-page__task-item">
-            <TaskCard
-              :tarea="tarea"
-              :actualizar-estado="makeActualizarEstado"
-              @error="onTaskError"
-              @estado-actualizado="onEstadoActualizado"
-              @report-incident="onReportIncident"
-            />
-          </li>
-        </ul>
-      </section>
-    </main>
-
-    <!-- ─── Toast notification ──────────────────────────────────────────── -->
-    <transition name="toast">
-      <div v-if="toastMsg" class="dashboard-page__toast" role="alert" aria-live="assertive">
-        <ExclamationCircleIcon class="dashboard-page__toast-icon" aria-hidden="true" />
-        {{ toastMsg }}
+      <!-- FAB: create new task (US-14) -->
+      <div class="dashboard-page__fab-container">
+        <button
+          type="button"
+          class="dashboard-page__fab"
+          aria-label="Crear nueva tarea"
+          @click="handleOpenCreateModal"
+        >
+          <PlusIcon class="dashboard-page__fab-icon" aria-hidden="true" />
+        </button>
       </div>
-    </transition>
+    </main>
 
     <!-- ─── Create Tarea Modal (US-14) ───────────────────────────────────── -->
     <CreateTareaModal v-if="showCreateModal" @close="handleCloseCreateModal" />
@@ -209,7 +117,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-@reference "../style.css";
+@reference "#/style.css";
 
 /* ─── Page shell ────────────────────────────────────────────────────────── */
 .dashboard-page {
@@ -258,14 +166,14 @@ onMounted(() => {
   opacity: 0.75;
 }
 
-/* ─── Admin nav (admin only) ─────────────────────────────────────────── */
-.dashboard-page__admin-nav {
+/* ─── Quick nav ────────────────────────────────────────────────────────── */
+.dashboard-page__quick-nav {
   @apply flex items-center gap-0.5 px-6 py-2;
   background-color: var(--color-surface-container-low);
   border-bottom: 1px solid var(--color-outline-variant);
 }
 
-.dashboard-page__admin-link {
+.dashboard-page__quick-link {
   @apply px-3 py-1.5 rounded-lg text-sm font-medium no-underline;
   color: var(--color-on-surface-variant);
   transition:
@@ -273,7 +181,7 @@ onMounted(() => {
     color 0.15s;
 }
 
-.dashboard-page__admin-link:hover {
+.dashboard-page__quick-link:hover {
   background-color: var(--color-surface-container-high);
   color: var(--color-on-surface);
 }
@@ -299,22 +207,11 @@ onMounted(() => {
   color: var(--color-on-surface-variant);
 }
 
-/* ─── Agenda section ────────────────────────────────────────────────────── */
-.dashboard-page__agenda {
-  @apply flex flex-col gap-4;
-}
-
-.dashboard-page__agenda-title {
-  @apply text-base font-semibold;
-  font-family: var(--font-headline);
-  color: var(--color-on-surface);
-}
-
-.dashboard-page__agenda-header {
-  @apply flex items-center justify-between;
-}
-
 /* ─── FAB (create tarea — US-14) ─────────────────────────────────────────── */
+.dashboard-page__fab-container {
+  @apply flex justify-end;
+}
+
 .dashboard-page__fab {
   @apply w-10 h-10 rounded-full flex items-center justify-center cursor-pointer border-none;
   background-color: var(--color-primary-container);
@@ -329,106 +226,5 @@ onMounted(() => {
 
 .dashboard-page__fab-icon {
   @apply w-5 h-5;
-}
-
-/* ─── Loading ───────────────────────────────────────────────────────────── */
-.dashboard-page__loading {
-  @apply flex items-center gap-3 py-8 justify-center text-sm;
-  color: var(--color-on-surface-variant);
-}
-
-.dashboard-page__spinner {
-  @apply inline-block h-5 w-5 rounded-full border-2 border-t-transparent;
-  border-color: var(--color-primary);
-  border-top-color: transparent;
-  animation: spin 0.75s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ─── Error ─────────────────────────────────────────────────────────────── */
-.dashboard-page__error {
-  @apply flex flex-col items-center gap-3 py-8 text-center;
-}
-
-.dashboard-page__error-icon {
-  @apply w-8 h-8;
-  color: var(--color-error);
-}
-
-.dashboard-page__error-msg {
-  @apply text-sm;
-  color: var(--color-on-surface-variant);
-}
-
-.dashboard-page__error-hint {
-  @apply text-xs mt-1;
-  color: var(--color-outline);
-}
-
-.dashboard-page__retry {
-  @apply rounded-full px-4 py-2 text-sm font-medium cursor-pointer border-none;
-  background-color: var(--color-primary-container);
-  color: var(--color-on-primary-container);
-  transition: opacity 0.15s ease;
-}
-
-.dashboard-page__retry:hover {
-  opacity: 0.85;
-}
-
-/* ─── Empty state ───────────────────────────────────────────────────────── */
-.dashboard-page__empty {
-  @apply flex flex-col items-center gap-3 py-12 text-center;
-}
-
-.dashboard-page__empty-icon {
-  @apply w-12 h-12;
-  color: var(--color-outline-variant);
-}
-
-.dashboard-page__empty-msg {
-  @apply text-sm;
-  color: var(--color-on-surface-variant);
-}
-
-/* ─── Task list ─────────────────────────────────────────────────────────── */
-.dashboard-page__task-list {
-  @apply flex flex-col gap-3 list-none p-0 m-0;
-}
-
-.dashboard-page__task-item {
-  @apply p-0 m-0;
-}
-
-/* ─── Toast ─────────────────────────────────────────────────────────────── */
-.dashboard-page__toast {
-  @apply fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium shadow-lg z-50;
-  background-color: var(--color-error-container);
-  color: var(--color-on-error-container);
-  max-width: calc(100vw - 3rem);
-}
-
-.dashboard-page__toast-icon {
-  @apply w-4 h-4;
-  flex-shrink: 0;
-}
-
-/* ─── Toast transition ──────────────────────────────────────────────────── */
-.toast-enter-active,
-.toast-leave-active {
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(12px);
 }
 </style>

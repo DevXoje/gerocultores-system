@@ -25,10 +25,10 @@ export const residentsRoutes: RouteRecordRaw[] = [
     component: IncidenciasResidenteView,
     meta: { requiresAuth: true },
   },
-  // US-09: Admin resident management routes
+  // US-09: Gerocultor gestiona sus propios residentes
   {
-    path: RESIDENTS_ROUTES.RESIDENTS_ADMIN.path,
-    name: RESIDENTS_ROUTES.RESIDENTS_ADMIN.name,
+    path: RESIDENTS_ROUTES.RESIDENTS_LIST.path,
+    name: RESIDENTS_ROUTES.RESIDENTS_LIST.name,
     component: ResidentsView,
     meta: { requiresAuth: true },
   },

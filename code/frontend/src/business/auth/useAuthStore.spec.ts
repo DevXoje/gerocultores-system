@@ -9,7 +9,7 @@ vi.mock('firebase/auth', () => ({
   connectAuthEmulator: vi.fn(),
 }))
 
-vi.mock('@/services/firebase', () => ({
+vi.mock('@/infrastructure/firebase/firebase', () => ({
   auth: { currentUser: null },
 }))
 

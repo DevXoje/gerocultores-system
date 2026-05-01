@@ -4,11 +4,11 @@
 -->
 <script setup lang="ts">
 /**
- * ResidentsView.vue — Admin-only resident management view.
+ * ResidentsView.vue — Gerocultor resident management view.
  *
  * US-09: Alta y gestión de residentes
  *
- * Displays a filterable list of all residents with admin actions:
+ * Displays a filterable list of residents owned by the logged-in gerocultor:
  * - Filter tabs: active / archived / all
  * - "Alta nuevo residente" button → navigates to creation form
  * - Per-row edit and archive actions

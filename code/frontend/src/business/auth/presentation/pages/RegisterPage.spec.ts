@@ -24,7 +24,7 @@ vi.mock('firebase/auth', () => ({
   updateProfile: vi.fn(),
 }))
 
-vi.mock('@/services/firebase', () => ({
+vi.mock('@/infrastructure/firebase/firebase', () => ({
   auth: {},
   googleProvider: {},
 }))

@@ -21,7 +21,7 @@ export const ResidenteDocSchema = z.object({
   medicacion: z.string().nullable(),
   preferencias: z.string().nullable(),
   archivado: z.boolean(),
-  gerocultoresAsignados: z.array(z.string()).optional(),
+  usuarioId: z.string(), // Gerocultor que creó el residente (owner)
   creadoEn: z.string(),
   actualizadoEn: z.string(),
 })
@@ -30,8 +30,9 @@ export const ResidenteDocSchema = z.object({
 export interface ResidenteDoc extends z.infer<typeof ResidenteDocSchema> {}
 
 /** API response shape — includes the document id. */
-export interface ResidenteResponse extends Omit<ResidenteDoc, 'gerocultoresAsignados'> {
+export interface ResidenteResponse extends Omit<ResidenteDoc, never> {
   id: string
+  usuarioId: string
 }
 
 /** Zod schema for validating :id path parameter */

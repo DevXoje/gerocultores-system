@@ -41,16 +41,23 @@ This file encodes the full identity, import rules, BEM conventions, TDD workflow
 
 ```
 src/
+  ui/                  # Shared UI components (Atomic Design)
+    atoms/             # Primitives: Button, Badge, Icon, OfflineBanner
+    molecules/         # Compositions: AppDialog, SearchBar, FormField
+    organisms/         # Complex compositions of atoms+molecules
   business/
-    {module}/        ← auth | residents | schedule | incidents
+    {module}/        ← auth | residents | agenda | incidents | turno | users
       domain/        — entities, value objects, repository interfaces (pure TypeScript, no framework deps)
       application/   — use cases, composables (no Firebase calls directly)
       infrastructure/ — Firestore repos, API clients (Axios)
       presentation/  — Vue components, page views, UI composables, Pinia stores
+  composables/        # Shared application-agnostic composables
   router/            — Vue Router routes
   assets/            — global CSS, images
   main.ts            — app bootstrap
 ```
+
+> **Clasificación de componentes:** si un componente depende de entidades de dominio (`TareaResponse`, `Residente`, etc.) → vive en `business/{module}/presentation/components/`. Si es UI genérica reutilizable sin acoplamiento de dominio → vive en `ui/atoms` o `ui/molecules`.
 
 ### Import Rules (enforced by ESLint)
 

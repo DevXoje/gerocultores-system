@@ -15,7 +15,7 @@
  *   GET  /api/turnos/:id/resumen  → 200 { resumen }
  */
 import { z } from 'zod'
-import { apiClient } from '@/services/apiClient'
+import { apiClient } from '@/infrastructure/apiClient'
 import { TurnoSchema, type Turno, type TipoTurno } from '@/business/turno/domain/entities/Turno'
 
 // ── TurnoResumen — aggregated end-of-shift summary ────────────────────────

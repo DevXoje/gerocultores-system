@@ -1,21 +1,21 @@
 /**
  * residentes.service.spec.ts — Unit tests for ResidentesService.
  *
- * Firestore is fully mocked — no real Firebase calls happen.
+ * Modelo descentralizado por ownership: cada gerocultor es dueño de los
+ * recursos que crea. Todos los métodos reciben solo requestingUid (sin role).
  *
  * US-05: Consulta de ficha de residente
+ * US-09: Alta y gestión de residentes
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 // ─── Mock Firebase before any imports ────────────────────────────────────────
 vi.mock('../services/firebase', () => {
-  // Per-ID docRef cache so repeated calls to doc(id) return the same mock ref.
   const docRefCache = new Map<string, ReturnType<typeof makeDocRef>>()
 
   function makeDocRef() {
-    const fn = vi.fn()
     return {
-      get: fn,
+      get: vi.fn(),
       set: vi.fn(),
       update: vi.fn(),
     }
@@ -43,12 +43,13 @@ vi.mock('../services/firebase', () => {
 import { ResidentesService, NotFoundError, ForbiddenError } from './residentes.service'
 import { adminDb } from './firebase'
 
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
+// ─── Fixtures ──────────────────────────────────────────────────────────────────
 
-const geroUid = 'gero-uid-001'
-const adminUid = 'admin-uid-001'
+const ownerUid = 'gero-uid-001'
+const otherUid = 'gero-uid-002'
 const residenteId = 'res-uuid-001'
 
+/** Residente creado por ownerUid — usa usuarioId (ownership) */
 const sampleResidenteData = {
   nombre: 'Eleanor',
   apellidos: 'Vance',
@@ -60,20 +61,12 @@ const sampleResidenteData = {
   medicacion: 'Donepezilo 10mg',
   preferencias: 'Prefiere desayuno temprano',
   archivado: false,
-  gerocultoresAsignados: [geroUid],
+  usuarioId: ownerUid,
   creadoEn: '2026-01-01T10:00:00Z',
   actualizadoEn: '2026-04-01T10:00:00Z',
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function makeDocRef() {
-  return {
-    get: vi.fn().mockResolvedValue({ exists: false, data: () => null }),
-    set: vi.fn().mockResolvedValue(undefined),
-    update: vi.fn().mockResolvedValue(undefined),
-  }
-}
 
 function getMocks() {
   const db = adminDb as unknown as {
@@ -82,13 +75,13 @@ function getMocks() {
       get: ReturnType<typeof vi.fn>
       where: ReturnType<typeof vi.fn>
     }
-    _docRefCache: Map<string, ReturnType<typeof makeDocRef>>
+    _docRefCache: Map<string, ReturnType<typeof ReturnType<typeof vi.fn>>>
   }
   const docRef = db._mockCollectionRef.doc(residenteId)
   return { docRef, collectionRef: db._mockCollectionRef }
 }
 
-// ─── Tests ────────────────────────────────────────────────────────────────────
+// ─── getResidenteById ───────────────────────────────────────────────────────
 
 describe('ResidentesService.getResidenteById', () => {
   let service: ResidentesService
@@ -100,7 +93,7 @@ describe('ResidentesService.getResidenteById', () => {
     collectionRef.doc.mockReturnValue(docRef)
   })
 
-  it('returns residente when admin requests any resident', async () => {
+  it('owner → returns residente', async () => {
     const { docRef } = getMocks()
     docRef.get.mockResolvedValueOnce({
       exists: true,
@@ -108,31 +101,17 @@ describe('ResidentesService.getResidenteById', () => {
       data: () => sampleResidenteData,
     })
 
-    const result = await service.getResidenteById(residenteId, adminUid, 'admin')
+    const result = await service.getResidenteById(residenteId, ownerUid)
 
     expect(result.id).toBe(residenteId)
     expect(result.nombre).toBe('Eleanor')
     expect(result.apellidos).toBe('Vance')
     expect(result.diagnosticos).toBe('Demencia leve')
-    // gerocultoresAsignados must NOT be in the response (stripped)
-    expect((result as Record<string, unknown>)['gerocultoresAsignados']).toBeUndefined()
+    // usuarioId must be in the response
+    expect(result.usuarioId).toBe(ownerUid)
   })
 
-  it('returns residente when gerocultor is in gerocultoresAsignados', async () => {
-    const { docRef } = getMocks()
-    docRef.get.mockResolvedValueOnce({
-      exists: true,
-      id: residenteId,
-      data: () => sampleResidenteData,
-    })
-
-    const result = await service.getResidenteById(residenteId, geroUid, 'gerocultor')
-
-    expect(result.id).toBe(residenteId)
-    expect(result.nombre).toBe('Eleanor')
-  })
-
-  it('throws ForbiddenError when gerocultor is NOT in gerocultoresAsignados', async () => {
+  it('other gerocultor (not owner) → ForbiddenError', async () => {
     const { docRef } = getMocks()
     docRef.get.mockResolvedValueOnce({
       exists: true,
@@ -141,20 +120,20 @@ describe('ResidentesService.getResidenteById', () => {
     })
 
     await expect(
-      service.getResidenteById(residenteId, 'other-gero-uid', 'gerocultor'),
+      service.getResidenteById(residenteId, otherUid),
     ).rejects.toThrow(ForbiddenError)
   })
 
-  it('throws NotFoundError when resident does not exist', async () => {
+  it('resident does not exist → NotFoundError', async () => {
     const { docRef } = getMocks()
     docRef.get.mockResolvedValueOnce({ exists: false, data: () => null })
 
     await expect(
-      service.getResidenteById('non-existent-id', adminUid, 'admin'),
+      service.getResidenteById('non-existent-id', ownerUid),
     ).rejects.toThrow(NotFoundError)
   })
 
-  it('returns null for optional fields when not present in Firestore doc', async () => {
+  it('null optional fields → null in response', async () => {
     const { docRef } = getMocks()
     const minimalData = {
       nombre: 'Ana',
@@ -167,7 +146,7 @@ describe('ResidentesService.getResidenteById', () => {
       medicacion: null,
       preferencias: null,
       archivado: false,
-      gerocultoresAsignados: [geroUid],
+      usuarioId: ownerUid,
       creadoEn: '2026-01-01T10:00:00Z',
       actualizadoEn: '2026-04-01T10:00:00Z',
     }
@@ -178,26 +157,13 @@ describe('ResidentesService.getResidenteById', () => {
       data: () => minimalData,
     })
 
-    const result = await service.getResidenteById('res-minimal', geroUid, 'gerocultor')
+    const result = await service.getResidenteById('res-minimal', ownerUid)
 
     expect(result.foto).toBeNull()
     expect(result.diagnosticos).toBeNull()
     expect(result.alergias).toBeNull()
     expect(result.medicacion).toBeNull()
     expect(result.preferencias).toBeNull()
-  })
-
-  it('gerocultor with empty gerocultoresAsignados array gets ForbiddenError', async () => {
-    const { docRef } = getMocks()
-    docRef.get.mockResolvedValueOnce({
-      exists: true,
-      id: residenteId,
-      data: () => ({ ...sampleResidenteData, gerocultoresAsignados: [] }),
-    })
-
-    await expect(
-      service.getResidenteById(residenteId, geroUid, 'gerocultor'),
-    ).rejects.toThrow(ForbiddenError)
   })
 })
 
@@ -213,12 +179,12 @@ describe('ResidentesService.createResidente', () => {
     collectionRef.doc.mockReturnValue(docRef)
   })
 
-  it('admin creates residente with valid data → calls set and returns 201-like response', async () => {
+  it('gerocultor crea residente con datos válidos → set + retorna respuesta', async () => {
     const { docRef } = getMocks()
     const callSequence = [
-      // set() succeeds — no return value needed
+      // set() succeeds
       undefined,
-      // get() returns the written doc (server timestamps)
+      // get() returns the written doc
       {
         exists: true,
         id: residenteId,
@@ -233,6 +199,7 @@ describe('ResidentesService.createResidente', () => {
           alergias: null,
           medicacion: null,
           preferencias: null,
+          usuarioId: ownerUid,
           creadoEn: '2026-04-01T10:00:00Z',
           actualizadoEn: '2026-04-01T10:00:00Z',
         }),
@@ -249,38 +216,27 @@ describe('ResidentesService.createResidente', () => {
       habitacion: '201-A',
     }
 
-    const result = await service.createResidente(dto, adminUid, 'admin')
+    const result = await service.createResidente(dto, ownerUid)
 
     expect(docRef.set).toHaveBeenCalledOnce()
     const setCall = (docRef.set as ReturnType<typeof vi.fn>).mock.calls[0][0]
     expect(setCall.nombre).toBe('María')
-    expect(setCall.apellidos).toBe('García López')
     expect(setCall.habitacion).toBe('201-A')
     expect(setCall.archivado).toBe(false)
+    expect(setCall.usuarioId).toBe(ownerUid) // Owner = requestingUid
     expect(setCall.id).toBeDefined()
 
     expect(result.id).toBe(residenteId)
     expect(result.nombre).toBe('María')
   })
 
-  it('gerocultor → ForbiddenError', async () => {
-    await expect(
-      service.createResidente(
-        { nombre: 'X', apellidos: 'Y', fechaNacimiento: '1955-03-15', habitacion: '101' },
-        geroUid,
-        'gerocultor',
-      ),
-    ).rejects.toThrow(ForbiddenError)
-  })
-
-  it('admin with invalid body → throws Error with validation message', async () => {
+  it('datos inválidos → throw con mensaje de validación', async () => {
     const { docRef } = getMocks()
     docRef.set.mockResolvedValueOnce(undefined)
     docRef.get.mockResolvedValueOnce({ exists: true, id: residenteId, data: () => sampleResidenteData })
 
-    // Missing required fields
     await expect(
-      service.createResidente({ nombre: '', apellidos: '', fechaNacimiento: '', habitacion: '' }, adminUid, 'admin'),
+      service.createResidente({ nombre: '', apellidos: '', fechaNacimiento: '', habitacion: '' }, ownerUid),
     ).rejects.toThrow(/Validation error/)
   })
 })
@@ -297,43 +253,41 @@ describe('ResidentesService.listResidentes', () => {
     collectionRef.doc.mockReturnValue(docRef)
   })
 
-  it('admin with filter=active → returns only active residents', async () => {
-    const { collectionRef, docRef } = getMocks()
-    // Simulate Firestore query chain: where().get()
-    // Only res-1 matches archivado=false
+  it('gerocultor ve solo sus propios residentes (filter=active)', async () => {
+    const { collectionRef } = getMocks()
     const mockGet = vi.fn().mockResolvedValueOnce({
       docs: [
+        // Residente creado por ownerUid
         { id: 'res-1', data: () => ({ ...sampleResidenteData, archivado: false }) },
+        // Residente creado por otro gerocultor — NO debe aparecer
+        { id: 'res-2', data: () => ({ ...sampleResidenteData, usuarioId: otherUid, archivado: false }) },
       ],
     })
     collectionRef.get = mockGet
 
-    const result = await service.listResidentes('active', adminUid, 'admin')
+    const result = await service.listResidentes('active', ownerUid)
 
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe('res-1')
   })
 
-  it('gerocultor sees only assigned residents', async () => {
+  it('gerocultor ve solo sus propios residentes (filter=all)', async () => {
     const { collectionRef } = getMocks()
     const mockGet = vi.fn().mockResolvedValueOnce({
       docs: [
-        {
-          id: 'res-1',
-          data: () => ({ ...sampleResidenteData, archivado: false, gerocultoresAsignados: [geroUid] }),
-        },
-        {
-          id: 'res-2',
-          data: () => ({ ...sampleResidenteData, archivado: false, gerocultoresAsignados: ['other-uid'] }),
-        },
+        { id: 'res-1', data: () => ({ ...sampleResidenteData, archivado: false }) },
+        { id: 'res-2', data: () => ({ ...sampleResidenteData, archivado: true }) },
+        { id: 'res-3', data: () => ({ ...sampleResidenteData, usuarioId: otherUid, archivado: false }) },
       ],
     })
     collectionRef.get = mockGet
 
-    const result = await service.listResidentes('active', geroUid, 'gerocultor')
+    const result = await service.listResidentes('all', ownerUid)
 
-    expect(result).toHaveLength(1)
-    expect(result[0].id).toBe('res-1')
+    expect(result).toHaveLength(2) // res-1 y res-2 (ambos de ownerUid)
+    expect(result.map((r) => r.id)).toContain('res-1')
+    expect(result.map((r) => r.id)).toContain('res-2')
+    expect(result.map((r) => r.id)).not.toContain('res-3')
   })
 })
 
@@ -349,10 +303,10 @@ describe('ResidentesService.updateResidente', () => {
     collectionRef.doc.mockReturnValue(docRef)
   })
 
-  it('admin updates existing residente → 200', async () => {
+  it('owner actualiza residente existente → update + retorna con nombre actualizado', async () => {
     const { docRef } = getMocks()
     const callSequence = [
-      // 1st get: check exists
+      // 1st get: check exists + ownership
       { exists: true, id: residenteId, data: () => sampleResidenteData },
       // 2nd get: fetch updated doc
       { exists: true, id: residenteId, data: () => ({ ...sampleResidenteData, nombre: 'Updated' }) },
@@ -360,32 +314,37 @@ describe('ResidentesService.updateResidente', () => {
     let callCount = 0
     docRef.get = vi.fn(() => Promise.resolve(callSequence[callCount++]))
 
-    const result = await service.updateResidente(residenteId, { nombre: 'Updated' }, adminUid, 'admin')
+    const result = await service.updateResidente(residenteId, { nombre: 'Updated' }, ownerUid)
 
     expect(docRef.update).toHaveBeenCalledOnce()
     expect((docRef.update as ReturnType<typeof vi.fn>).mock.calls[0][0]).toHaveProperty('actualizadoEn')
     expect(result.nombre).toBe('Updated')
   })
 
-  it('gerocultor → ForbiddenError', async () => {
+  it('other gerocultor (no owner) → ForbiddenError', async () => {
+    const { docRef } = getMocks()
+    docRef.get.mockResolvedValueOnce({
+      exists: true,
+      id: residenteId,
+      data: () => sampleResidenteData,
+    })
+
     await expect(
-      service.updateResidente(residenteId, { nombre: 'X' }, geroUid, 'gerocultor'),
+      service.updateResidente(residenteId, { nombre: 'X' }, otherUid),
     ).rejects.toThrow(ForbiddenError)
   })
 
-  it('not found → NotFoundError', async () => {
+  it('residente no existe → NotFoundError', async () => {
     const { docRef } = getMocks()
-    // Override get specifically for this test — docToResponse is never reached
-    // because service checks snap.exists first
     docRef.get = vi.fn().mockResolvedValueOnce({ exists: false, data: () => null })
 
     await expect(
-      service.updateResidente('non-existent', { nombre: 'X' }, adminUid, 'admin'),
+      service.updateResidente('non-existent', { nombre: 'X' }, ownerUid),
     ).rejects.toThrow(NotFoundError)
   })
 })
 
-// ─── archiveResidente ─────────────────────────────────────────────────────────
+// ─── archiveResidente ────────────────────────────────────────────────────────
 
 describe('ResidentesService.archiveResidente', () => {
   let service: ResidentesService
@@ -397,10 +356,10 @@ describe('ResidentesService.archiveResidente', () => {
     service = new ResidentesService()
   })
 
-  it('admin archives existing residente → 200 with archivado: true', async () => {
+  it('owner archiva residente → archivado: true', async () => {
     const { docRef } = getMocks()
     const callSequence = [
-      // 1st get: check exists
+      // 1st get: check exists + ownership
       { exists: true, id: residenteId, data: () => sampleResidenteData },
       // 2nd get: fetch archived doc
       { exists: true, id: residenteId, data: () => ({ ...sampleResidenteData, archivado: true }) },
@@ -408,7 +367,7 @@ describe('ResidentesService.archiveResidente', () => {
     let callCount = 0
     docRef.get = vi.fn(() => Promise.resolve(callSequence[callCount++]))
 
-    const result = await service.archiveResidente(residenteId, adminUid, 'admin')
+    const result = await service.archiveResidente(residenteId, ownerUid)
 
     expect(docRef.update).toHaveBeenCalledOnce()
     const updateCall = (docRef.update as ReturnType<typeof vi.fn>).mock.calls[0][0]
@@ -416,9 +375,16 @@ describe('ResidentesService.archiveResidente', () => {
     expect(result.archivado).toBe(true)
   })
 
-  it('gerocultor → ForbiddenError', async () => {
+  it('other gerocultor (no owner) → ForbiddenError', async () => {
+    const { docRef } = getMocks()
+    docRef.get.mockResolvedValueOnce({
+      exists: true,
+      id: residenteId,
+      data: () => sampleResidenteData,
+    })
+
     await expect(
-      service.archiveResidente(residenteId, geroUid, 'gerocultor'),
+      service.archiveResidente(residenteId, otherUid),
     ).rejects.toThrow(ForbiddenError)
   })
 })

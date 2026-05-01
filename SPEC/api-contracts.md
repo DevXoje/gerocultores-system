@@ -125,8 +125,8 @@ TODO: poblar en Fase 5 tras definir el stack de API.
 
 <!-- sdd/alta-residente SPEC delta -->
 ## [POST] /api/residentes
-**Descripción**: Crear un nuevo residente (alta). Solo administradores.
-**Autenticación**: requerida (Firebase Auth Token + rol `admin`)
+**Descripción**: Crear un nuevo residente (alta). Cualquier gerocultor autenticado puede crear residentes.
+**Autenticación**: requerida (Firebase Auth Token)
 
 **Request body**:
 ```json
@@ -158,6 +158,7 @@ TODO: poblar en Fase 5 tras definir el stack de API.
     "medicacion": "Metformina 850mg",
     "preferencias": "Prefiere ducha por las mañanas",
     "archivado": false,
+    "usuarioId": "uid-del-gerocultor",
     "creadoEn": "2026-04-30T10:00:00.000Z",
     "actualizadoEn": "2026-04-30T10:00:00.000Z"
   }
@@ -169,13 +170,12 @@ TODO: poblar en Fase 5 tras definir el stack de API.
 |--------|-----------|
 | 400 | Campos obligatorios faltantes (`nombre`, `apellidos`, `fechaNacimiento`, `habitacion`) |
 | 401 | Token no provisto o inválido |
-| 403 | Usuario no es `admin` |
 
 ---
 
 ## [GET] /api/residentes
-**Descripción**: Listar residentes con filtro opcional por estado de archivo.
-**Autenticación**: requerida (cualquier rol: `admin` o `gerocultor`)
+**Descripción**: Listar residentes creados por el gerocultor autenticado, con filtro opcional por estado de archivo.
+**Autenticación**: requerida (Firebase Auth Token)
 
 **Query params**:
 | Parámetro | Tipo | Valores | Default |
@@ -192,6 +192,7 @@ TODO: poblar en Fase 5 tras definir el stack de API.
       "apellidos": "Pérez",
       "habitacion": "101",
       "archivado": false,
+      "usuarioId": "uid-del-gerocultor",
       "creadoEn": "2026-04-30T10:00:00.000Z",
       "actualizadoEn": "2026-04-30T10:00:00.000Z"
     }
@@ -207,8 +208,8 @@ TODO: poblar en Fase 5 tras definir el stack de API.
 ---
 
 ## [PATCH] /api/residentes/:id
-**Descripción**: Actualizar campos de un residente existente. Solo administradores.
-**Autenticación**: requerida (Firebase Auth Token + rol `admin`)
+**Descripción**: Actualizar campos de un residente existente. Solo el gerocultor que lo creó puede editarlo.
+**Autenticación**: requerida (Firebase Auth Token — debe ser el owner del residente)
 
 **Request body** (parcial — cualquier subconjunto de campos):
 ```json
@@ -230,6 +231,7 @@ TODO: poblar en Fase 5 tras definir el stack de API.
     "fechaNacimiento": "1950-05-10T00:00:00.000Z",
     "habitacion": "101",
     "archivado": false,
+    "usuarioId": "uid-del-gerocultor",
     "creadoEn": "2026-04-30T10:00:00.000Z",
     "actualizadoEn": "2026-04-30T12:30:00.000Z"
   }
@@ -241,14 +243,14 @@ TODO: poblar en Fase 5 tras definir el stack de API.
 |--------|-----------|
 | 400 | Datos inválidos |
 | 401 | Token no provisto o inválido |
-| 403 | Usuario no es `admin` |
+| 403 | El usuario no es el owner del residente |
 | 404 | Residente no encontrado |
 
 ---
 
 ## [PATCH] /api/residentes/:id/archive
-**Descripción**: Archivar (dar de baja lógica) un residente activo. Solo administradores.
-**Autenticación**: requerida (Firebase Auth Token + rol `admin`)
+**Descripción**: Archivar (dar de baja lógica) un residente activo. Solo el gerocultor que lo creó puede archivarlo.
+**Autenticación**: requerida (Firebase Auth Token — debe ser el owner del residente)
 
 **Request body**: (vacío — la acción está codificada en la ruta)
 
@@ -269,6 +271,6 @@ TODO: poblar en Fase 5 tras definir el stack de API.
 | Código | Condición |
 |--------|-----------|
 | 401 | Token no provisto o inválido |
-| 403 | Usuario no es `admin` |
+| 403 | El usuario no es el owner del residente |
 | 404 | Residente no encontrado |
 <!-- fin delta -->

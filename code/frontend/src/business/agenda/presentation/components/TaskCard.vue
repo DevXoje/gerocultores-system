@@ -14,7 +14,7 @@
  */
 import { computed } from 'vue'
 import { useTaskCard } from '@/business/agenda/presentation/composables/useTaskCard'
-import type { TareaDTO, EstadoTarea } from '@/services/tareas.api'
+import type { TareaDTO, EstadoTarea } from '@/infrastructure/tareas/tareas.api'
 import {
   BeakerIcon,
   HeartIcon,
@@ -179,7 +179,7 @@ async function onCambiarEstado(estado: EstadoTarea): Promise<void> {
 </template>
 
 <style scoped>
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ─── Card base ─────────────────────────────────────────────────────────── */
 .task-card {

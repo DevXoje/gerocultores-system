@@ -10,7 +10,7 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ResumenTurnoModal from './ResumenTurnoModal.vue'
-import AppDialog from '@/components/dialogs/AppDialog.vue'
+import AppDialog from '@/ui/molecules/dialogs/AppDialog.vue'
 
 describe('ResumenTurnoModal', () => {
   describe('AppDialog wrapper contract', () => {

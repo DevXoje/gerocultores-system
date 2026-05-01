@@ -224,7 +224,7 @@ El código actual usa español para:
 
 #### 1.7 — Frontend: servicios API
 
-- `code/frontend/src/services/tareas.api.ts` → `tasks.api.ts`
+- `code/frontend/src/infrastructure/tareas/tareas.api.ts` → `tasks.api.ts`
 - Renombrar types: `TipoTarea` → `TaskType`, `EstadoTarea` → `TaskStatus`
 - Renombrar constantes: `TIPO_OPTIONS` → `TYPE_OPTIONS`, `SEVERIDAD_OPTIONS` → `SEVERITY_OPTIONS`
 - Renombrar DTOs: `CreateTareaDTO` → `CreateTaskDTO`, `UpdateTareaStatusDTO` → `UpdateTaskStatusDTO`

@@ -7,7 +7,7 @@
  * US-09: Alta y gestión de residentes
  */
 
-import { apiClient } from '@/services/apiClient'
+import { apiClient } from '@/infrastructure/apiClient'
 import type { Residente } from './Residente'
 
 export interface ArchiveResidenteResult {

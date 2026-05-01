@@ -3,39 +3,43 @@
  *
  * US-14: Crear tarea
  *
- * Architecture rules (frontend-specialist.md §3):
- *   - Lives in application/ — allowed to call infrastructure (tareasApi).
- *   - Returns domain types from domain/entities/tarea.types.ts.
+ * Architecture (frontend-specialist.md §3):
+ *   - Lives in application/ — orchestrates infrastructure calls.
+ *   - Delegates state to tareasStore (Pinia) — composable is NEVER the state owner.
+ *   - Uses tareasApi from infrastructure/.
  */
-import { ref, readonly } from 'vue'
-import { tareasApi } from '@/services/tareas.api'
-import type { TareaResponse, CreateTareaDTO } from '@/business/agenda/domain/entities/tarea.types'
+import { storeToRefs } from 'pinia'
+import { tareasApi } from '@/infrastructure/tareas/tareas.api'
+import { useTareasStore } from '@/business/agenda/presentation/stores/tareasStore'
+import type { CreateTareaDTO } from '@/business/agenda/domain/entities/tarea.types'
 
 export function useTareas() {
-  const isCreating = ref(false)
-  const createError = ref<string | null>(null)
+  const store = useTareasStore()
+  const { isLoading, error } = storeToRefs(store)
 
   async function createTarea(
     data: CreateTareaDTO
-  ): Promise<{ success: boolean; data?: TareaResponse; errorMsg?: string }> {
-    isCreating.value = true
-    createError.value = null
+  ): Promise<{ success: boolean; errorMsg?: string }> {
+    store.setLoading(true)
+    store.setError(null)
 
     try {
       const response = await tareasApi.createTarea(data)
-      return { success: true, data: response.data }
+      // Add the created tarea to the store
+      store.setTareas([...store.tareas, response.data])
+      return { success: true }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Error al crear la tarea'
-      createError.value = errorMsg
+      store.setError(errorMsg)
       return { success: false, errorMsg }
     } finally {
-      isCreating.value = false
+      store.setLoading(false)
     }
   }
 
   return {
-    isCreating: readonly(isCreating),
-    createError: readonly(createError),
+    isCreating: isLoading,
+    createError: error,
     createTarea,
   }
 }

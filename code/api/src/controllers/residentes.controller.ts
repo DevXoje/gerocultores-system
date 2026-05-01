@@ -12,16 +12,12 @@ import {
   UpdateResidenteSchema,
   ListResidentesQuerySchema,
 } from '../types/residente.types'
-import type { UserRole } from '../types/user.types'
-import { UserRoleEnum } from '../types/user.types'
 
-function getAuthUser(req: Request): { uid: string; role: UserRole } {
-  const rawRole = req.user?.['role']
-  const role = UserRoleEnum.safeParse(rawRole)
-  if (!role.success || !req.user?.uid) {
+function getAuthUser(req: Request): { uid: string } {
+  if (!req.user?.uid) {
     throw new Error('Autorización inválida')
   }
-  return { uid: req.user.uid, role: role.data }
+  return { uid: req.user.uid }
 }
 
 export class ResidentesController {
@@ -40,9 +36,9 @@ export class ResidentesController {
       }
 
       const { id } = parsed.data
-      const { uid: userUid, role: userRole } = getAuthUser(req)
+      const { uid } = getAuthUser(req)
 
-      const residente = await this.service.getResidenteById(id, userUid, userRole)
+      const residente = await this.service.getResidenteById(id, uid)
       res.json({ data: residente })
     } catch (e) {
       if (e instanceof NotFoundError) {
@@ -69,14 +65,9 @@ export class ResidentesController {
         return
       }
 
-      const { uid, role } = getAuthUser(req)
+      const { uid } = getAuthUser(req)
 
-      if (role !== 'admin') {
-        res.status(403).json({ error: 'Acceso no autorizado', code: 'FORBIDDEN' })
-        return
-      }
-
-      const residente = await this.service.createResidente(parsed.data, uid, role)
+      const residente = await this.service.createResidente(parsed.data, uid)
       res.status(201).json({ data: residente })
     } catch (e) {
       if (e instanceof ZodError) {
@@ -103,10 +94,10 @@ export class ResidentesController {
         return
       }
 
-      const { uid, role } = getAuthUser(req)
+      const { uid } = getAuthUser(req)
       const filter = parsed.data.filter ?? 'active'
 
-      const residentes = await this.service.listResidentes(filter, uid, role)
+      const residentes = await this.service.listResidentes(filter, uid)
       res.json({ data: residentes })
     } catch (e) {
       if (e instanceof ZodError) {
@@ -139,14 +130,9 @@ export class ResidentesController {
         return
       }
 
-      const { uid, role } = getAuthUser(req)
+      const { uid } = getAuthUser(req)
 
-      if (role !== 'admin') {
-        res.status(403).json({ error: 'Acceso no autorizado', code: 'FORBIDDEN' })
-        return
-      }
-
-      const residente = await this.service.updateResidente(idParsed.data.id, bodyParsed.data, uid, role)
+      const residente = await this.service.updateResidente(idParsed.data.id, bodyParsed.data, uid)
       res.json({ data: residente })
     } catch (e) {
       if (e instanceof ZodError) {
@@ -177,14 +163,9 @@ export class ResidentesController {
         return
       }
 
-      const { uid, role } = getAuthUser(req)
+      const { uid } = getAuthUser(req)
 
-      if (role !== 'admin') {
-        res.status(403).json({ error: 'Acceso no autorizado', code: 'FORBIDDEN' })
-        return
-      }
-
-      const residente = await this.service.archiveResidente(parsed.data.id, uid, role)
+      const residente = await this.service.archiveResidente(parsed.data.id, uid)
       res.json({ data: residente })
     } catch (e) {
       if (e instanceof ForbiddenError) {

@@ -223,7 +223,7 @@ function formatFecha(iso: string): string {
 </template>
 
 <style scoped>
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ── Root ───────────────────────────────────────────────────────────────── */
 .residente-view {

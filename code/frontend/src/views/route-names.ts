@@ -6,3 +6,8 @@ export const DASHBOARD_ROUTES = {
   name: 'dashboard',
   path: '/dashboard',
 } as const
+
+export const TASKS_ROUTES = {
+  name: 'tasks',
+  all: '/tareas',
+} as const

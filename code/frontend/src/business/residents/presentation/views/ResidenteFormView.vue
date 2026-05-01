@@ -11,7 +11,7 @@
  * Route params:
  *   - id (optional): pre-loads resident for edit mode
  *
- * On success → navigates to /admin/residents
+ * On success → navigates to /residentes
  * On cancel  → navigates back
  */
 import { onMounted, ref } from 'vue'
@@ -76,7 +76,7 @@ async function handleSubmit(data: CreateResidenteDto | UpdateResidenteDto): Prom
     } else {
       await createResidente(data as CreateResidenteDto)
     }
-    router.push({ name: RESIDENTS_ROUTES.RESIDENTS_ADMIN.name })
+    router.push({ name: RESIDENTS_ROUTES.RESIDENTS_LIST.name })
   } catch {
     // error managed in store
   } finally {
@@ -85,7 +85,7 @@ async function handleSubmit(data: CreateResidenteDto | UpdateResidenteDto): Prom
 }
 
 function handleCancel(): void {
-  router.push({ name: RESIDENTS_ROUTES.RESIDENTS_ADMIN.name })
+  router.push({ name: RESIDENTS_ROUTES.RESIDENTS_LIST.name })
 }
 </script>
 

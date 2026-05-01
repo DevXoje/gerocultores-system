@@ -13,7 +13,7 @@ vi.mock('firebase/auth', () => ({
 }))
 
 // ─── Mock firebase.ts ─────────────────────────────────────────────────────────
-vi.mock('@/services/firebase', () => ({
+vi.mock('@/infrastructure/firebase/firebase', () => ({
   auth: {},
   googleProvider: {},
 }))

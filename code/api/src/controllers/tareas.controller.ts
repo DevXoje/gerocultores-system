@@ -5,7 +5,6 @@ import {
   ForbiddenError,
   ValidationError,
   ResidenteNotFoundError,
-  UsuarioNotFoundError,
   AccessDeniedError,
 } from '../services/tareas.service'
 import {
@@ -13,19 +12,14 @@ import {
   ListTareasQuerySchema,
   CreateTareaSchema,
 } from '../types/tarea.types'
-import type { UserRole } from '../types/user.types'
-import { UserRoleEnum } from '../types/user.types'
 import type { CreateTareaDto } from '../types/tarea.types'
 
-function getAuthUser(req: Request): { uid: string; role: UserRole } {
-  // Support both emulator tokens (user_id) and production tokens (uid)
+function getAuthUser(req: Request): { uid: string } {
   const uid = req.user?.['uid'] || req.user?.['user_id']
-  const rawRole = req.user?.['role']
-  const role = UserRoleEnum.safeParse(rawRole)
-  if (!role.success || !uid) {
+  if (!uid) {
     throw new Error('Autorización inválida')
   }
-  return { uid, role: role.data }
+  return { uid }
 }
 
 export class TareasController {
@@ -45,22 +39,17 @@ export class TareasController {
 
       const filters = parsed.data
 
-      // Extract auth user — return 401 if missing/invalid role
       let userUid: string
-      let userRole: UserRole
       try {
         const authUser = getAuthUser(req)
         userUid = authUser.uid
-        userRole = authUser.role
       } catch (authError) {
         res.status(401).json({ error: authError instanceof Error ? authError.message : 'Autorización inválida', code: 'UNAUTHORIZED' })
         return
       }
 
-      // gerocultor can only see their own tasks
-      if (userRole === 'gerocultor') {
-        filters.assignedTo = userUid
-      }
+      // Gerocultor only sees their own tasks
+      filters.assignedTo = userUid
 
       const tareas = await this.service.getTareas(filters)
       res.json({ data: tareas, meta: { total: tareas.length } })
@@ -77,11 +66,18 @@ export class TareasController {
         return
       }
       const id = rawId
+
+      let userUid: string
+      try {
+        userUid = getAuthUser(req).uid
+      } catch {
+        res.status(401).json({ error: 'Autorización inválida', code: 'UNAUTHORIZED' })
+        return
+      }
+
       const tarea = await this.service.getTareaById(id)
 
-      const { uid: userUid, role: userRole } = getAuthUser(req)
-
-      if (userRole === 'gerocultor' && tarea.usuarioId !== userUid) {
+      if (tarea.usuarioId !== userUid) {
         res.status(403).json({ error: 'Acceso no autorizado', code: 'FORBIDDEN' })
         return
       }
@@ -114,9 +110,15 @@ export class TareasController {
         return
       }
 
-      const { uid: userUid, role: userRole } = getAuthUser(req)
+      let userUid: string
+      try {
+        userUid = getAuthUser(req).uid
+      } catch {
+        res.status(401).json({ error: 'Autorización inválida', code: 'UNAUTHORIZED' })
+        return
+      }
 
-      const updated = await this.service.updateEstado(id, parsed.data.estado, userUid, userRole)
+      const updated = await this.service.updateEstado(id, parsed.data.estado, userUid)
       res.json({ data: updated })
     } catch (e) {
       if (e instanceof NotFoundError) {
@@ -145,10 +147,16 @@ export class TareasController {
         return
       }
 
-      const { uid: userUid, role: userRole } = getAuthUser(req)
+      let userUid: string
+      try {
+        userUid = getAuthUser(req).uid
+      } catch {
+        res.status(401).json({ error: 'Autorización inválida', code: 'UNAUTHORIZED' })
+        return
+      }
 
       const dto: CreateTareaDto = parseResult.data
-      const tarea = await this.service.createTarea(dto, userUid, userRole)
+      const tarea = await this.service.createTarea(dto, userUid)
 
       res.status(201).json({ data: tarea })
     } catch (e) {
@@ -158,10 +166,6 @@ export class TareasController {
       }
       if (e instanceof ResidenteNotFoundError) {
         res.status(400).json({ error: 'RESIDENTE_NOT_FOUND', message: e.message, field: e.field })
-        return
-      }
-      if (e instanceof UsuarioNotFoundError) {
-        res.status(400).json({ error: 'USUARIO_NOT_FOUND', message: e.message, field: e.field })
         return
       }
       if (e instanceof AccessDeniedError) {

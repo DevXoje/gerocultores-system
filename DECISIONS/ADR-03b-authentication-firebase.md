@@ -45,8 +45,9 @@ Se elige **Opción B: Firebase Auth + Firestore Rules + Express middleware**.
 
 | Rol | Custom Claim | Permisos |
 |-----|-------------|----------|
-| `gerocultor` | `{ rol: 'gerocultor' }` | CRUD sus tareas, read sus residentes asignados, create incidencias |
-| `admin` | `{ rol: 'admin' }` | Full access, gestión de usuarios, CRUD residentes, read todas las tareas/incidencias |
+| `gerocultor` | `{ rol: 'gerocultor' }` | Solo puede crear, leer, actualizar y eliminar sus propios recursos (tareas, incidencias, residentes que ha creado). No puede ver recursos de otros usuarios. |
+
+> **Modelo de seguridad**: Descentralizado por ownership. Cada recurso (Tarea, Incidencia, Residente) tiene un campo `usuarioId` que identifica al gerocultor que lo creó. Firestore Rules y Express middleware verifican `request.auth.uid == resource.data.usuarioId` para toda operación de escritura. No existe administrador global.
 
 ### Flujo de autenticación
 
@@ -69,35 +70,37 @@ Se elige **Opción B: Firebase Auth + Firestore Rules + Express middleware**.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Usuarios: solo lectura propia, admin gestiona
+    // Usuarios: solo el propio usuario puede leer/escribir su documento
     match /usuarios/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth.token.rol == 'admin';
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    // Tareas: gerocultor ve las suyas, admin ve todas
+    // Tareas: solo el gerocultor que la creó puede leer/escribir
     match /tareas/{tareaId} {
-      allow read: if request.auth != null && (
-        resource.data.usuarioId == request.auth.uid ||
-        request.auth.token.rol == 'admin'
-      );
-      allow update: if request.auth != null && (
-        resource.data.usuarioId == request.auth.uid ||
-        request.auth.token.rol == 'admin'
-      );
-    }
-    // Residentes: acceso por asignación (via API) o admin
-    match /residentes/{residenteId} {
-      allow read: if request.auth != null && (
-        request.auth.token.rol == 'admin'
-      );
-      // Gerocultores acceden via Express API (verifica asignación)
-    }
-    // Incidencias: inmutables post-creación
-    match /incidencias/{incidenciaId} {
+      allow read, write: if request.auth != null &&
+        resource.data.usuarioId == request.auth.uid;
       allow create: if request.auth != null &&
-        request.auth.token.rol in ['gerocultor', 'admin'];
-      allow read: if request.auth != null;
+        request.resource.data.usuarioId == request.auth.uid;
+    }
+    // Residentes: solo el gerocultor que lo creó puede leer/escribir
+    match /residentes/{residenteId} {
+      allow read, write: if request.auth != null &&
+        resource.data.usuarioId == request.auth.uid;
+      allow create: if request.auth != null &&
+        request.resource.data.usuarioId == request.auth.uid;
+    }
+    // Incidencias: solo el gerocultor que la creó puede leer; creación abierta para cualquier gerocultor autenticado
+    match /incidencias/{incidenciaId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null &&
+        resource.data.usuarioId == request.auth.uid;
       allow update, delete: if false;
+    }
+    // Notificaciones: solo el destinatario puede leer
+    match /notificaciones/{notificacionId} {
+      allow read: if request.auth != null &&
+        resource.data.usuarioId == request.auth.uid;
+      allow update: if request.auth != null &&
+        resource.data.usuarioId == request.auth.uid;
     }
   }
 }
@@ -114,10 +117,10 @@ service cloud.firestore {
 ## Criterios de aceptación
 
 - [ ] Firebase Auth configurado con método email/password.
-- [ ] Custom claims (`rol`) asignados vía Admin SDK desde Express.
-- [ ] Firestore Rules desplegadas con restricciones por rol.
-- [ ] Express middleware `verifyAuth` verificando ID tokens.
-- [ ] Registro público bloqueado (solo admin crea cuentas).
+- [ ] Custom claims (`rol`) asignados a `'gerocultor'` por defecto via Admin SDK desde Express.
+- [ ] Firestore Rules desplegadas con aislamiento por `usuarioId` (ownership).
+- [ ] Express middleware `verifyAuth` verificando ID tokens y validando que el usuario solo acceda a sus propios recursos.
+- [ ] Registro abierto (cualquiera puede registrarse, no se requiere invitación de admin).
 
 ## Nota de aprobación
 

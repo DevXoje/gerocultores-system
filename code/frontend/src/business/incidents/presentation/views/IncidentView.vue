@@ -117,7 +117,7 @@ function onCancelled(): void {
 </template>
 
 <style scoped>
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ─── Page shell ────────────────────────────────────────────────────────────── */
 .incident-view {

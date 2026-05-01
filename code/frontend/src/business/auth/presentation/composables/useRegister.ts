@@ -16,7 +16,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { createUserWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth'
 import { useAuthStore } from '@/business/auth/useAuthStore'
-import { auth, googleProvider } from '@/services/firebase'
+import { auth, googleProvider } from '@/infrastructure/firebase/firebase'
 import { DASHBOARD_ROUTES } from '@/views/route-names'
 
 const API_BASE = import.meta.env.VITE_API_URL as string

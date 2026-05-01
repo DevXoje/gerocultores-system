@@ -132,7 +132,7 @@ onMounted(() => {
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ─── Overlay ────────────────────────────────────────────────────────────── */
 .notification-panel__overlay {

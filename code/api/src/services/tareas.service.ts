@@ -8,7 +8,6 @@ import type {
   CreateTareaDto,
 } from '../types/tarea.types'
 import { TareaDocSchema, CreateTareaSchema } from '../types/tarea.types'
-import type { UserRole } from '../types/user.types'
 
 export class NotFoundError extends Error {
   readonly statusCode = 404
@@ -122,7 +121,6 @@ export class TareasService {
     id: string,
     estado: TareaEstado,
     requestingUid: string,
-    requestingRole: UserRole,
   ): Promise<TareaResponse> {
     await adminDb.runTransaction(async (tx) => {
       const ref = adminDb.collection(COLLECTIONS.tareas).doc(id)
@@ -130,8 +128,9 @@ export class TareasService {
 
       if (!snap.exists) throw new NotFoundError('Tarea not found')
 
-      if (requestingRole === 'gerocultor' && snap.data()!['usuarioId'] !== requestingUid) {
-        throw new ForbiddenError("Cannot update another user's task")
+      // Ownership check: only the assigned gerocultor can update
+      if (snap.data()!['usuarioId'] !== requestingUid) {
+        throw new ForbiddenError('No tienes acceso a esta tarea')
       }
 
       const updates: Partial<TareaDoc> = {
@@ -148,10 +147,15 @@ export class TareasService {
     return this.getTareaById(id)
   }
 
+  /**
+   * Creates a new task in the Firestore subcollection.
+   * Any authenticated gerocultor can create tasks for any resident.
+   * The `usuarioId` in the task must match the requester's uid.
+   * US-14: Task creation
+   */
   async createTarea(
     dto: CreateTareaDto,
     requestingUid: string,
-    requestingRole: UserRole,
   ): Promise<TareaResponse> {
     // 1. Validate with Zod — forward Zod errors as 400
     const parseResult = CreateTareaSchema.safeParse(dto)
@@ -169,28 +173,15 @@ export class TareasService {
       throw new ResidenteNotFoundError()
     }
 
-    // 3. Authorization: gerocultor can only create tasks for assigned residents
-    if (requestingRole === 'gerocultor') {
-      const gerocultoresAsignados: string[] = residenteSnap.data()?.['gerocultoresAsignados'] ?? []
-      if (!gerocultoresAsignados.includes(requestingUid)) {
-        throw new AccessDeniedError()
-      }
+    // 3. Validate usuarioId matches the requester (self-assignment only)
+    if (data.usuarioId !== requestingUid) {
+      throw new AccessDeniedError('Solo puedes crear tareas para ti mismo')
     }
 
-    // 4. Validate usuarioId exists and is not disabled
-    const usuarioSnap = await adminDb.collection(COLLECTIONS.usuarios).doc(data.usuarioId).get()
-    if (!usuarioSnap.exists || usuarioSnap.data()?.['disabled'] === true) {
-      throw new UsuarioNotFoundError()
-    }
-
-    // 5. Generate UUID and write to Firestore subcollection
+    // 3. Generate UUID and write to root tasks collection (consistent with reads)
     const uuid = crypto.randomUUID()
     const now = new Date().toISOString()
-    const tareaRef = adminDb
-      .collection(COLLECTIONS.residentes)
-      .doc(data.residenteId)
-      .collection(COLLECTIONS.tareas)
-      .doc(uuid)
+    const tareaRef = adminDb.collection(COLLECTIONS.tareas).doc(uuid)
 
     const docData: TareaDoc = {
       titulo: data.titulo,
@@ -208,7 +199,7 @@ export class TareasService {
     await tareaRef.set(docData)
 
     return {
-      id: `${COLLECTIONS.tareas}/${uuid}`,
+      id: uuid,
       ...docData,
     }
   }

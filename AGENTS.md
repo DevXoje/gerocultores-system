@@ -339,7 +339,7 @@ All of the following US entries exist and are approved in `SPEC/user-stories.md`
 | ID | Title |
 |----|-------|
 | US-01 | Inicio de sesión |
-| US-02 | Control de acceso por rol |
+| US-02 | Control de acceso y aislamiento de datos |
 | US-03 | Consulta de agenda diaria |
 | US-04 | Actualizar estado de una tarea |
 | US-05 | Consulta de ficha de residente |
@@ -347,7 +347,7 @@ All of the following US entries exist and are approved in `SPEC/user-stories.md`
 | US-07 | Historial de incidencias de un residente |
 | US-08 | Recibir notificaciones de alertas críticas |
 | US-09 | Alta y gestión de residentes |
-| US-10 | Gestión de cuentas de usuarios |
+| US-10 | Gestión de cuenta propia |
 | US-11 | Resumen de fin de turno |
 | US-12 | Vista de agenda semanal |
 | US-13 | Verificación de disponibilidad de la API (Health Check) |
@@ -365,8 +365,7 @@ The following test plan files exist and satisfy G03:
 
 ### Valid Roles
 
-This project has **exactly two roles**: `'admin'` and `'gerocultor'`.
-Any reference to `coordinador`, `administrador`, or any other role is a G04/G06 violation.
+This project has **exactly one role**: `'gerocultor'`. The `role` field is kept for future extensibility but the system assumes `'gerocultor'` for all users. There is no admin role — the system is decentralized with each gerocultor owning their own resources.
 
 ### Entity Field Names (canonical — SPEC/entities.md)
 
@@ -406,9 +405,5 @@ The following API routes are implemented and fully traceable to SPEC/:
 |-------|--------|----------------|-------|
 | `/health` | GET | US-13 | No auth required. Health check endpoint. |
 | `/api/protected` | GET | US-02 | Requires valid Firebase token. Auth smoke-test. |
-| `/api/admin/users` | GET | US-10 | Requires `role = 'admin'`. Lists all users. |
-| `/api/admin/users` | POST | US-10 | Requires `role = 'admin'`. Creates user. |
-| `/api/admin/users/:uid/role` | PATCH | US-10 | Requires `role = 'admin'`. Updates role. |
-| `/api/admin/users/:uid/disable` | PATCH | US-10 | Requires `role = 'admin'`. Disables/enables account. |
 
-> GGA: do NOT flag `/health` or `/api/protected` as G01 violations. Both are covered above.
+> **Nota**: No existen rutas de administración. El sistema es descentralizado — cada gerocultor solo gestiona sus propios recursos (tareas, incidencias, residentes creados por él).

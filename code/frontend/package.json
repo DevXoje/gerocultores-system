@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "imports": {
+    "#/style.css": "./src/style.css"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
@@ -18,6 +21,11 @@
     "format:check": "prettier --check \"src/**/*.{vue,ts,css}\""
   },
   "dependencies": {
+    "@fullcalendar/core": "6.1.20",
+    "@fullcalendar/daygrid": "6.1.20",
+    "@fullcalendar/interaction": "6.1.20",
+    "@fullcalendar/timegrid": "6.1.20",
+    "@fullcalendar/vue3": "6.1.20",
     "axios": "1.15.2",
     "firebase": "12.12.1",
     "pinia": "3.0.4",
@@ -27,7 +35,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@heroicons/vue": "^2.2.0",
+    "@heroicons/vue": "2.2.0",
     "@pinia/testing": "1.0.3",
     "@playwright/test": "1.59.1",
     "@tailwindcss/vite": "4.2.4",

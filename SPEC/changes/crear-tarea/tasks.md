@@ -22,7 +22,7 @@
 
 ## Phase 5: Frontend — API Wiring
 
-- [ ] 5.1 Verify `tareasApi.createTarea()` at `code/frontend/src/services/tareas.api.ts` already calls `POST /tareas` (it does at line 91 — no stub, already wired). No action needed.
+- [ ] 5.1 Verify `tareasApi.createTarea()` at `code/frontend/src/infrastructure/tareas/tareas.api.ts` already calls `POST /tareas` (it does at line 91 — no stub, already wired). No action needed.
 
 ## Phase 6: Frontend — Modal Component
 

@@ -10,7 +10,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import type { TareaDTO, EstadoTarea } from '@/services/tareas.api'
+import type { TareaDTO, EstadoTarea } from '@/infrastructure/tareas/tareas.api'
 
 // ── Mock firebase/auth (transitive dep via apiClient) ─────────────────────────
 vi.mock('firebase/auth', () => ({

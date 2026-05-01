@@ -16,7 +16,7 @@ vi.mock('firebase/auth', () => ({
   onAuthStateChanged: vi.fn(),
 }))
 
-vi.mock('@/services/apiClient', () => ({
+vi.mock('@/infrastructure/apiClient', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
@@ -26,7 +26,7 @@ vi.mock('@/services/apiClient', () => ({
 }))
 
 import { turnoApi } from './turnoApi'
-import { apiClient } from '@/services/apiClient'
+import { apiClient } from '@/infrastructure/apiClient'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 function makeRawTurnoResponse(overrides = {}) {

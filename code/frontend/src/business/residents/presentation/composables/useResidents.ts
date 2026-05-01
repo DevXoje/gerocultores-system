@@ -1,50 +1,28 @@
 /**
- * residents/presentation/composables/useResidents.ts
+ * useResidents.ts — Presentation composable bridge.
  *
- * Composable bridge for the residents admin module (US-09).
- * Exposes reactive state + async actions for listing, creating,
- * updating, and archiving residents.
+ * US-09: Alta y gestión de residentes
  *
  * Architecture (frontend-specialist.md §3):
  *   - Components import ONLY from composables — not stores directly.
- *   - Delegates all API calls to useResidentesStore.
+ *   - This composable delegates to useResidentes (application layer).
+ *   - Exposes reactive state + async actions for listing, creating,
+ *     updating, and archiving residents.
  */
-
-import { computed } from 'vue'
-import { useResidentesStore } from '@/business/residents/presentation/stores/residentesStore'
-import type {
-  Residente,
-  CreateResidenteDto,
-  UpdateResidenteDto,
-  ResidenteFilter,
-} from '@/business/residents/domain/Residente'
+import { useResidentes } from '@/business/residents/application/useResidentes'
 
 export function useResidents() {
-  const store = useResidentesStore()
-
-  // ── State ──────────────────────────────────────────────────────────────────
-  const residentes = computed<Residente[]>(() => store.residentes)
-  const activeResidentes = computed<Residente[]>(() => store.activeResidentes)
-  const archivedResidentes = computed<Residente[]>(() => store.archivedResidentes)
-  const isLoading = computed<boolean>(() => store.isLoading)
-  const error = computed<string | null>(() => store.error)
-
-  // ── Actions ──────────────────────────────────────────────────────────────
-  async function fetchResidentes(filter: ResidenteFilter = 'active'): Promise<void> {
-    await store.fetchResidentes(filter)
-  }
-
-  async function createResidente(dto: CreateResidenteDto): Promise<Residente> {
-    return store.createResidente(dto)
-  }
-
-  async function updateResidente(id: string, dto: UpdateResidenteDto): Promise<Residente> {
-    return store.updateResidente(id, dto)
-  }
-
-  async function archiveResidente(id: string): Promise<Residente> {
-    return store.archiveResidente(id)
-  }
+  const {
+    residentes,
+    activeResidentes,
+    archivedResidentes,
+    isLoading,
+    error,
+    fetchResidentes,
+    createResidente,
+    updateResidente,
+    archiveResidente,
+  } = useResidentes()
 
   return {
     // State

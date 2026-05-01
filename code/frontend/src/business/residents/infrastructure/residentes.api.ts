@@ -9,7 +9,7 @@
  * US-05: Consulta de ficha de residente
  */
 
-import { apiClient } from '@/services/apiClient'
+import { apiClient } from '@/infrastructure/apiClient'
 import type { ResidenteDTO } from '@/business/residents/domain/entities/residente.types'
 
 export interface ApiResponse<T> {

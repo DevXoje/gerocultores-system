@@ -8,7 +8,7 @@
  * US-03: Consulta de agenda diaria
  */
 
-import { apiClient } from '@/services/apiClient'
+import { apiClient } from '@/infrastructure/apiClient'
 import type { Residente, ResidenteFilter } from './Residente'
 
 export interface ListResidentesResult {

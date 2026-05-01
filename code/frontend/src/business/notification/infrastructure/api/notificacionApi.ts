@@ -9,7 +9,7 @@
  *   - Field names match SPEC/entities.md exactly (G04).
  */
 import { z } from 'zod'
-import { apiClient } from '@/services/apiClient'
+import { apiClient } from '@/infrastructure/apiClient'
 import {
   NotificacionSchema,
   type Notificacion,

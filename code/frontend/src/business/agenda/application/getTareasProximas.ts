@@ -11,7 +11,7 @@
  *   - Lives in application/ — delegates HTTP to tareasApi.
  *   - Pure logic, no framework deps.
  */
-import { tareasApi } from '@/services/tareas.api'
+import { tareasApi } from '@/infrastructure/tareas/tareas.api'
 import type { TareaResponse } from '@/business/agenda/domain/entities/tarea.types'
 
 export interface GetTareasProximasParams {

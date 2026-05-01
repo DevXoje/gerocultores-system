@@ -1,7 +1,5 @@
 import { Router } from 'express'
 import { verifyAuth } from '../middleware/verifyAuth'
-import { requireRole } from '../middleware/requireRole'
-import adminUsersRouter from './admin.users.routes'
 import tareasRouter from './tareas.routes'
 import notificacionesRouter from './notificaciones.routes'
 import turnosRouter from './turnos.routes'
@@ -33,13 +31,7 @@ protectedRouter.get('/', (_req, res) => {
   res.json({ status: 'authenticated' })
 })
 
-// Admin-only route — requires admin role
-protectedRouter.get('/admin-only', requireRole('admin'), (_req, res) => {
-  res.json({ status: 'admin-authorized' })
-})
-
 router.use('/api/protected', protectedRouter)
-router.use('/api/admin/users', adminUsersRouter)
 router.use('/api/tareas', tareasRouter)
 
 

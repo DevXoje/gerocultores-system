@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+/* FullCalendar v6 bundles CSS into JS — no separate CSS imports needed */
+
 /* ─── Custom font families ───────────────────────────────────────────────────── */
 @theme {
   --font-headline: 'Manrope', sans-serif;

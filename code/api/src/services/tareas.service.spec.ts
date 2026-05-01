@@ -1,17 +1,16 @@
 /**
  * tareas.service.spec.ts — Unit tests for TareasService.
  *
- * Firestore is fully mocked — no real Firebase calls happen.
+ * Modelo descentralizado por ownership: un gerocultor solo puede modificar
+ * sus propias tareas y crear tareas solo para sí mismo.
  *
  * US-03: Consulta de agenda diaria
  * US-04: Actualizar estado de una tarea
+ * US-14: Crear tarea
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 // ─── Mock Firebase before any imports ────────────────────────────────────────
-// NOTE: vi.mock is hoisted, so the factory must not reference top-level variables.
-// We use vi.fn() directly inside the factory to avoid ReferenceError.
-
 vi.mock('../services/firebase', () => {
   const mockTx = {
     get: vi.fn(),
@@ -36,10 +35,6 @@ vi.mock('../services/firebase', () => {
     collection: vi.fn(() => mockSubColRef),
   }
 
-  const mockUsuarioDocRef = {
-    get: vi.fn(),
-  }
-
   const mockCollectionRef = {
     doc: vi.fn(() => mockDocRef),
     where: vi.fn(),
@@ -48,10 +43,6 @@ vi.mock('../services/firebase', () => {
 
   const mockResidenteCollectionRef = {
     doc: vi.fn(() => mockResidenteDocRef),
-  }
-
-  const mockUsuarioCollectionRef = {
-    doc: vi.fn(() => mockUsuarioDocRef),
   }
 
   mockCollectionRef.where.mockReturnValue(mockCollectionRef)
@@ -65,7 +56,6 @@ vi.mock('../services/firebase', () => {
     adminDb: {
       collection: vi.fn((name: string) => {
         if (name === 'residents') return mockResidenteCollectionRef
-        if (name === 'users') return mockUsuarioCollectionRef
         return mockCollectionRef
       }),
       runTransaction: mockRunTransaction,
@@ -74,23 +64,20 @@ vi.mock('../services/firebase', () => {
       _mockCollectionRef: mockCollectionRef,
       _mockRunTransaction: mockRunTransaction,
       _mockResidenteDocRef: mockResidenteDocRef,
-      _mockUsuarioDocRef: mockUsuarioDocRef,
       _mockSubColRef: mockSubColRef,
     },
   }
 })
 
 import { TareasService, NotFoundError, ForbiddenError } from './tareas.service'
-import {
-  ValidationError,
-  ResidenteNotFoundError,
-  UsuarioNotFoundError,
-  AccessDeniedError,
-} from './tareas.service'
+import { ValidationError, ResidenteNotFoundError, AccessDeniedError } from './tareas.service'
 import { adminDb } from './firebase'
 import { CreateTareaSchema } from '../types/tarea.types'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
+
+const ownerUid = 'gero-uid-001'
+const otherUid = 'gero-uid-002'
 
 const sampleTareaData = {
   titulo: 'Administrar medicación',
@@ -99,7 +86,7 @@ const sampleTareaData = {
   estado: 'pendiente',
   notas: null,
   residenteId: 'res-uuid-456',
-  usuarioId: 'user-uid-123',
+  usuarioId: ownerUid,
   creadoEn: '2026-04-17T10:00:00Z',
   actualizadoEn: '2026-04-17T10:00:00Z',
   completadaEn: null,
@@ -141,31 +128,10 @@ describe('TareasService.updateEstado', () => {
     collectionRef.where.mockReturnValue(collectionRef)
   })
 
-  it('successfully updates estado when admin calls updateEstado', async () => {
+  it('owner actualiza estado de su propia tarea → completada', async () => {
     const { tx, docRef } = getMocks()
 
-    const snapInTx = { exists: true, data: () => ({ ...sampleTareaData, usuarioId: 'user-uid-123' }) }
-    tx.get.mockResolvedValueOnce(snapInTx)
-
-    const snapAfter = {
-      exists: true,
-      id: tareaId,
-      data: () => ({ ...sampleTareaData, estado: 'en_curso', actualizadoEn: '2026-04-18T09:00:00Z' }),
-    }
-    docRef.get.mockResolvedValueOnce(snapAfter)
-
-    const result = await service.updateEstado(tareaId, 'en_curso', 'admin-uid', 'admin')
-
-    expect(getMocks().runTransaction).toHaveBeenCalledOnce()
-    expect(tx.update).toHaveBeenCalledOnce()
-    expect(result.id).toBe(tareaId)
-  })
-
-  it('successfully updates estado when gerocultor updates their own task', async () => {
-    const ownUid = 'user-uid-123'
-    const { tx, docRef } = getMocks()
-
-    const snapInTx = { exists: true, data: () => ({ ...sampleTareaData, usuarioId: ownUid }) }
+    const snapInTx = { exists: true, data: () => ({ ...sampleTareaData, usuarioId: ownerUid }) }
     tx.get.mockResolvedValueOnce(snapInTx)
 
     const snapAfter = {
@@ -175,43 +141,41 @@ describe('TareasService.updateEstado', () => {
     }
     docRef.get.mockResolvedValueOnce(snapAfter)
 
-    const result = await service.updateEstado(tareaId, 'completada', ownUid, 'gerocultor')
+    const result = await service.updateEstado(tareaId, 'completada', ownerUid)
 
+    expect(getMocks().runTransaction).toHaveBeenCalledOnce()
     expect(tx.update).toHaveBeenCalledOnce()
     const updateArg = tx.update.mock.calls[0][1] as Record<string, unknown>
     expect(updateArg['completadaEn']).toBeDefined()
     expect(result.id).toBe(tareaId)
   })
 
-  it('throws NotFoundError when task does not exist', async () => {
+  it('throw NotFoundError si la tarea no existe', async () => {
     const { tx } = getMocks()
-
-    const snapInTx = { exists: false, data: () => null }
-    tx.get.mockResolvedValueOnce(snapInTx)
+    tx.get.mockResolvedValueOnce({ exists: false, data: () => null })
 
     await expect(
-      service.updateEstado(tareaId, 'en_curso', 'any-uid', 'admin'),
+      service.updateEstado(tareaId, 'en_curso', ownerUid),
     ).rejects.toThrow(NotFoundError)
   })
 
-  it('throws ForbiddenError when gerocultor tries to update another user task', async () => {
+  it('ForbiddenError cuando intenta actualizar tarea de otro gerocultor', async () => {
     const { tx } = getMocks()
 
-    const snapInTx = { exists: true, data: () => ({ ...sampleTareaData, usuarioId: 'other-uid' }) }
+    const snapInTx = { exists: true, data: () => ({ ...sampleTareaData, usuarioId: otherUid }) }
     tx.get.mockResolvedValueOnce(snapInTx)
 
     await expect(
-      service.updateEstado(tareaId, 'en_curso', 'requesting-uid', 'gerocultor'),
+      service.updateEstado(tareaId, 'en_curso', ownerUid),
     ).rejects.toThrow(ForbiddenError)
 
     expect(tx.update).not.toHaveBeenCalled()
   })
 
-  it('sets completadaEn only when estado is completada', async () => {
-    const ownUid = 'user-uid-123'
+  it('completadaEn solo se establece cuando estado es completada', async () => {
     const { tx, docRef } = getMocks()
 
-    const snapInTx = { exists: true, data: () => ({ ...sampleTareaData, usuarioId: ownUid }) }
+    const snapInTx = { exists: true, data: () => ({ ...sampleTareaData, usuarioId: ownerUid }) }
     tx.get.mockResolvedValueOnce(snapInTx)
 
     const snapAfter = {
@@ -221,7 +185,7 @@ describe('TareasService.updateEstado', () => {
     }
     docRef.get.mockResolvedValueOnce(snapAfter)
 
-    await service.updateEstado(tareaId, 'en_curso', ownUid, 'gerocultor')
+    await service.updateEstado(tareaId, 'en_curso', ownerUid)
 
     const updateArg = tx.update.mock.calls[0][1] as Record<string, unknown>
     expect(updateArg['completadaEn']).toBeUndefined()
@@ -240,7 +204,7 @@ describe('TareasService.getTareaById', () => {
     collectionRef.doc.mockReturnValue(docRef)
   })
 
-  it('returns tarea when it exists', async () => {
+  it('retorna tarea cuando existe', async () => {
     const { docRef } = getMocks()
     docRef.get.mockResolvedValueOnce({
       exists: true,
@@ -253,7 +217,7 @@ describe('TareasService.getTareaById', () => {
     expect(result.titulo).toBe(sampleTareaData.titulo)
   })
 
-  it('throws NotFoundError when tarea does not exist', async () => {
+  it('throw NotFoundError cuando no existe', async () => {
     const { docRef } = getMocks()
     docRef.get.mockResolvedValueOnce({ exists: false, data: () => null })
 
@@ -269,51 +233,42 @@ describe('CreateTareaSchema', () => {
     tipo: 'higiene',
     fechaHora: '2026-04-20T08:00:00Z',
     residenteId: '550e8400-e29b-41d4-a716-446655440001',
-    usuarioId: 'uid-123',
+    usuarioId: ownerUid,
     notas: 'Evitar agua muy caliente',
   }
 
-  it('parses a valid DTO', () => {
+  it('parsea un DTO válido', () => {
     const result = CreateTareaSchema.safeParse(validDto)
     expect(result.success).toBe(true)
   })
 
-  it('parses DTO without notas (optional)', () => {
+  it('parsea DTO sin notas (opcional)', () => {
     const { notas: _notas, ...dtoWithoutNotas } = validDto
     const result = CreateTareaSchema.safeParse(dtoWithoutNotas)
     expect(result.success).toBe(true)
   })
 
-  it('rejects empty titulo', () => {
+  it('rechaza titulo vacío', () => {
     const result = CreateTareaSchema.safeParse({ ...validDto, titulo: '' })
     expect(result.success).toBe(false)
   })
 
-  it('rejects whitespace-only titulo', () => {
-    // Zod .min(1) does NOT trim — a string of spaces passes .min(1).
-    // The service-layer trim() is applied after parse in real usage, not in schema.
-    // Test: whitespace-only is NOT rejected by schema alone (matches real Zod behavior)
-    const result = CreateTareaSchema.safeParse({ ...validDto, titulo: '   ' })
-    // Comment: .min(1) allows spaces; real validation trims at service layer after parse.
-    expect(result.success).toBe(true)
-  })
-
-  it('rejects invalid tipo value', () => {
+  it('rechaza tipo inválido', () => {
     const result = CreateTareaSchema.safeParse({ ...validDto, tipo: 'invalid' })
     expect(result.success).toBe(false)
   })
 
-  it('rejects non-ISO8601 fechaHora', () => {
+  it('rechaza fechaHora no ISO8601', () => {
     const result = CreateTareaSchema.safeParse({ ...validDto, fechaHora: 'not-a-date' })
     expect(result.success).toBe(false)
   })
 
-  it('rejects non-UUID residenteId', () => {
+  it('rechaza residenteId que no es UUID', () => {
     const result = CreateTareaSchema.safeParse({ ...validDto, residenteId: 'not-a-uuid' })
     expect(result.success).toBe(false)
   })
 
-  it('rejects missing required fields', () => {
+  it('rechaza campos requeridos faltantes', () => {
     const result = CreateTareaSchema.safeParse({})
     expect(result.success).toBe(false)
   })
@@ -329,48 +284,40 @@ describe('TareasService.createTarea', () => {
     service = new TareasService()
   })
 
-  function getMocks() {
+  function getResidenteMocks() {
     const db = adminDb as unknown as {
       _mockResidenteDocRef: { get: ReturnType<typeof vi.fn> }
-      _mockUsuarioDocRef: { get: ReturnType<typeof vi.fn> }
       _mockDocRef: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn> }
     }
     return {
       residenteDocRef: db._mockResidenteDocRef,
-      usuarioDocRef: db._mockUsuarioDocRef,
       tareaDocRef: db._mockDocRef,
     }
   }
 
-  const validDto = {
-    titulo: 'Baño matutino',
-    tipo: 'higiene',
-    fechaHora: '2026-04-20T08:00:00Z',
-    residenteId: '550e8400-e29b-41d4-a716-446655440001',
-    usuarioId: 'uid-123',
-    notas: 'Evitar agua muy caliente',
-  }
+  it('gerocultor crea tarea para sí mismo → 201 con estado pendiente', async () => {
+    const { residenteDocRef, tareaDocRef } = getResidenteMocks()
 
-  it('creates a tarea as admin and returns 201 response with correct id format', async () => {
-    const { residenteDocRef, usuarioDocRef, tareaDocRef } = getMocks()
-
-    // Residente exists and is active
+    // Residente existe y está activo
     residenteDocRef.get.mockResolvedValueOnce({
       exists: true,
-      data: () => ({ archivado: false, gerocultoresAsignados: [] }),
+      data: () => ({ archivado: false }),
     })
-    // Usuario exists and is active
-    usuarioDocRef.get.mockResolvedValueOnce({
-      exists: true,
-      data: () => ({ disabled: false }),
-    })
-    // Firestore set succeeds
     tareaDocRef.set.mockResolvedValueOnce(undefined)
 
-    const result = await service.createTarea(validDto, 'admin-uid', 'admin')
+    const dto = {
+      titulo: 'Baño matutino',
+      tipo: 'higiene',
+      fechaHora: '2026-04-20T08:00:00Z',
+      residenteId: '550e8400-e29b-41d4-a716-446655440001',
+      usuarioId: ownerUid,
+      notas: 'Evitar agua muy caliente',
+    }
+
+    const result = await service.createTarea(dto, ownerUid)
 
     expect(result.estado).toBe('pendiente')
-    expect(result.id).toMatch(/^tasks\//)
+    expect(result.id).toMatch(/^[0-9a-f-]{36}$/) // UUID v4 without collection prefix
     expect(result.titulo).toBe('Baño matutino')
     expect(result.tipo).toBe('higiene')
     expect(result.creadoEn).toBeDefined()
@@ -379,98 +326,70 @@ describe('TareasService.createTarea', () => {
     expect(tareaDocRef.set).toHaveBeenCalledOnce()
   })
 
-  it('creates a tarea when gerocultor is assigned to the resident', async () => {
-    const { residenteDocRef, usuarioDocRef, tareaDocRef } = getMocks()
-
-    residenteDocRef.get.mockResolvedValueOnce({
-      exists: true,
-      data: () => ({
-        archivado: false,
-        gerocultoresAsignados: ['gerocultor-uid'],
-      }),
-    })
-    usuarioDocRef.get.mockResolvedValueOnce({
-      exists: true,
-      data: () => ({ disabled: false }),
-    })
-    tareaDocRef.set.mockResolvedValueOnce(undefined)
-
-    const result = await service.createTarea(validDto, 'gerocultor-uid', 'gerocultor')
-
-    expect(result.estado).toBe('pendiente')
-    expect(tareaDocRef.set).toHaveBeenCalledOnce()
-  })
-
-  it('throws ResidenteNotFoundError when residenteId does not exist', async () => {
-    const { residenteDocRef } = getMocks()
+  it('throw ResidenteNotFoundError si residente no existe', async () => {
+    const { residenteDocRef } = getResidenteMocks()
+    // UUID válido que pasa schema pero no existe en Firestore
     residenteDocRef.get.mockResolvedValueOnce({ exists: false })
 
+    const dto = {
+      titulo: 'Baño',
+      tipo: 'higiene',
+      fechaHora: '2026-04-20T08:00:00Z',
+      residenteId: '550e8400-e29b-41d4-a716-446655440000',
+      usuarioId: ownerUid,
+    }
+
     await expect(
-      service.createTarea(validDto, 'admin-uid', 'admin'),
+      service.createTarea(dto, ownerUid),
     ).rejects.toThrow(ResidenteNotFoundError)
   })
 
-  it('throws ResidenteNotFoundError when residente is archived', async () => {
-    const { residenteDocRef } = getMocks()
+  it('throw ResidenteNotFoundError si residente está archivado', async () => {
+    const { residenteDocRef } = getResidenteMocks()
     residenteDocRef.get.mockResolvedValueOnce({
       exists: true,
       data: () => ({ archivado: true }),
     })
 
+    const dto = {
+      titulo: 'Baño',
+      tipo: 'higiene',
+      fechaHora: '2026-04-20T08:00:00Z',
+      residenteId: '550e8400-e29b-41d4-a716-446655440001',
+      usuarioId: ownerUid,
+    }
+
     await expect(
-      service.createTarea(validDto, 'admin-uid', 'admin'),
+      service.createTarea(dto, ownerUid),
     ).rejects.toThrow(ResidenteNotFoundError)
   })
 
-  it('throws AccessDeniedError when gerocultor creates for unassigned resident', async () => {
-    const { residenteDocRef } = getMocks()
+  it('throw AccessDeniedError si usuarioId !== requestingUid', async () => {
+    const { residenteDocRef } = getResidenteMocks()
+    // Residente existe y activo — la verificación de ownership falla DESPUÉS
     residenteDocRef.get.mockResolvedValueOnce({
       exists: true,
-      data: () => ({
-        archivado: false,
-        gerocultoresAsignados: ['other-gerocultor-uid'],
-      }),
+      data: () => ({ archivado: false }),
     })
 
+    const dto = {
+      titulo: 'Baño',
+      tipo: 'higiene',
+      fechaHora: '2026-04-20T08:00:00Z',
+      residenteId: '550e8400-e29b-41d4-a716-446655440001',
+      usuarioId: otherUid, // Intenta crear para otro gerocultor
+    }
+
     await expect(
-      service.createTarea(validDto, 'gerocultor-uid', 'gerocultor'),
+      service.createTarea(dto, ownerUid), // pero requester es ownerUid → AccessDeniedError
     ).rejects.toThrow(AccessDeniedError)
   })
 
-  it('throws UsuarioNotFoundError when usuarioId does not exist', async () => {
-    const { residenteDocRef, usuarioDocRef } = getMocks()
-    residenteDocRef.get.mockResolvedValueOnce({
-      exists: true,
-      data: () => ({ archivado: false, gerocultoresAsignados: [] }),
-    })
-    usuarioDocRef.get.mockResolvedValueOnce({ exists: false })
+  it('throw ValidationError cuando DTO es inválido', async () => {
+    const invalidDto = { titulo: '', tipo: 'higiene', fechaHora: '2026-04-20T08:00:00Z', residenteId: '550e8400-e29b-41d4-a716-446655440001', usuarioId: ownerUid }
 
     await expect(
-      service.createTarea(validDto, 'admin-uid', 'admin'),
-    ).rejects.toThrow(UsuarioNotFoundError)
-  })
-
-  it('throws UsuarioNotFoundError when usuario is disabled', async () => {
-    const { residenteDocRef, usuarioDocRef } = getMocks()
-    residenteDocRef.get.mockResolvedValueOnce({
-      exists: true,
-      data: () => ({ archivado: false, gerocultoresAsignados: [] }),
-    })
-    usuarioDocRef.get.mockResolvedValueOnce({
-      exists: true,
-      data: () => ({ disabled: true }),
-    })
-
-    await expect(
-      service.createTarea(validDto, 'admin-uid', 'admin'),
-    ).rejects.toThrow(UsuarioNotFoundError)
-  })
-
-  it('throws ValidationError when DTO is invalid', async () => {
-    const invalidDto = { ...validDto, titulo: '' }
-
-    await expect(
-      service.createTarea(invalidDto, 'admin-uid', 'admin'),
+      service.createTarea(invalidDto, ownerUid),
     ).rejects.toThrow(ValidationError)
   })
 })

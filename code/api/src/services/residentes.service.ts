@@ -1,20 +1,18 @@
 /**
  * residentes.service.ts — Business logic + Firestore operations for Residente.
  *
+ * Modelo descentralizado: cada gerocultor es dueño de los recursos que crea.
  * US-05: Consulta de ficha de residente
  * US-09: Alta y gestión de residentes
- * - Admin: full access to all operations
- * - Gerocultor: read-only access to residents in their gerocultoresAsignados array
  */
 import { randomUUID } from 'node:crypto'
 
 import { adminDb } from './firebase'
 import { COLLECTIONS } from './collections'
-import { FieldValue } from 'firebase-admin/firestore'
+import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import type { ResidenteResponse } from '../types/residente.types'
 import { CreateResidenteSchema, ResidenteDocSchema, UpdateResidenteSchema } from '../types/residente.types'
 import type { CreateResidenteDto, UpdateResidenteDto } from '../types/residente.types'
-import type { UserRole } from '../types/user.types'
 
 export class NotFoundError extends Error {
   readonly statusCode = 404
@@ -33,11 +31,29 @@ export class ForbiddenError extends Error {
 }
 
 /**
+ * Converts a Firestore Timestamp to an ISO string.
+ * Firestore returns Timestamp objects for serverTimestamp fields.
+ */
+function toISO(value: unknown): string | null {
+  if (value === null || value === undefined) return null
+  if (value instanceof Timestamp) return value.toDate().toISOString()
+  if (typeof value === 'string') return value
+  return String(value)
+}
+
+/**
  * Converts a Firestore document to ResidenteResponse after validating the raw data.
  * Uses Zod safeParse to ensure runtime type safety — no silent failures on bad data.
+ * Firestore Timestamp fields are converted to ISO strings before Zod validation.
  */
 function docToResponse(id: string, data: FirebaseFirestore.DocumentData): ResidenteResponse {
-  const parsed = ResidenteDocSchema.safeParse(data)
+  // Convert Firestore Timestamp fields to ISO strings so Zod schema (expecting string) passes
+  const normalized = {
+    ...data,
+    creadoEn: toISO(data['creadoEn']),
+    actualizadoEn: toISO(data['actualizadoEn']),
+  }
+  const parsed = ResidenteDocSchema.safeParse(normalized)
   if (!parsed.success) {
     // Log for debugging; in production this should never happen if Firestore rules are correct
     console.error('[ResidentesService] Firestore doc failed schema validation:', parsed.error.flatten())
@@ -56,6 +72,7 @@ function docToResponse(id: string, data: FirebaseFirestore.DocumentData): Reside
     medicacion: d.medicacion,
     preferencias: d.preferencias,
     archivado: d.archivado,
+    usuarioId: d.usuarioId,
     creadoEn: d.creadoEn,
     actualizadoEn: d.actualizadoEn,
   }
@@ -69,7 +86,6 @@ export class ResidentesService {
   async getResidenteById(
     id: string,
     requestingUid: string,
-    requestingRole: UserRole,
   ): Promise<ResidenteResponse> {
     const snap = await this.collection.doc(id).get()
 
@@ -79,30 +95,22 @@ export class ResidentesService {
 
     const data = snap.data()!
 
-    // Gerocultor access control: must be in gerocultoresAsignados array
-    if (requestingRole === 'gerocultor') {
-      const assigned = data['gerocultoresAsignados'] ?? []
-      if (!Array.isArray(assigned) || !assigned.includes(requestingUid)) {
-        throw new ForbiddenError('No tienes acceso a este residente')
-      }
+    // Ownership check: only the creator can read
+    if (data.usuarioId !== requestingUid) {
+      throw new ForbiddenError('No tienes acceso a este residente')
     }
 
     return docToResponse(snap.id, data)
   }
 
   /**
-   * Creates a new resident. Admin only.
+   * Creates a new resident. Any authenticated gerocultor can create residents.
    * US-09 — Phase 2 Task 2.1
    */
   async createResidente(
     dto: CreateResidenteDto,
-    _requestingUid: string,
-    requestingRole: UserRole,
+    requestingUid: string,
   ): Promise<ResidenteResponse> {
-    if (requestingRole !== 'admin') {
-      throw new ForbiddenError('Solo un admin puede crear residentes')
-    }
-
     const parsed = CreateResidenteSchema.safeParse(dto)
     if (!parsed.success) {
       const message = parsed.error.issues.map((e) => e.message).join(', ')
@@ -124,7 +132,7 @@ export class ResidentesService {
       medicacion: parsed.data.medicacion ?? null,
       preferencias: parsed.data.preferencias ?? null,
       archivado: false,
-      gerocultoresAsignados: [],
+      usuarioId: requestingUid, // Owner — el gerocultor que lo crea
       creadoEn: now,
       actualizadoEn: now,
     })
@@ -135,15 +143,12 @@ export class ResidentesService {
   }
 
   /**
-   * Lists residents with optional filter.
-   * - Admin: all residents (respects filter)
-   * - Gerocultor: only residents where uid appears in gerocultoresAsignados
+   * Lists residents created by the requesting gerocultor.
    * US-09 — Phase 2 Task 2.2
    */
   async listResidentes(
     filter: 'active' | 'archived' | 'all',
     requestingUid: string,
-    requestingRole: UserRole,
   ): Promise<ResidenteResponse[]> {
     let query: FirebaseFirestore.Query = this.collection
 
@@ -155,38 +160,22 @@ export class ResidentesService {
     // 'all' → no filter
 
     const snap = await query.get()
-    const all = snap.docs.map((doc) => docToResponse(doc.id, doc.data()))
 
-    if (requestingRole === 'admin') {
-      return all
-    }
-
-    // Gerocultor: filter to only their assigned residents
-    return all.filter((r) => {
-      // For this we need gerocultoresAsignados — not in ResidenteResponse
-      // Fetch raw doc to check the array
-      return snap.docs.some((doc) => {
-        const data = doc.data()
-        const assigned: string[] = data['gerocultoresAsignados'] ?? []
-        return doc.id === r.id && assigned.includes(requestingUid)
-      })
-    })
+    // Ownership filter: only residents created by this gerocultor
+    return snap.docs
+      .map((doc) => docToResponse(doc.id, doc.data()))
+      .filter((r) => r.usuarioId === requestingUid)
   }
 
   /**
-   * Updates a resident's fields. Admin only.
+   * Updates a resident's fields. Only the owner can update.
    * US-09 — Phase 2 Task 2.3
    */
   async updateResidente(
     id: string,
     dto: UpdateResidenteDto,
-    _requestingUid: string,
-    requestingRole: UserRole,
+    requestingUid: string,
   ): Promise<ResidenteResponse> {
-    if (requestingRole !== 'admin') {
-      throw new ForbiddenError('Solo un admin puede actualizar residentes')
-    }
-
     const parsed = UpdateResidenteSchema.safeParse(dto)
     if (!parsed.success) {
       const message = parsed.error.issues.map((e) => e.message).join(', ')
@@ -196,6 +185,13 @@ export class ResidentesService {
     const snap = await this.collection.doc(id).get()
     if (!snap.exists) {
       throw new NotFoundError('Residente not found')
+    }
+
+    const data = snap.data()!
+
+    // Ownership check
+    if (data.usuarioId !== requestingUid) {
+      throw new ForbiddenError('Solo el creador del residente puede editarlo')
     }
 
     // Build update object with only provided fields
@@ -217,21 +213,23 @@ export class ResidentesService {
   }
 
   /**
-   * Archives a resident. Admin only.
+   * Archives a resident. Only the owner can archive.
    * US-09 — Phase 2 Task 2.4
    */
   async archiveResidente(
     id: string,
-    _requestingUid: string,
-    requestingRole: UserRole,
+    requestingUid: string,
   ): Promise<ResidenteResponse> {
-    if (requestingRole !== 'admin') {
-      throw new ForbiddenError('Solo un admin puede archivar residentes')
-    }
-
     const snap = await this.collection.doc(id).get()
     if (!snap.exists) {
       throw new NotFoundError('Residente not found')
+    }
+
+    const data = snap.data()!
+
+    // Ownership check
+    if (data.usuarioId !== requestingUid) {
+      throw new ForbiddenError('Solo el creador del residente puede archivarlo')
     }
 
     await this.collection.doc(id).update({

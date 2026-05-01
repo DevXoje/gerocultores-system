@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { AUTH_ROUTES } from '@/business/auth/route-names'
-import { DASHBOARD_ROUTES } from '@/views/route-names'
+import { DASHBOARD_ROUTES, TASKS_ROUTES } from '@/views/route-names'
 import { authRoutes } from '@/business/auth/routes'
 import { residentsRoutes } from '@/business/residents/routes'
 import { incidentsRoutes } from '@/business/incidents/routes'
@@ -35,6 +35,12 @@ export const routes: RouteRecordRaw[] = [
     path: '/turno',
     name: 'turno',
     component: TurnoView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: TASKS_ROUTES.all,
+    name: TASKS_ROUTES.name,
+    component: () => import('@/business/agenda/presentation/views/TasksView.vue'),
     meta: { requiresAuth: true },
   },
 ]

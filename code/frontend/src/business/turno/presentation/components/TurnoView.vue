@@ -140,7 +140,7 @@ function formatDate(date: Date): string {
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 .turno-view {
   @apply flex flex-col gap-6 px-4 py-6 max-w-2xl mx-auto;

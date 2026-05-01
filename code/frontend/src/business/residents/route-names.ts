@@ -14,17 +14,17 @@ export const RESIDENTS_ROUTES = {
     name: 'residente-incidencias',
     path: '/residentes/:id/incidencias',
   },
-  // US-09: Admin resident management
-  RESIDENTS_ADMIN: {
-    name: 'residents-admin',
-    path: '/admin/residents',
+  // US-09: Gerocultor crea/gestiona sus propios residentes
+  RESIDENTS_LIST: {
+    name: 'residents-list',
+    path: '/residentes',
   },
   RESIDENTE_NUEVO: {
     name: 'residente-nuevo',
-    path: '/admin/residents/nuevo',
+    path: '/residentes/nuevo',
   },
   RESIDENTE_EDITAR: {
     name: 'residente-editar',
-    path: '/admin/residents/:id/editar',
+    path: '/residentes/:id/editar',
   },
 } as const

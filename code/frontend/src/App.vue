@@ -16,7 +16,7 @@
  */
 import { onMounted, ref } from 'vue'
 import { BellIcon } from '@heroicons/vue/24/outline'
-import OfflineBanner from '@/components/OfflineBanner.vue'
+import OfflineBanner from '@/ui/atoms/OfflineBanner.vue'
 import NotificationPanel from '@/business/notification/presentation/components/NotificationPanel.vue'
 import NotificationToast from '@/business/notification/presentation/components/NotificationToast.vue'
 import { useNotificacion } from '@/business/notification/presentation/composables/useNotificacion'
@@ -70,7 +70,7 @@ function handleClosePanel(): void {
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "./style.css";
+@reference "#/style.css";
 
 .app-shell__notification-bell {
   @apply fixed top-4 right-4 z-40 flex items-center justify-center;

@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import './style.css'
 // Firebase init: connects to emulators in DEV, uses VITE_* env vars in all envs (G05 compliant)
-import './services/firebase'
+import '@/infrastructure/firebase/firebase'
 import App from './App.vue'
 import router from './router/router'
 

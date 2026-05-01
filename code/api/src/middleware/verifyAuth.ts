@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
 import { adminAuth } from '../services/firebase'
-export { requireRole } from './requireRole'
 
 const isEmulator = process.env['USE_FIREBASE_EMULATORS'] === 'true'
 

@@ -10,12 +10,15 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  *   - Uses useTareas (application/) for API calls.
  */
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useTareas } from '@/business/agenda/application/useTareas'
 import type { TareaTipo } from '@/business/agenda/domain/entities/tarea.types'
 import { useAuthStore } from '@/business/auth/useAuthStore'
 import type { CreateTareaDTO } from '@/business/agenda/domain/entities/tarea.types'
-import AppDialog from '@/components/dialogs/AppDialog.vue'
+import { useResidents } from '@/business/residents/presentation/composables/useResidents'
+import type { CreateResidenteDto } from '@/business/residents/domain/Residente'
+import ResidenteForm from '@/business/residents/presentation/components/ResidenteForm.vue'
+import AppDialog from '@/ui/molecules/dialogs/AppDialog.vue'
 
 const modelValue = defineModel<boolean>()
 
@@ -40,6 +43,44 @@ const usuarioId = computed(() => auth.user?.uid ?? '')
 // Validation error per field
 const fieldErrors = ref<Record<string, string>>({})
 
+// ─── Residentes ──────────────────────────────────────────────────────────────
+
+const { activeResidentes, fetchResidentes, createResidente } = useResidents()
+
+const showCreateResidente = ref(false)
+
+onMounted(() => {
+  fetchResidentes('active')
+})
+
+function handleResidenteChange(): void {
+  if (residenteId.value === '__create_new__') {
+    // Reset select display to placeholder
+    residenteId.value = ''
+    showCreateResidente.value = true
+  }
+}
+
+async function handleCreateResidente(data: CreateResidenteDto): Promise<void> {
+  const created = await createResidente(data)
+  residenteId.value = created.id
+  showCreateResidente.value = false
+  // Refresh list so the new resident appears
+  await fetchResidentes('active')
+}
+
+function handleCancelNewResidente(): void {
+  showCreateResidente.value = false
+}
+
+function handleClose(): void {
+  emit('close')
+}
+
+function handleCancel(): void {
+  modelValue.value = false
+}
+
 const TIPO_OPTIONS: Array<{ value: TareaTipo; label: string }> = [
   { value: 'higiene', label: 'Higiene' },
   { value: 'medicacion', label: 'Medicación' },
@@ -49,9 +90,9 @@ const TIPO_OPTIONS: Array<{ value: TareaTipo; label: string }> = [
   { value: 'otro', label: 'Otro' },
 ]
 
-// Minimal residentes list — in production this would come from
-// a useResidentes composable. Placeholder for Phase 6.
-const residentesList = ref<Array<{ id: string; nombre: string }>>([])
+const residentesList = computed(() =>
+  activeResidentes.value.map((r) => ({ id: r.id, nombre: `${r.nombre} ${r.apellidos}` }))
+)
 
 function validate(): boolean {
   const errors: Record<string, string> = {}
@@ -94,21 +135,17 @@ async function handleSubmit(): Promise<void> {
     modelValue.value = false
     emit('close')
   }
-  // If failed, createError is surfaced by the composable (can be displayed in UI)
-}
-
-function handleClose(): void {
-  emit('close')
-}
-
-function handleCancel(): void {
-  modelValue.value = false
 }
 </script>
 
 <template>
   <AppDialog v-model="modelValue" title="Nueva tarea" size="sm" @close="handleClose">
-    <form class="create-tarea-modal__form" novalidate @submit.prevent="handleSubmit">
+    <form
+      id="create-tarea-form"
+      class="create-tarea-modal__form"
+      novalidate
+      @submit.prevent="handleSubmit"
+    >
       <!-- titulo -->
       <div class="create-tarea-modal__field">
         <label for="tarea-titulo" class="create-tarea-modal__label">Título</label>
@@ -168,11 +205,13 @@ function handleCancel(): void {
           v-model="residenteId"
           class="create-tarea-modal__select"
           :class="{ 'create-tarea-modal__select--error': fieldErrors['residenteId'] }"
+          @change="handleResidenteChange"
         >
           <option value="" disabled>Selecciona un residente</option>
           <option v-for="res in residentesList" :key="res.id" :value="res.id">
             {{ res.nombre }}
           </option>
+          <option value="__create_new__">— Alta nuevo residente —</option>
         </select>
         <span v-if="fieldErrors['residenteId']" class="create-tarea-modal__error">
           {{ fieldErrors['residenteId'] }}
@@ -220,11 +259,25 @@ function handleCancel(): void {
         </button>
       </div>
     </template>
+
+    <!-- Nested modal for resident creation -->
+    <AppDialog
+      v-if="showCreateResidente"
+      v-model="showCreateResidente"
+      title="Alta nuevo residente"
+      size="md"
+    >
+      <ResidenteForm
+        submit-label="Crear residente"
+        @submit="handleCreateResidente"
+        @cancelled="handleCancelNewResidente"
+      />
+    </AppDialog>
   </AppDialog>
 </template>
 
 <style scoped>
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ─── Form ───────────────────────────────────────────────────────────────── */
 .create-tarea-modal__form {

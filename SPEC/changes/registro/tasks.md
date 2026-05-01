@@ -8,7 +8,7 @@
 
 ## Phase 2: Firebase Service Export
 
-- [x] 2.1 Modify `code/frontend/src/services/firebase.ts` — add `googleProvider` export (GoogleAuthProvider with email+profile scopes)
+- [x] 2.1 Modify `code/frontend/src/infrastructure/firebase/firebase.ts` — add `googleProvider` export (GoogleAuthProvider with email+profile scopes)
 
 ## Phase 3: Composable
 

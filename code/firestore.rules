@@ -42,9 +42,11 @@ service cloud.firestore {
 
     // --- Tareas ---
     match /tasks/{tareaId} {
-      allow read: if isResourceOwner() || isAdmin();
-      allow update: if isResourceOwner() || isAdmin();
-      allow create: if hasAnyRole(['gerocultor', 'admin']);
+      // Create: cualquier gerocultor autenticado
+      allow create: if isAuthenticated();
+      // Read/Update: solo el owner (usuarioId == auth.uid)
+      allow read: if isAuthenticated() && get('usuarioId') == request.auth.uid;
+      allow update: if isAuthenticated() && get('usuarioId') == request.auth.uid;
     }
 
     // --- Residentes ---
@@ -57,18 +59,21 @@ service cloud.firestore {
     }
 
     match /residents/{residenteId} {
-      // Lectura: admin ve todos; gerocultor ve solo residentes asignados Y no archivados
-      allow read: if isAdmin() ||
-        (isGerocultor() && isGerocultorAssignedTo(residenteId) && get('archivado') == false);
-      // Escritura (create/update/archive): solo admin
-      allow create, update: if isAdmin();
+      // Modelo descentralizado: cada gerocultor es dueño de los residentes que crea.
+      // Create: cualquier gerocultor autenticado (el service asigna usuarioId = requestingUid)
+      allow create: if isAuthenticated();
+      // Read/Update/Archive: solo el owner (usuarioId == auth.uid)
+      allow read: if isAuthenticated() && get('usuarioId') == request.auth.uid;
+      allow update: if isAuthenticated() && get('usuarioId') == request.auth.uid;
       // No delete — el archivo es un update que setea archivado=true
     }
 
     // --- Incidencias ---
     match /incidencias/{incidenciaId} {
-      allow create: if isGerocultor() || isAdmin();
-      allow read: if isAuthenticated();
+      // Create: cualquier gerocultor autenticado
+      allow create: if isAuthenticated();
+      // Read: solo el owner (usuarioId == auth.uid)
+      allow read: if isAuthenticated() && get('usuarioId') == request.auth.uid;
       allow update, delete: if false;
     }
 

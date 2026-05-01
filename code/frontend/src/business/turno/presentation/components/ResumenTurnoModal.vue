@@ -14,7 +14,7 @@
  *   - No store imports — all state flows via composable in parent.
  */
 import { ref, watch } from 'vue'
-import AppDialog from '@/components/dialogs/AppDialog.vue'
+import AppDialog from '@/ui/molecules/dialogs/AppDialog.vue'
 import type { TurnoResumen } from '@/business/turno/infrastructure/api/turnoApi'
 
 interface Props {
@@ -126,7 +126,7 @@ defineExpose({
 
 <style scoped>
 /* Tailwind v4: @reference is required in scoped styles to access @apply utilities */
-@reference "../../../../style.css";
+@reference "#/style.css";
 
 /* ─── Stats ──────────────────────────────────────────────────────────────── */
 .resumen-modal__stats {

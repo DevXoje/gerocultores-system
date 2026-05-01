@@ -76,7 +76,7 @@ done
 | `code/frontend/src/business/auth/presentation/composables/useRegister.ts` | Create | Registration composable: form state, state machine, submit logic |
 | `code/frontend/src/business/auth/route-names.ts` | Modify | Add `REGISTER` entry to `AUTH_ROUTES` |
 | `code/frontend/src/business/auth/routes.ts` | Modify | Mount `RegisterPage` at `AUTH_ROUTES.REGISTER.path` |
-| `code/frontend/src/services/firebase.ts` | Modify | Export `googleProvider` (GoogleAuthProvider instance) |
+| `code/frontend/src/infrastructure/firebase/firebase.ts` | Modify | Export `googleProvider` (GoogleAuthProvider instance) |
 | `code/api/src/functions/setUserClaims.ts` | Create | Firebase callable function: sets `role: 'gerocultor'` custom claim |
 | `code/api/src/app.ts` | Modify | Mount callable functions at `/api` via `onCall` (Firebase Functions Express adapter) |
 
@@ -107,7 +107,7 @@ export const setUserClaims = functions.https.onCall(async (data, context) => {
 
 ```typescript
 import { httpsCallable } from 'firebase/functions'
-import { functions } from '@/services/firebase'
+import { functions } from '@/infrastructure/firebase/firebase'
 
 const setUserClaimsFn = httpsCallable(functions, 'setUserClaims')
 await setUserClaimsFn({}) // uid comes from context.auth.uid, not from data
@@ -142,7 +142,7 @@ interface UseRegister {
 ### Google provider export
 
 ```typescript
-// code/frontend/src/services/firebase.ts
+// code/frontend/src/infrastructure/firebase/firebase.ts
 import { GoogleAuthProvider } from 'firebase/auth'
 export const googleProvider = new GoogleAuthProvider()
 googleProvider.addScope('email')

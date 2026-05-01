@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { signOut as firebaseSignOut, onIdTokenChanged, type User } from 'firebase/auth'
-import { auth } from '@/services/firebase'
+import { auth } from '@/infrastructure/firebase/firebase'
 
 /**
  * AuthStore — global authentication state.
