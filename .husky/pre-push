@@ -25,6 +25,9 @@ npm --prefix code/frontend run build
 echo "[pre-push] Type-checking API..."
 npm --prefix code/api run type-check
 
+echo "[pre-push] Building API..."
+npm --prefix code/api run build
+
 echo "[pre-push] Running API unit tests..."
 npm --prefix code/api run test
 
