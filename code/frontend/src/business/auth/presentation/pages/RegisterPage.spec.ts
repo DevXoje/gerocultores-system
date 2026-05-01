@@ -60,7 +60,6 @@ function createTestPinia(initialState?: { auth?: { isLoading?: boolean } }) {
     initialState,
   })
   const store = useAuthStore(pinia)
-  store.signIn = vi.fn().mockResolvedValue(undefined)
   store.signOut = vi.fn().mockResolvedValue(undefined)
   return { pinia, store }
 }

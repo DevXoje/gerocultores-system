@@ -24,7 +24,7 @@ export const TurnoResumenSchema = z.object({
   tareasCompletadas: z.number(),
   tareasPendientes: z.number(),
   incidenciasRegistradas: z.number(),
-  residentesAtendidos: z.array(z.string()),
+  residentesAtendidos: z.array(z.string()).readonly(),
   textoResumen: z.string(),
 })
 

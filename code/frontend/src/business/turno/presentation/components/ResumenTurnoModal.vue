@@ -53,6 +53,12 @@ function handleCancel(): void {
   modelValue.value = false
   emit('cancel')
 }
+
+defineExpose({
+  handleCancel,
+  handleConfirm,
+  resumen,
+})
 </script>
 
 <template>

@@ -68,7 +68,7 @@ describe('ResumenTurnoModal', () => {
       wrapper.vm.handleConfirm()
       // handleConfirm emits 'confirm' with trimmed resumen
       expect(wrapper.emitted('confirm')).toHaveLength(1)
-      const emitPayload = wrapper.emitted('confirm')[0][0]
+      const emitPayload = wrapper.emitted('confirm')![0][0]
       expect(emitPayload).toBe('') // empty string trimmed is still ''
     })
   })

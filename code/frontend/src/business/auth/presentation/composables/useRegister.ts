@@ -112,9 +112,10 @@ export function useRegister() {
       state.value = 'setting-claims'
       await setClaimsOnApi(user)
 
-      // Step 4: Sign in and redirect
+      // Step 4: Update store with newly registered user and redirect
       state.value = 'signing-in'
-      await store.signIn(email.value, passwordInput.value)
+      store.setUser(user)
+      await store.setRoleFromUser(user)
       state.value = 'done'
       await router.push({ name: DASHBOARD_ROUTES.name })
     } catch (err: unknown) {
