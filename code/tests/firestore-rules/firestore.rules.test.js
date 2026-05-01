@@ -96,7 +96,7 @@ describe('Colección /tasks', () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
       await ctx.firestore().doc(`tasks/${TAREA_ID}`).set({
         titulo: 'Baño matutino',
-        userId: OWNER_UID,
+        usuarioId: OWNER_UID,
       });
     });
   });
@@ -123,7 +123,7 @@ describe('Colección /tasks', () => {
 
   test('gerocultor puede crear una tarea', async () => {
     const db = authedDb(OWNER_UID, 'gerocultor');
-    await assertSucceeds(db.doc('tasks/nueva-tarea').set({ titulo: 'Nueva', userId: OWNER_UID }));
+    await assertSucceeds(db.doc('tasks/nueva-tarea').set({ titulo: 'Nueva', usuarioId: OWNER_UID }));
   });
 
   test('usuario no autenticado NO puede crear tarea', async () => {
@@ -144,7 +144,10 @@ describe('Colección /residents', () => {
 
   beforeEach(async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await ctx.firestore().doc(`residents/${RES_ID}`).set({ nombre: 'Ana López' });
+      await ctx.firestore().doc(`residents/${RES_ID}`).set({
+        nombre: 'Ana López',
+        usuarioId: 'gero-uid',
+      });
     });
   });
 
@@ -188,7 +191,7 @@ describe('Colección /incidencias', () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
       await ctx.firestore().doc(`incidencias/${INC_ID}`).set({
         descripcion: 'Caída en pasillo',
-        userId: 'gero-uid',
+        usuarioId: 'gero-uid',
       });
     });
   });
@@ -211,21 +214,21 @@ describe('Colección /incidencias', () => {
   test('gerocultor puede crear una incidencia', async () => {
     const db = authedDb('gero-uid', 'gerocultor');
     await assertSucceeds(
-      db.doc('incidencias/nueva-inc').set({ descripcion: 'Nueva', userId: 'gero-uid' }),
+      db.doc('incidencias/nueva-inc').set({ descripcion: 'Nueva', usuarioId: 'gero-uid' }),
     );
   });
 
   test('admin puede crear una incidencia', async () => {
     const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(
-      db.doc('incidencias/inc-coord').set({ descripcion: 'Coord inc', userId: 'coord-uid' }),
+      db.doc('incidencias/inc-coord').set({ descripcion: 'Coord inc', usuarioId: 'coord-uid' }),
     );
   });
 
   test('admin puede crear una incidencia', async () => {
     const db = authedDb('admin-uid', 'admin');
     await assertSucceeds(
-      db.doc('incidencias/inc-admin').set({ descripcion: 'Admin inc', userId: 'admin-uid' }),
+      db.doc('incidencias/inc-admin').set({ descripcion: 'Admin inc', usuarioId: 'admin-uid' }),
     );
   });
 
