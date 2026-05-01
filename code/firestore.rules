@@ -1,40 +1,50 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Utilidades ---
+    // ── Utilidades ─────────────────────────────────────────────────────────────
     function isAuthenticated() {
       return request.auth != null;
     }
+
     function hasRole(rol) {
       return isAuthenticated() && request.auth.token.role == rol;
     }
+
     function hasAnyRole(roles) {
       return isAuthenticated() && request.auth.token.role in roles;
     }
+
     function isGerocultor() {
       return hasRole('gerocultor');
     }
+
     function isAdmin() {
       return hasRole('admin');
     }
+
     function isAccountOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
     // Safe field read: returns the field value, or null if absent.
     // In Firestore rules v2, accessing a nonexistent field as a VALUE
-    // (not in hasAll/hasAny) throws "Null value error".
-    // Wrapping in a function that checks hasAll first prevents the error.
+    // throws "Null value error". Wrapping in hasAll() prevents it.
     function get(field) {
       return resource.data.keys().hasAll([field]) ? resource.data[field] : null;
     }
 
+    // G04 compliance: entities.md and service code use 'usuarioId' (Spanish)
+    // for the ownership field — NOT 'userId'.
     function isResourceOwner() {
-      return isAuthenticated() && get('userId') == request.auth.uid;
+      return isAuthenticated() && get('usuarioId') == request.auth.uid;
     }
 
-    // --- Usuarios ---
+    // ── users ────────────────────────────────────────────────────────────────
+    // Firebase Auth handles authentication.
+    // The Firestore document stores additional user profile data (G04 fields).
+    // Only the user themselves can read their profile. Admin SDK bypasses rules.
     match /users/{userId} {
       allow read, write: if false;
     }
@@ -54,7 +64,10 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // --- Notificaciones ---
+    // ── notificaciones ───────────────────────────────────────────────────────
+    // G04: 'usuarioId' stores the recipient gerocultor's uid.
+    // Only the recipient can read their own notifications.
+    // Notifications are created by the system (Admin SDK), not by clients.
     match /notificaciones/{notifId} {
       allow read, write: if false;
     }

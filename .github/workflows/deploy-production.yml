@@ -21,10 +21,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
           cache: npm
           cache-dependency-path: code/frontend/package-lock.json
 
@@ -48,10 +48,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
           cache: npm
           cache-dependency-path: code/tests/firestore-rules/package-lock.json
 
@@ -79,9 +79,44 @@ jobs:
             --project demo-test \
             "cd tests/firestore-rules && npm test"
 
-  deploy-production:
-    name: Build & Deploy to Production
+  deploy-api:
+    name: Build & Deploy API to Production Cloud Function
     needs: [ci, firestore-rules]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: code/api/package-lock.json
+
+      - name: Install API dependencies
+        working-directory: code/api
+        run: npm ci
+
+      - name: Build API (TypeScript → dist/)
+        working-directory: code/api
+        run: npm run build
+
+      - name: Deploy Cloud Function — production
+        working-directory: code
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_CONTENT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GERO_CARE }}
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_CONTENT" > /tmp/firebase-deployer-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-deployer-sa.json
+          npx firebase deploy --only functions --non-interactive --project gero-care
+
+  deploy-production:
+    name: Build & Deploy Frontend to Production
+    needs: [deploy-api]
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -92,11 +127,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          cache: 'npm'
+          node-version: 22
+          cache: npm
           cache-dependency-path: code/frontend/package-lock.json
 
       - name: Install dependencies
@@ -110,6 +145,7 @@ jobs:
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL_PRODUCTION }}
         run: npm run build
 
       - name: Deploy to Firebase Hosting — live channel (production)
