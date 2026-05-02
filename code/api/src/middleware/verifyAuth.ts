@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import { adminAuth } from '../services/firebase'
 
-const isEmulator = process.env['USE_FIREBASE_EMULATORS'] === 'true'
+const isEmulator = process.env['USE_EMULATORS'] === 'true'
 
 /**
  * verifyAuth — validates the Firebase ID Token from Authorization: Bearer <token>.

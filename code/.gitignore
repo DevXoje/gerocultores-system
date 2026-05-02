@@ -71,3 +71,7 @@ node_modules/
 dist
 
 emulator-data/*
+
+# Environment variables 
+env.
+env.local
