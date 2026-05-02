@@ -19,6 +19,7 @@ api/dist/
 
 # Firebase Emulator data (persisted locally, not committed)
 code/emulator_data/*
+code/emulator-data/*
 !code/emulator_data/.gitkeep
 
 # Local files

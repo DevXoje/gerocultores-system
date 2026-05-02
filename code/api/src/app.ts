@@ -3,11 +3,14 @@ import cors from 'cors'
 import { errorHandler } from './middleware/errorHandler'
 import routes from './routes/index'
 
+export const PORT = process.env['PORT'] ?? 3000
+export const CORS_ORIGIN = process.env['CORS_ORIGIN'] ?? '*'
+export const NODE_ENV = process.env['NODE_ENV'] ?? 'development'
+
 const app = express()
 
 // --- Middleware ---
-// CORS: in production, restrict origins via CORS_ORIGIN env var (see .env.example)
-app.use(cors({ origin: process.env['CORS_ORIGIN'] || '*' }))
+app.use(cors({ origin: CORS_ORIGIN }))
 app.use(express.json())
 
 // --- Routes ---

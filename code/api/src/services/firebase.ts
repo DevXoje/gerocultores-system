@@ -13,33 +13,12 @@ const hasApps = admin.apps?.length > 0
 
 if (!hasApps) {
   if (shouldUseEmulators) {
-    const projectId = process.env['FIREBASE_PROJECT_ID'];
-    if (!projectId) {
-      throw new Error('FIREBASE_PROJECT_ID must be set when using emulators')
-    }
-    const credential = admin.credential?.applicationDefault()
-    admin.initializeApp({
-      projectId,
-      credential,
-    })
+    process.env['FIREBASE_AUTH_EMULATOR_HOST'] = 'localhost:9099'
+    process.env['FIRESTORE_EMULATOR_HOST'] = 'localhost:8080'
+    const projectId = process.env['FIREBASE_PROJECT_ID'] ?? 'gerocultores-system'
+    admin.initializeApp({ projectId: projectId })
   } else {
-    const projectId = process.env['FIREBASE_PROJECT_ID']
-    const clientEmail = process.env['FIREBASE_CLIENT_EMAIL']
-    const rawKey = process.env['FIREBASE_PRIVATE_KEY']
-
-    if (!projectId || !clientEmail || !rawKey) {
-      throw new Error(
-        'Missing required env vars: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY'
-      )
-    }
-
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId,
-        clientEmail,
-        privateKey: rawKey.replace(/\\n/g, '\n'),
-      }),
-    })
+    admin.initializeApp({ projectId: 'gerocultores-system' })
   }
 }
 
