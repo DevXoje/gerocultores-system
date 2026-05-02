@@ -35,7 +35,7 @@ export const IncidenciaDocSchema = z.object({
  * Field names match SPEC/entities.md exactly (G04).
  * Note: 'foto' is design-only; not stored in this sprint.
  */
-export interface IncidenciaDoc extends z.infer<typeof IncidenciaDocSchema> {}
+export type IncidenciaDoc = z.infer<typeof IncidenciaDocSchema>
 
 /** API response shape — includes the document id. */
 export interface IncidenciaResponse extends IncidenciaDoc {

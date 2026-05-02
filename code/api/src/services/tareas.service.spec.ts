@@ -243,7 +243,8 @@ describe('CreateTareaSchema', () => {
   })
 
   it('parsea DTO sin notas (opcional)', () => {
-    const { notas: _notas, ...dtoWithoutNotas } = validDto
+    const dtoWithoutNotas = { ...validDto }
+    delete dtoWithoutNotas.notas
     const result = CreateTareaSchema.safeParse(dtoWithoutNotas)
     expect(result.success).toBe(true)
   })

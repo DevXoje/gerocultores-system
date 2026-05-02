@@ -72,7 +72,7 @@ Tecnologías confirmadas tras los ADRs de stack (ADR-01b a ADR-04b):
 | **HTTP client** | Axios con interceptores para token Firebase Auth | ADR-01b |
 | **Testing frontend** | Vitest (unitarios) + Playwright (E2E) | ADR-01b |
 | **Backend** | Express.js (Node.js) + Firebase Admin SDK (Cloud Run) | ADR-02b |
-| **Base de datos** | Cloud Firestore (región `europe-west1` / `europe-west3`, EU) | ADR-02b |
+| **Base de datos** | Cloud Firestore (región `europe-west1`, EU) | ADR-02b |
 | **Autenticación** | Firebase Auth (email/password) + Custom Claims de rol | ADR-03b |
 | **Seguridad datos** | Firestore Security Rules + middleware Express `verifyIdToken` | ADR-03b |
 | **Hosting** | Firebase Hosting (frontend SPA Vue 3) | ADR-04b |

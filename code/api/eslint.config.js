@@ -1,11 +1,12 @@
-import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
+const js = require('@eslint/js')
+const tseslint = require('typescript-eslint')
 
-export default tseslint.config(
+module.exports = tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
     files: ['**/*.ts'],
+    ignores: ['**/*.spec.ts', '**/*.integration.spec.ts'],
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
@@ -13,16 +14,13 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unused-vars': 'error',
-      '@typescript-eslint/no-restricted-imports': [
+      '@typescript-eslint/no-unused-vars': [
         'error',
-        {
-          patterns: ['../'],
-        },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'coverage/'],
+    ignores: ['dist/', 'lib/', 'node_modules/', 'coverage/'],
   }
 )

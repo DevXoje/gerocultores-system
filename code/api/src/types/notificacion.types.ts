@@ -21,7 +21,7 @@ export const NotificacionDocSchema = z.object({
 })
 
 /** Shape of a Notificacion document in Firestore. Field names match SPEC/entities.md exactly (G04). */
-export interface NotificacionDoc extends z.infer<typeof NotificacionDocSchema> {}
+export type NotificacionDoc = z.infer<typeof NotificacionDocSchema>
 
 /** API response shape — includes the document id. */
 export interface NotificacionResponse extends NotificacionDoc {

@@ -33,7 +33,7 @@ export const TareaDocSchema = z.object({
 })
 
 /** Shape of a Tarea document in Firestore. Field names match SPEC/entities.md exactly (G04). */
-export interface TareaDoc extends z.infer<typeof TareaDocSchema> {}
+export type TareaDoc = z.infer<typeof TareaDocSchema>
 
 /** API response shape — includes the document id. */
 export interface TareaResponse extends TareaDoc {

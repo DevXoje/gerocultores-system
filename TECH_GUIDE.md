@@ -430,7 +430,7 @@ Las vars de test E2E (`E2E_USER`, `E2E_PASS`, `PLAYWRIGHT_TEST_BASE_URL`) **no v
 
 ### 5.3 RGPD
 
-- Región Firestore: `europe-west1` (Bélgica) o `europe-west3` (Frankfurt). Confirmada en ADR-04b.
+- Región Firestore: `europe-west1` (Bélgica). Confirmada en ADR-04b.
 - Datos de residentes son datos de categoría especial (art. 9 RGPD) — acceso solo con autenticación.
 - Los datos de test se generan con Faker.js — **nunca** datos reales de personas.
 

@@ -1,0 +1,33 @@
+# Build output (TypeScript compile)
+dist/
+dist/**/*.js
+dist/**/*.js.map
+
+# Legacy Cloud Functions build (firebase init legacy)
+lib/
+lib/**/*.js
+lib/**/*.js.map
+
+# Dependencies
+node_modules/
+
+# Environment variables (G05 compliance)
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+firebase-debug.log*
+firebase-debug.*.log*
+
+# Coverage
+coverage/
+
+# Local files
+*.local
+
+# TypeScript build info
+*.tsbuildinfo

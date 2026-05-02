@@ -378,6 +378,7 @@ describe('POST /api/tareas — createTarea', () => {
 
   it('returns 400 when titulo is missing', async () => {
     const { titulo: _titulo, ...body } = validBody
+    void _titulo // explicit discard to satisfy linter
 
     const res = await request(app)
       .post('/api/tareas')

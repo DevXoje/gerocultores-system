@@ -84,7 +84,7 @@ La elección de Firestore sobre PostgreSQL (la opción original con Supabase, de
 
 Una ventaja concreta de Firestore para esta aplicación es su soporte nativo de *listeners* en tiempo real: si un coordinador actualiza el estado de una tarea, el cambio puede propagarse automáticamente a la vista del gerocultor sin necesidad de polling. Esto abre la puerta a funcionalidades de tiempo real sin arquitectura adicional.
 
-En cuanto al cumplimiento del RGPD, configuro el proyecto Firebase con la localización de Firestore en la región `europe-west1` (Bélgica) o `europe-west3` (Frankfurt) para asegurar que los datos permanecen en la Unión Europea. Este aspecto se desarrolla en detalle en la sección 10.
+En cuanto al cumplimiento del RGPD, configuro el proyecto Firebase con la localización de Firestore en la región `europe-west1` (Bélgica) para asegurar que los datos permanecen en la Unión Europea. Este aspecto se desarrolla en detalle en la sección 10.
 
 ### Firebase Authentication
 
@@ -1346,7 +1346,7 @@ Las versiones indicadas en la tabla corresponden a las versiones mínimas objeti
 | Servicio | Plan | Rol en el proyecto | Región | URL |
 |----------|------|-------------------|--------|-----|
 | Firebase Authentication | Spark (gratuito) | Autenticación email/password; emisión de ID tokens JWT; custom claims de rol | Global | https://firebase.google.com/docs/auth |
-| Cloud Firestore | Spark (gratuito) | Base de datos NoSQL; colecciones para las 7 entidades del dominio | europe-west1 / europe-west3 (EU) | https://firebase.google.com/docs/firestore |
+| Cloud Firestore | Spark (gratuito) | Base de datos NoSQL; colecciones para las 7 entidades del dominio | europe-west1 (EU) | https://firebase.google.com/docs/firestore |
 | Firebase Hosting | Spark (gratuito) | Hosting SPA Vue compilada; CDN global + HTTPS automático; deploy con `firebase deploy` | Global (CDN) | https://firebase.google.com/docs/hosting |
 | Firebase Local Emulator Suite | — (local) | Emulación local de Firestore + Auth para desarrollo y tests de Security Rules | Local | https://firebase.google.com/docs/emulator-suite |
 

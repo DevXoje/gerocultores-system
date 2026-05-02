@@ -121,7 +121,7 @@ describe('TurnoService.openTurno', () => {
   })
 
   it('creates a new turno when no active shift exists', async () => {
-    const { collectionRef, docRef } = getMocks()
+    const { collectionRef } = getMocks()
     // No active shift found
     collectionRef.get.mockResolvedValueOnce({ docs: [] })
     // add() returns ref to new document
@@ -265,7 +265,7 @@ describe('TurnoService.getResumen', () => {
   })
 
   it('returns summary with correct counts for tareasCompletadas and tareasPendientes', async () => {
-    const { collectionRef, docRef, tareasCollectionRef } = getMocks()
+    const { docRef, tareasCollectionRef } = getMocks()
     const turnoSnap = {
       exists: true,
       id: turnoId,

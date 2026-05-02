@@ -33,7 +33,7 @@ El proyecto eligió inicialmente Supabase (PostgreSQL BaaS) como backend (ADR-02
 
 Se elige **Opción B: Firestore + Express API Wrapper**.
 
-- **Base de datos**: Cloud Firestore en modo producción (región `europe-west1` o `europe-west3`).
+- **Base de datos**: Cloud Firestore en modo producción (región `europe-west1`).
 - **API layer**: Express.js (Node.js) con Firebase Admin SDK.
 - **Modelo de datos**: Colecciones Firestore mapeadas 1:1 a entidades de `SPEC/entities.md`.
 - **Seguridad**: Doble capa — Firestore Rules (acceso directo si se necesita) + validación en Express middleware.
@@ -62,7 +62,7 @@ Se elige **Opción B: Firestore + Express API Wrapper**.
 
 ## Criterios de aceptación
 
-- [ ] Proyecto Firebase creado con Firestore en región EU (`europe-west1` o `europe-west3`).
+- [ ] Proyecto Firebase creado con Firestore en región EU (`europe-west1`).
 - [ ] Colecciones iniciales creadas con al menos un documento de test.
 - [ ] Express API wrapper desplegado localmente con Firebase Admin SDK.
 - [ ] Firestore Rules básicas habilitadas.

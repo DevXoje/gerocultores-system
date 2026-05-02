@@ -27,7 +27,7 @@ export const ResidenteDocSchema = z.object({
 })
 
 /** Shape of a Residente document in Firestore. Field names match SPEC/entities.md exactly (G04). */
-export interface ResidenteDoc extends z.infer<typeof ResidenteDocSchema> {}
+export type ResidenteDoc = z.infer<typeof ResidenteDocSchema>
 
 /** API response shape — includes the document id. */
 export interface ResidenteResponse extends Omit<ResidenteDoc, never> {

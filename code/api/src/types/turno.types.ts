@@ -15,7 +15,7 @@ export const TurnoDocSchema = z.object({
 })
 
 /** Shape of a Turno document in Firestore. Field names match SPEC/entities.md exactly (G04). */
-export interface TurnoDoc extends z.infer<typeof TurnoDocSchema> {}
+export type TurnoDoc = z.infer<typeof TurnoDocSchema>
 
 /** API response shape — includes the document id. */
 export interface TurnoResponse extends TurnoDoc {

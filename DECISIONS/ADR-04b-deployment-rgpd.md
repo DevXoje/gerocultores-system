@@ -19,7 +19,7 @@ Al pivotar el stack a Firebase (ADR-01b, ADR-02b, ADR-03b), las decisiones de de
 
 ### 1. Región de datos: EU
 
-El proyecto Firebase DEBE configurarse con la localización de Firestore en **`europe-west1` (Bélgica)** o **`europe-west3` (Frankfurt)** para cumplir RGPD. Esta decisión es **definitiva** independientemente del hosting.
+El proyecto Firebase DEBE configurarse con la localización de Firestore en **`europe-west1`** para cumplir RGPD. Esta decisión es **definitiva** independientemente del hosting.
 
 ### 2. RGPD — Datos ficticios
 
@@ -50,7 +50,7 @@ Se elige **Firebase Hosting** como plataforma de hosting para el frontend (SPA V
 Se elige **Google Cloud Run** para desplegar la API Express en producción.
 
 - Contenedor Docker (Dockerfile en `code/api/`).
-- Región EU (`europe-west1` o `europe-west3`).
+- Región EU (`europe-west1`).
 - Escalado automático a cero (solo consume cuando hay tráfico).
 - Integración con Firebase Auth mediante Firebase Admin SDK validando tokens en el middleware.
 - Plan Spark gratuito de Firebase incluye uso de Cloud Run (380.000 vCPU-segundos, 180.000 solicitudes/mes).
@@ -86,7 +86,7 @@ Se usa **Cloud Functions (2nd gen)** para funciones callable desde el frontend.
 
 ## Criterios de aceptación
 
-- [ ] Proyecto Firebase creado en región EU (`europe-west1` o `europe-west3`).
+- [ ] Proyecto Firebase creado en región EU (`europe-west1`).
 - [ ] Firebase Hosting configurado con directorio de build correcto (`dist/`).
 - [ ] Dockerfile en `code/api/` para Cloud Run, builds erfolgreich.
 - [ ] Cloud Run desplegado y accesible con `GET /health`.

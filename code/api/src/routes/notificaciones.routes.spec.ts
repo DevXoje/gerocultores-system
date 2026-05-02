@@ -106,7 +106,7 @@ describe('GET /api/notificaciones', () => {
 
   it('returns 401 when verifyAuth rejects the token', async () => {
     const { verifyAuth } = await import('../middleware/verifyAuth')
-    ;(verifyAuth as ReturnType<typeof vi.fn>).mockImplementationOnce((_req, res, _next) => {
+    ;(verifyAuth as ReturnType<typeof vi.fn>).mockImplementationOnce((_req, res) => {
       res.status(401).json({ error: 'Token no provisto o inválido', code: 'UNAUTHORIZED' })
     })
 
