@@ -5,40 +5,59 @@ node_modules/
 .env
 .env.local
 .env.*.local
-frontend/.env
-frontend/.env.local
-api/.env
-api/.env.local
+
+# Package managers
+pnpm-lock.yaml
+bun.lockb
+package-lock.json
+yarn.lock
 
 # Build outputs
-frontend/dist/
-api/dist/
+dist/
+dist-ssr/
+*.tsbuildinfo
 
 # Firebase
 .firebase/
-
-# Firebase Emulator data (persisted locally, not committed)
 code/emulator_data/*
 !code/emulator_data/.gitkeep
 
 # Local files
 *.local
+.tmp/
+tmp/
 
 # Editor
 .DS_Store
 .vscode/settings.json
+.idea/
 *.swp
 *.swo
+*.sublime-*
 
 # Logs
 *.log
 npm-debug.log*
 
-# TypeScript build info
-*.tsbuildinfo
-
-# Temporary files
-tmp/
-.tmp
-
+# Playwright
 .playwright-cli
+playwright-report/
+test-results/
+/coverage/
+
+# Cache
+.turbo/
+.vercel/
+.next/
+.nuxt/
+.eslintcache
+.npm
+.yarn-integrity
+
+# Temporary
+*.pid
+*.seed
+*.pid.lock
+
+# OS
+Thumbs.db
