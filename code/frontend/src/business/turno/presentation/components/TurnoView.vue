@@ -13,6 +13,7 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
 import { onMounted, ref } from 'vue'
+import { ClockIcon } from '@heroicons/vue/24/outline'
 import { useTurno } from '@/business/turno/presentation/composables/useTurno'
 import ResumenTurnoModal from '@/business/turno/presentation/components/ResumenTurnoModal.vue'
 import type { TipoTurno } from '@/business/turno/domain/entities/Turno'
@@ -128,7 +129,7 @@ function formatDate(date: Date): string {
 
     <!-- Resumen modal -->
     <ResumenTurnoModal
-      :open="showResumenModal"
+      v-model="showResumenModal"
       :is-loading="isLoading"
       :initial-resumen="turnoActivo?.resumenTraspaso"
       :resumen-data="resumen"

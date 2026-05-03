@@ -32,7 +32,7 @@ const {
   togglePassword,
 } = useRegister()
 
-const year = Temporal.Now.plainDateISO().year
+const year = new Date().getFullYear()
 </script>
 
 <template>

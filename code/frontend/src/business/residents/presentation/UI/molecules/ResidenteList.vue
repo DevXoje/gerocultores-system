@@ -1,10 +1,14 @@
 <!--
   ResidenteList.vue — Reusable resident list component.
   US-09: Alta y gestión de residentes
+
+  Refactored from table to card layout per Stitch design:
+  - US-05: Resident Directory (refined v2)
+  - US-09: Resident Records
 -->
 <script setup lang="ts">
 /**
- * ResidenteList.vue — Displays a list of residents with filter tabs and action buttons.
+ * ResidenteList.vue — Displays a grid of resident cards with filter and actions.
  *
  * US-09: Alta y gestión de residentes
  *
@@ -19,7 +23,7 @@
  */
 import { computed } from 'vue'
 import { filterResidentesByState, type Residente } from '@/business/residents/domain/Residente'
-import { calcularEdad, formatResidenteDateShort } from '@/business/residents/domain/ResidenteDate'
+import { calcularEdad } from '@/business/residents/domain/ResidenteDate'
 
 const props = withDefaults(
   defineProps<{
@@ -50,6 +54,10 @@ function handleEdit(residente: Residente): void {
 function handleArchive(residente: Residente): void {
   emit('archive', residente)
 }
+
+function getInitials(nombre: string, apellidos: string): string {
+  return `${nombre.charAt(0)}${apellidos.charAt(0)}`.toUpperCase()
+}
 </script>
 
 <template>
@@ -59,96 +67,84 @@ function handleArchive(residente: Residente): void {
       No hay residentes para mostrar.
     </p>
 
-    <!-- Table -->
-    <div v-else class="residente-list__table-wrapper">
-      <table class="residente-list__table">
-        <thead class="residente-list__thead">
-          <tr class="residente-list__tr">
-            <th class="residente-list__th" scope="col">Nombre</th>
-            <th class="residente-list__th" scope="col">Habitación</th>
-            <th class="residente-list__th" scope="col">Fecha nacimiento</th>
-            <th class="residente-list__th" scope="col">Estado</th>
-            <th v-if="showActions" class="residente-list__th" scope="col">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <template v-for="residente in filteredResidentes" :key="residente.id">
-            <tr class="residente-list__tr">
-              <td class="residente-list__td">
-                <div class="residente-list__name-cell">
-                  <div v-if="residente.foto" class="residente-list__avatar">
-                    <img :src="residente.foto" :alt="`Foto de ${residente.nombre}`" />
-                  </div>
-                  <div v-else class="residente-list__avatar-placeholder" aria-hidden="true">
-                    <span>{{ residente.nombre.charAt(0) }}{{ residente.apellidos.charAt(0) }}</span>
-                  </div>
-                  <div class="residente-list__name-info">
-                    <span class="residente-list__full-name">
-                      {{ residente.nombre }} {{ residente.apellidos }}
-                    </span>
-                    <span v-if="residente.archivado" class="residente-list__age-hint">
-                      Archivado
-                    </span>
-                  </div>
-                </div>
-              </td>
-              <td class="residente-list__td">
-                <span class="residente-list__habitacion">{{ residente.habitacion }}</span>
-              </td>
-              <td class="residente-list__td">
-                <div class="residente-list__birth-date">
-                  <span>{{ formatResidenteDateShort(residente.fechaNacimiento) }}</span>
-                  <span class="residente-list__age"
-                    >({{ calcularEdad(residente.fechaNacimiento) }} años)</span
-                  >
-                </div>
-              </td>
-              <td class="residente-list__td">
-                <span
-                  class="residente-list__badge"
-                  :class="
-                    residente.archivado
-                      ? 'residente-list__badge--archived'
-                      : 'residente-list__badge--active'
-                  "
-                >
-                  {{ residente.archivado ? 'Archivado' : 'Activo' }}
-                </span>
-              </td>
-              <td v-if="showActions" class="residente-list__td">
-                <div class="residente-list__actions">
-                  <button
-                    type="button"
-                    class="residente-list__action-btn residente-list__action-btn--edit"
-                    :aria-label="`Editar ${residente.nombre} ${residente.apellidos}`"
-                    @click="handleEdit(residente)"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    v-if="!residente.archivado"
-                    type="button"
-                    class="residente-list__action-btn residente-list__action-btn--archive"
-                    :aria-label="`Archivar ${residente.nombre} ${residente.apellidos}`"
-                    @click="handleArchive(residente)"
-                  >
-                    Archivar
-                  </button>
-                  <button
-                    v-else
-                    type="button"
-                    class="residente-list__action-btn residente-list__action-btn--restore"
-                    :aria-label="`Restaurar ${residente.nombre} ${residente.apellidos}`"
-                    @click="handleArchive(residente)"
-                  >
-                    Restaurar
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
+    <!-- Cards grid -->
+    <div v-else class="residente-list__grid">
+      <article
+        v-for="residente in filteredResidentes"
+        :key="residente.id"
+        class="residente-list__card"
+        :aria-label="`Residente ${residente.nombre} ${residente.apellidos}`"
+      >
+        <!-- Card body -->
+        <div class="residente-list__card-body">
+          <!-- Avatar -->
+          <div class="residente-list__avatar-wrapper">
+            <div v-if="residente.foto" class="residente-list__avatar">
+              <img :src="residente.foto" :alt="`Foto de ${residente.nombre}`" />
+            </div>
+            <div v-else class="residente-list__avatar-placeholder" aria-hidden="true">
+              <span>{{ getInitials(residente.nombre, residente.apellidos) }}</span>
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="residente-list__info">
+            <h3 class="residente-list__name">{{ residente.nombre }} {{ residente.apellidos }}</h3>
+            <p class="residente-list__detail">
+              <span class="residente-list__detail-icon" aria-hidden="true">🏠</span>
+              <span>Hab. {{ residente.habitacion }}</span>
+            </p>
+            <p class="residente-list__detail">
+              <span class="residente-list__detail-icon" aria-hidden="true">🎂</span>
+              <span>{{ calcularEdad(residente.fechaNacimiento) }} años</span>
+            </p>
+          </div>
+
+          <!-- Status badge -->
+          <div class="residente-list__status">
+            <span
+              class="residente-list__badge"
+              :class="
+                residente.archivado
+                  ? 'residente-list__badge--archived'
+                  : 'residente-list__badge--active'
+              "
+            >
+              {{ residente.archivado ? 'Archivado' : 'Activo' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Card actions -->
+        <div v-if="showActions" class="residente-list__card-actions">
+          <button
+            type="button"
+            class="residente-list__action-btn residente-list__action-btn--edit"
+            :aria-label="`Editar ${residente.nombre} ${residente.apellidos}`"
+            @click="handleEdit(residente)"
+          >
+            Editar
+          </button>
+          <button
+            v-if="!residente.archivado"
+            type="button"
+            class="residente-list__action-btn residente-list__action-btn--archive"
+            :aria-label="`Archivar ${residente.nombre} ${residente.apellidos}`"
+            @click="handleArchive(residente)"
+          >
+            Archivar
+          </button>
+          <button
+            v-else
+            type="button"
+            class="residente-list__action-btn residente-list__action-btn--restore"
+            :aria-label="`Restaurar ${residente.nombre} ${residente.apellidos}`"
+            @click="handleArchive(residente)"
+          >
+            Restaurar
+          </button>
+        </div>
+      </article>
     </div>
   </div>
 </template>
@@ -161,66 +157,57 @@ function handleArchive(residente: Residente): void {
 
 /* ── Empty ─────────────────────────────────────────────────────────────── */
 .residente-list__empty {
-  padding: 2rem 1rem;
+  padding: 3rem 1rem;
   text-align: center;
   font-size: 0.875rem;
   color: #6b7280;
 }
 
-/* ── Table wrapper ──────────────────────────────────────────────────────── */
-.residente-list__table-wrapper {
-  overflow-x: auto;
+/* ── Cards grid ───────────────────────────────────────────────────────── */
+.residente-list__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
-.residente-list__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-
-/* ── Header ─────────────────────────────────────────────────────────────── */
-.residente-list__thead {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.residente-list__tr {
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.residente-list__tr:last-child {
-  border-bottom: none;
-}
-
-.residente-list__th {
-  padding: 0.5rem 1rem;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-
-/* ── Cells ──────────────────────────────────────────────────────────────── */
-.residente-list__td {
-  padding: 0.75rem 1rem;
-  vertical-align: middle;
-}
-
-/* ── Name cell ─────────────────────────────────────────────────────────── */
-.residente-list__name-cell {
+/* ── Card ─────────────────────────────────────────────────────────────── */
+.residente-list__card {
   display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
+}
+
+.residente-list__card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #d1d5db;
+}
+
+/* ── Card body ───────────────────────────────────────────────────────── */
+.residente-list__card-body {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  padding: 1.5rem 1rem 1rem;
+  text-align: center;
   gap: 0.75rem;
 }
 
+/* ── Avatar ───────────────────────────────────────────────────────────── */
+.residente-list__avatar-wrapper {
+  margin-bottom: 0.25rem;
+}
+
 .residente-list__avatar {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 4rem;
+  height: 4rem;
   border-radius: 9999px;
   overflow: hidden;
-  flex-shrink: 0;
 }
 
 .residente-list__avatar img {
@@ -230,59 +217,61 @@ function handleArchive(residente: Residente): void {
 }
 
 .residente-list__avatar-placeholder {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 4rem;
+  height: 4rem;
   border-radius: 9999px;
   background-color: #e0e7ff;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .residente-list__avatar-placeholder span {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: #4338ca;
+  letter-spacing: 0.05em;
 }
 
-.residente-list__name-info {
+/* ── Info ────────────────────────────────────────────────────────────── */
+.residente-list__info {
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
 }
 
-.residente-list__full-name {
-  font-weight: 500;
+.residente-list__name {
+  font-size: 1rem;
+  font-weight: 600;
   color: #111827;
+  margin: 0;
+  line-height: 1.3;
 }
 
-.residente-list__age-hint {
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-/* ── Habitación ────────────────────────────────────────────────────────── */
-.residente-list__habitacion {
-  font-variant-numeric: tabular-nums;
-  color: #374151;
-}
-
-/* ── Birth date ────────────────────────────────────────────────────────── */
-.residente-list__birth-date {
+.residente-list__detail {
   display: flex;
-  flex-direction: column;
-  color: #374151;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0;
 }
 
-.residente-list__age {
-  font-size: 0.75rem;
-  color: #9ca3af;
+.residente-list__detail-icon {
+  font-size: 0.875rem;
+  line-height: 1;
 }
 
-/* ── Badge ─────────────────────────────────────────────────────────────── */
+/* ── Status badge ─────────────────────────────────────────────────────── */
+.residente-list__status {
+  margin-top: 0.25rem;
+}
+
 .residente-list__badge {
   display: inline-block;
-  padding: 0.125rem 0.5rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -298,38 +287,39 @@ function handleArchive(residente: Residente): void {
   color: #4b5563;
 }
 
-/* ── Actions ─────────────────────────────────────────────────────────────── */
-.residente-list__actions {
+/* ── Card actions ─────────────────────────────────────────────────────── */
+.residente-list__card-actions {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  border-top: 1px solid #f3f4f6;
 }
 
 .residente-list__action-btn {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  font-size: 0.75rem;
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: none;
   transition:
     background-color 0.15s,
-    opacity 0.15s;
-  min-height: 32px;
+    color 0.15s;
+  min-height: 48px;
+}
+
+.residente-list__action-btn:not(:last-child) {
+  border-right: 1px solid #f3f4f6;
 }
 
 .residente-list__action-btn--edit {
-  border-color: #d1d5db;
   background-color: #ffffff;
   color: #374151;
 }
 
 .residente-list__action-btn--edit:hover {
-  background-color: #f3f4f6;
+  background-color: #f9fafb;
 }
 
 .residente-list__action-btn--archive {
-  border-color: #fca5a5;
   background-color: #fef2f2;
   color: #991b1b;
 }
@@ -339,7 +329,6 @@ function handleArchive(residente: Residente): void {
 }
 
 .residente-list__action-btn--restore {
-  border-color: #6ee7b7;
   background-color: #f0fdf4;
   color: #065f46;
 }

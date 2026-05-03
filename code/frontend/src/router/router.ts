@@ -2,6 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { routes } from './routes'
 import { createAuthGuard } from '@/business/auth/presentation/composables/useAuthGuard'
 
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    title?: string
+  }
+}
+
 /**
  * Application router.
  *
@@ -17,5 +24,9 @@ const router = createRouter({
 })
 
 router.beforeEach(createAuthGuard())
+
+router.afterEach((to) => {
+  document.title = to.meta.title ? `${to.meta.title} — Care & Serenity` : 'Care & Serenity'
+})
 
 export default router

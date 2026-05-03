@@ -3,15 +3,18 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/business/auth/useAuthStore'
 import { AUTH_ROUTES } from '@/business/auth/route-names'
 import { useTurno } from '@/business/turno/presentation/composables/useTurno'
+import { useCreateIncidenceModal } from '@/business/incidents/presentation/composables/useCreateIncidenceModal'
 
 export function useDashboardPage() {
   const router = useRouter()
   const auth = useAuthStore()
   const showCreateModal = ref(false)
-  const showCreateIncidentModal = ref(false)
+  const showCreateResidenteModal = ref(false)
   const now = ref(new Date())
   const isOnline = ref(navigator.onLine)
   const { turnoActivo, cargarTurnoActivo } = useTurno()
+  const { showCreateIncidentModal, openIncidenceModal, closeIncidenceModal } =
+    useCreateIncidenceModal()
   let clockTimer: ReturnType<typeof setInterval> | null = null
 
   const nombreUsuario = computed(() => auth.user?.displayName ?? auth.user?.email ?? 'Cuidador/a')
@@ -68,12 +71,12 @@ export function useDashboardPage() {
     showCreateModal.value = false
   }
 
-  function openIncidenceModal(): void {
-    showCreateIncidentModal.value = true
+  function openResidenteModal(): void {
+    showCreateResidenteModal.value = true
   }
 
-  function closeIncidenceModal(): void {
-    showCreateIncidentModal.value = false
+  function closeResidenteModal(): void {
+    showCreateResidenteModal.value = false
   }
 
   function handleConnectivityChange(): void {
@@ -107,6 +110,7 @@ export function useDashboardPage() {
     nombreUsuario,
     showCreateModal,
     showCreateIncidentModal,
+    showCreateResidenteModal,
     turnoLabel,
     turnoMeta,
     signOut,
@@ -114,5 +118,7 @@ export function useDashboardPage() {
     closeCreateModal,
     openIncidenceModal,
     closeIncidenceModal,
+    openResidenteModal,
+    closeResidenteModal,
   }
 }

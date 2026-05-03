@@ -16,10 +16,14 @@
 import type { NavigationGuard } from 'vue-router'
 import { useAuthStore } from '@/business/auth/useAuthStore'
 import { AUTH_ROUTES } from '@/business/auth/route-names'
+import { DASHBOARD_ROUTES } from '@/business/dashboard/route-names'
 
-// Track whether auth has been initialized for this navigation cycle.
-// Initialized once per page load; subsequent navigations use the cached state.
-let authInitialized = false
+// Module-level flag — exported so tests can reset it between runs.
+export let authInitialized = false
+
+export function resetAuthInitialized(): void {
+  authInitialized = false
+}
 
 export function createAuthGuard(): NavigationGuard {
   return async (to) => {
@@ -30,6 +34,12 @@ export function createAuthGuard(): NavigationGuard {
     if (!authInitialized) {
       await auth.initAuth()
       authInitialized = true
+    }
+
+    // Root path: dynamic redirect based on auth state.
+    // Authenticated → dashboard. Unauthenticated → login.
+    if (to.path === '/') {
+      return auth.user !== null ? { name: DASHBOARD_ROUTES.name } : { name: AUTH_ROUTES.LOGIN.name }
     }
 
     if (to.meta['requiresAuth'] === true && auth.user === null) {

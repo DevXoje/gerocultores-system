@@ -26,7 +26,7 @@ import { useTareaFilters } from '@/business/agenda/presentation/composables/useT
 import { tareaToCalendarEvent } from '@/business/agenda/presentation/utils/tareaToCalendarEvent'
 import TareaFilterBar from '@/business/agenda/presentation/components/TareaFilterBar.vue'
 import TaskDetailPanel from '@/business/agenda/presentation/components/TaskDetailPanel.vue'
-import { TASKS_ROUTES } from '@/views/route-names'
+import { DASHBOARD_ROUTES } from '@/business/dashboard/route-names'
 import { SparklesIcon } from '@heroicons/vue/24/outline'
 
 // ─── Composable state ─────────────────────────────────────────────────────────
@@ -110,7 +110,7 @@ onMounted(() => {
         <h1 class="tasks-view__title">Agenda Completa</h1>
       </div>
       <RouterLink
-        :to="{ name: TASKS_ROUTES.name }"
+        :to="{ name: DASHBOARD_ROUTES.name }"
         class="tasks-view__back"
         aria-label="Volver al dashboard"
       >

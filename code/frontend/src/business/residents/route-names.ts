@@ -15,8 +15,10 @@ export const RESIDENTS_ROUTES = {
     path: '/residentes/:id/incidencias',
   },
   // US-09: Gerocultor crea/gestiona sus propios residentes
+  // Filters via query: ?status=active|archived|all, ?search=texto, ?habitacion=texto
   RESIDENTS_LIST: {
     name: 'residents-list',
     path: '/residentes',
+    pathWithQuery: '/residentes?status=active',
   },
 } as const

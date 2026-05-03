@@ -80,10 +80,10 @@ function handleBackdropClick() {
   background: transparent;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 200;
 }
 
-.app-dialog::backdrop {
+.app-dialog[open]::backdrop {
   background: rgba(0, 0, 0, 0.4);
   animation: fadeIn 200ms ease-out;
 }

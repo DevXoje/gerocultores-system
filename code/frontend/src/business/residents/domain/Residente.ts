@@ -143,8 +143,21 @@ export type UpdateResidenteDto = z.infer<typeof UpdateResidenteDtoSchema>
 // ── List filter ────────────────────────────────────────────────────────────
 
 export const ResidenteFilterSchema = z.enum(['active', 'archived', 'all'])
-
 export type ResidenteFilter = z.infer<typeof ResidenteFilterSchema>
+
+export const ResidentFiltersSchema = z.object({
+  status: ResidenteFilterSchema,
+  search: z.string().default(''),
+  habitacion: z.string().default(''),
+})
+
+export type ResidentFilters = z.infer<typeof ResidentFiltersSchema>
+
+export const DEFAULT_FILTERS: ResidentFilters = {
+  status: 'active',
+  search: '',
+  habitacion: '',
+}
 
 export function filterResidentesByState(
   residentes: Residente[],

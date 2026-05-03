@@ -74,7 +74,7 @@ const userInitials = computed(() => {
 
 <template>
   <aside class="dashboard-sidebar">
-    <AppBrandMark title="Cuida+" subtitle="Residencia" />
+    <AppBrandMark title="GeroCare" subtitle="Residencia" />
 
     <nav class="dashboard-sidebar__nav" aria-label="Navegación principal">
       <SidebarNavLink

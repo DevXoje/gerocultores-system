@@ -1,13 +1,13 @@
-import type { Residente, ResidenteFilter } from '@/business/residents/domain/Residente'
+import { computed } from 'vue'
+import {
+  DEFAULT_FILTERS,
+  ResidentFiltersSchema,
+  type Residente,
+  type ResidenteFilter,
+} from '@/business/residents/domain/Residente'
 import { useResidents } from '@/business/residents/presentation/composables/useResidents'
 import { useAppModal } from '@/shared/composables/useAppModal'
-import { useTabs, type TabOption } from '@/shared/composables/useTabs'
-
-export const RESIDENTS_FILTER_TABS: TabOption<ResidenteFilter>[] = [
-  { value: 'active', label: 'Activos' },
-  { value: 'archived', label: 'Archivados' },
-  { value: 'all', label: 'Todos' },
-]
+import { useUrlFilters } from '@/shared/composables/useUrlFilters'
 
 export function useResidentsView() {
   const { residentes, isLoading, error, fetchResidentes, archiveResidente } = useResidents()
@@ -16,7 +16,49 @@ export function useResidentsView() {
     context: selectedResidentId,
     openModal,
   } = useAppModal<Residente['id']>()
-  const { activeTab, selectTab } = useTabs<ResidenteFilter>('active')
+
+  // ── Filter state from URL query params ──────────────────────────────
+
+  const { filters: filtros, pushFilters } = useUrlFilters(ResidentFiltersSchema, DEFAULT_FILTERS)
+
+  // ── Computed ──────────────────────────────────────────────────────────
+
+  const filteredResidentes = computed<Residente[]>(() => {
+    const f = filtros.value
+    let result = [...residentes.value]
+
+    // Filter by status
+    if (f.status === 'active') {
+      result = result.filter((r) => !r.archivado)
+    } else if (f.status === 'archived') {
+      result = result.filter((r) => r.archivado)
+    }
+
+    // Filter by search (name + apellidos)
+    const search = f.search.trim().toLowerCase()
+    if (search) {
+      result = result.filter(
+        (r) => r.nombre.toLowerCase().includes(search) || r.apellidos.toLowerCase().includes(search)
+      )
+    }
+
+    // Filter by habitacion
+    const habitacion = f.habitacion.trim().toLowerCase()
+    if (habitacion) {
+      result = result.filter((r) => r.habitacion.toLowerCase().includes(habitacion))
+    }
+
+    return result
+  })
+
+  const hasActiveFilters = computed(() => {
+    const f = filtros.value
+    return (
+      f.status !== DEFAULT_FILTERS.status || f.search.trim() !== '' || f.habitacion.trim() !== ''
+    )
+  })
+
+  // ── Actions ──────────────────────────────────────────────────────────
 
   async function loadResidents(): Promise<void> {
     await fetchResidentes('all')
@@ -41,13 +83,28 @@ export function useResidentsView() {
   }
 
   function handleFormSaved(): void {
-    fetchResidentes(activeTab.value).catch(() => {
+    fetchResidentes('all').catch(() => {
       // Error state is managed by the residents store/composable.
     })
   }
 
-  function handleTabClick(tab: ResidenteFilter): void {
-    selectTab(tab)
+  function handleStatusFilter(status: ResidenteFilter): void {
+    const current = filtros.value
+    pushFilters({ ...current, status })
+  }
+
+  function handleSearchChange(search: string): void {
+    const current = filtros.value
+    pushFilters({ ...current, search })
+  }
+
+  function handleHabitacionChange(habitacion: string): void {
+    const current = filtros.value
+    pushFilters({ ...current, habitacion })
+  }
+
+  function clearFilters(): void {
+    pushFilters({ ...DEFAULT_FILTERS })
   }
 
   function handleRetry(): void {
@@ -57,19 +114,22 @@ export function useResidentsView() {
   }
 
   return {
-    residentes,
+    filteredResidentes,
     isLoading,
     error,
     loadResidents,
     showFormModal,
     selectedResidentId,
-    activeTab,
-    tabs: RESIDENTS_FILTER_TABS,
+    filtros,
+    hasActiveFilters,
     handleArchive,
     handleEdit,
     handleCreateNew,
     handleFormSaved,
-    handleTabClick,
+    handleStatusFilter,
+    handleSearchChange,
+    handleHabitacionChange,
+    clearFilters,
     handleRetry,
   }
 }

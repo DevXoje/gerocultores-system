@@ -25,8 +25,14 @@ defineProps<{
 }
 
 .app-clock__time {
-  @apply text-4xl font-semibold leading-none;
+  @apply text-3xl font-semibold leading-none;
   color: #1b2437;
   font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 900px) {
+  .app-clock__time {
+    @apply text-4xl;
+  }
 }
 </style>

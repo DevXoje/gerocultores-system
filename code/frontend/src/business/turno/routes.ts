@@ -12,6 +12,6 @@ export const turnoRoutes: RouteRecordRaw[] = [
     path: TURNO_ROUTES.DETAIL.path,
     name: TURNO_ROUTES.DETAIL.name,
     component: TurnoView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: 'Mi Turno' },
   },
 ]

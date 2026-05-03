@@ -9,33 +9,71 @@
  * US-09: Alta y gestión de residentes
  *
  * Displays a filterable list of residents owned by the logged-in gerocultor:
- * - Filter tabs: active / archived / all
+ * - Filter dropdown: status, search by name, habitacion
  * - "Alta nuevo residente" button → navigates to creation form
- * - Per-row edit and archive actions
+ * - Card grid of residents with edit/archive actions
  *
  * View state/orchestration is delegated to useResidentsView().
  */
-import { useResidentsView } from '@/business/residents/presentation/composables/useResidentsView'
+import { ref } from 'vue'
+import {
+  useResidentsView,
+  type ResidentStatusFilter,
+} from '@/business/residents/presentation/composables/useResidentsView'
 import { onMounted } from 'vue'
 import ResidenteList from '@/business/residents/presentation/UI/molecules/ResidenteList.vue'
 import ResidenteFormModal from '@/business/residents/presentation/UI/molecules/dialogs/ResidenteFormModal.vue'
 
 const {
-  residentes,
+  filteredResidentes,
   isLoading,
   error,
   loadResidents,
   showFormModal,
   selectedResidentId,
-  activeTab,
-  tabs,
+  filtros,
+  hasActiveFilters,
   handleArchive,
   handleEdit,
   handleCreateNew,
   handleFormSaved,
-  handleTabClick,
+  handleStatusFilter,
+  handleSearchChange,
+  handleHabitacionChange,
+  clearFilters,
   handleRetry,
 } = useResidentsView()
+
+const showFilters = ref(false)
+
+function handleStatusBtnClick(status: ResidentStatusFilter): void {
+  handleStatusFilter(status)
+}
+
+function toggleFilters(): void {
+  showFilters.value = !showFilters.value
+}
+
+function handleSearchInput(event: Event): void {
+  const target = event.target as HTMLInputElement
+  handleSearchChange(target.value)
+}
+
+function handleHabitacionInput(event: Event): void {
+  const target = event.target as HTMLInputElement
+  handleHabitacionChange(target.value)
+}
+
+function getStatusLabel(status: ResidentStatusFilter): string {
+  switch (status) {
+    case 'active':
+      return 'Activos'
+    case 'archived':
+      return 'Archivados'
+    case 'all':
+      return 'Todos'
+  }
+}
 
 onMounted(async () => {
   await loadResidents()
@@ -80,32 +118,95 @@ onMounted(async () => {
       aria-label="Cargando residentes"
     >
       <template v-for="n in 5" :key="n">
-        <div class="residents-view__skeleton-row" />
+        <div class="residents-view__skeleton-card" />
       </template>
     </div>
 
     <!-- Content -->
     <div v-else class="residents-view__content">
-      <!-- Filter tabs -->
-      <nav class="residents-view__tabs" aria-label="Filtrar residentes">
-        <template v-for="tab in tabs" :key="tab.value">
+      <!-- Filter bar -->
+      <div class="residents-view__filter-bar">
+        <!-- Status filter pills -->
+        <div class="residents-view__status-filters" role="group" aria-label="Filtrar por estado">
           <button
+            v-for="status in ['active', 'archived', 'all'] as ResidentStatusFilter[]"
+            :key="status"
             type="button"
-            class="residents-view__tab"
-            :class="{ 'residents-view__tab--active': activeTab === tab.value }"
-            :aria-selected="activeTab === tab.value"
-            role="tab"
-            @click="handleTabClick(tab.value)"
+            class="residents-view__status-btn"
+            :class="{ 'residents-view__status-btn--active': filtros.status === status }"
+            :aria-pressed="filtros.status === status"
+            @click="handleStatusBtnClick(status)"
           >
-            {{ tab.label }}
+            {{ getStatusLabel(status) }}
           </button>
-        </template>
-      </nav>
+        </div>
 
-      <!-- Resident list -->
+        <!-- Filter toggle -->
+        <button
+          type="button"
+          class="residents-view__filter-toggle"
+          :class="{ 'residents-view__filter-toggle--active': showFilters || hasActiveFilters }"
+          :aria-expanded="showFilters"
+          aria-controls="filters-panel"
+          @click="toggleFilters"
+        >
+          <span aria-hidden="true">⚙</span>
+          Filtros
+          <span
+            v-if="hasActiveFilters"
+            class="residents-view__filter-badge"
+            aria-label="Filtros activos"
+            >.</span
+          >
+        </button>
+      </div>
+
+      <!-- Filters panel -->
+      <div
+        v-if="showFilters"
+        id="filters-panel"
+        class="residents-view__filters-panel"
+        role="search"
+        aria-label="Filtros de búsqueda"
+      >
+        <div class="residents-view__filter-group">
+          <label class="residents-view__filter-label" for="search-input"> Buscar por nombre </label>
+          <input
+            id="search-input"
+            type="search"
+            class="residents-view__filter-input"
+            placeholder="Nombre o apellidos..."
+            :value="filtros.search"
+            @input="handleSearchInput"
+          />
+        </div>
+
+        <div class="residents-view__filter-group">
+          <label class="residents-view__filter-label" for="habitacion-input"> Habitación </label>
+          <input
+            id="habitacion-input"
+            type="text"
+            class="residents-view__filter-input"
+            placeholder="Ej. 101, 2A..."
+            :value="filtros.habitacion"
+            @input="handleHabitacionInput"
+          />
+        </div>
+
+        <button
+          v-if="hasActiveFilters"
+          type="button"
+          class="residents-view__clear-filters"
+          @click="clearFilters"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+
+      <!-- Resident list (cards) -->
       <ResidenteList
-        :residentes="residentes"
-        :filter="activeTab"
+        :residentes="filteredResidentes"
+        filter="all"
         :show-actions="true"
         @edit="handleEdit"
         @archive="handleArchive"
@@ -214,14 +315,14 @@ onMounted(async () => {
 
 /* ── Skeleton ───────────────────────────────────────────────────────────── */
 .residents-view__skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
-.residents-view__skeleton-row {
-  height: 3.5rem;
-  border-radius: 0.5rem;
+.residents-view__skeleton-card {
+  height: 12rem;
+  border-radius: 0.75rem;
   background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite;
@@ -243,36 +344,146 @@ onMounted(async () => {
   gap: 1rem;
 }
 
-/* ── Filter tabs ────────────────────────────────────────────────────────── */
-.residents-view__tabs {
+/* ── Filter bar ────────────────────────────────────────────────────────── */
+.residents-view__filter-bar {
   display: flex;
-  gap: 0.25rem;
-  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.residents-view__tab {
-  padding: 0.5rem 1rem;
+.residents-view__status-filters {
+  display: flex;
+  gap: 0.25rem;
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+}
+
+.residents-view__status-btn {
+  padding: 0.375rem 0.875rem;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-radius: 0.375rem;
   background: none;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: #6b7280;
   cursor: pointer;
   transition:
-    color 0.15s,
-    border-color 0.15s;
-  margin-bottom: -1px;
-  min-height: 40px;
+    background-color 0.15s,
+    color 0.15s;
+  min-height: 36px;
 }
 
-.residents-view__tab:hover {
+.residents-view__status-btn:hover {
   color: #374151;
 }
 
-.residents-view__tab--active {
-  color: #2d6a6a;
-  border-bottom-color: #2d6a6a;
+.residents-view__status-btn--active {
+  background-color: #ffffff;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   font-weight: 600;
+}
+
+.residents-view__filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+  min-height: 40px;
+}
+
+.residents-view__filter-toggle:hover {
+  background-color: #f9fafb;
+}
+
+.residents-view__filter-toggle--active {
+  background-color: #f0fdf4;
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+
+.residents-view__filter-badge {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #2d6a6a;
+  display: inline-block;
+}
+
+/* ── Filters panel ─────────────────────────────────────────────────────── */
+.residents-view__filters-panel {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.residents-view__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 160px;
+}
+
+.residents-view__filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.residents-view__filter-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: #111827;
+  background-color: #ffffff;
+  min-height: 40px;
+  transition: border-color 0.15s;
+}
+
+.residents-view__filter-input:focus {
+  outline: none;
+  border-color: #2d6a6a;
+}
+
+.residents-view__filter-input::placeholder {
+  color: #9ca3af;
+}
+
+.residents-view__clear-filters {
+  padding: 0.5rem 0.875rem;
+  border: none;
+  border-radius: 0.375rem;
+  background-color: #fef2f2;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #991b1b;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  min-height: 40px;
+}
+
+.residents-view__clear-filters:hover {
+  background-color: #fee2e2;
 }
 </style>

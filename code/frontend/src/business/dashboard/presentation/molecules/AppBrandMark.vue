@@ -4,11 +4,12 @@ import { HomeIcon } from '@heroicons/vue/24/outline'
 defineProps<{
   title: string
   subtitle: string
+  tone?: 'dark' | 'light'
 }>()
 </script>
 
 <template>
-  <div class="app-brand-mark">
+  <div class="app-brand-mark" :class="{ 'app-brand-mark--light': tone === 'light' }">
     <div class="app-brand-mark__icon-wrap">
       <HomeIcon class="app-brand-mark__icon" aria-hidden="true" />
     </div>
@@ -47,5 +48,13 @@ defineProps<{
 .app-brand-mark__subtitle {
   @apply text-sm;
   color: rgba(247, 251, 255, 0.75);
+}
+
+.app-brand-mark--light .app-brand-mark__title {
+  color: #1b2437;
+}
+
+.app-brand-mark--light .app-brand-mark__subtitle {
+  color: #6d7690;
 }
 </style>

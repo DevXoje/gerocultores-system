@@ -19,12 +19,12 @@ defineProps<{
 @reference "#/style.css";
 
 .greeting-card {
-  @apply flex items-center gap-3 rounded-2xl px-4 py-3;
+  @apply flex items-center gap-3 rounded-2xl px-3 py-3;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 255, 0.88));
 }
 
 .greeting-card__icon {
-  @apply flex h-11 w-11 items-center justify-center rounded-2xl text-xl;
+  @apply flex h-10 w-10 items-center justify-center rounded-2xl text-lg;
   background-color: rgba(255, 176, 32, 0.12);
 }
 
@@ -33,12 +33,26 @@ defineProps<{
 }
 
 .greeting-card__title {
-  @apply text-2xl font-semibold;
+  @apply text-xl font-semibold;
   color: #1b2437;
 }
 
 .greeting-card__subtitle {
   @apply text-sm;
   color: #6d7690;
+}
+
+@media (min-width: 900px) {
+  .greeting-card {
+    @apply px-4 py-3;
+  }
+
+  .greeting-card__icon {
+    @apply h-11 w-11 text-xl;
+  }
+
+  .greeting-card__title {
+    @apply text-2xl;
+  }
 }
 </style>

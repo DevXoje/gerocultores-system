@@ -23,4 +23,14 @@
   --color-on-error-container: #93000a;
   --color-outline-variant: #bec9c8;
   --color-outline: #6e7979;
+
+  /* ─── Dial / FAB (Floating Action Button) ───────────────────────────── */
+  --color-dial-fab-bg: #dfe9ff;
+  --color-dial-fab-text: #10254c;
+  --color-dial-fab-shadow: rgba(73, 119, 255, 0.34);
+  --color-dial-backdrop: rgba(15, 26, 50, 0.45);
+  --color-dial-option-bg: #ffffff;
+  --color-dial-option-text: #33405c;
+  --color-dial-option-hover-bg: #f0f5ff;
+  --color-dial-option-hover-border: rgba(94, 133, 243, 0.55);
 }

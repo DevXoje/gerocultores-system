@@ -6,10 +6,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    tailwindcss(),
-  ],
+  plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
       // Alias '@/' apunta a 'code/frontend/src/' usando una ruta relativa al propio vite.config.ts.
@@ -45,15 +42,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.ts', 'src/**/*.vue'],
-      exclude: [
-        'src/**/*.spec.ts',
-        'src/main.ts',
-        'src/App.vue',
-        'src/views/DashboardView.vue',
-        'src/views/AdminView.vue',
-        'src/views/ResidentsView.vue',
-        'src/views/ForbiddenView.vue',
-      ],
+      exclude: ['src/**/*.spec.ts', 'src/main.ts', 'src/App.vue'],
     },
   },
 })

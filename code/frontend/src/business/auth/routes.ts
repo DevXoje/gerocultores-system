@@ -14,12 +14,12 @@ export const authRoutes: RouteRecordRaw[] = [
     path: AUTH_ROUTES.LOGIN.path,
     name: AUTH_ROUTES.LOGIN.name,
     component: LoginPage,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false, title: 'Iniciar sesión' },
   },
   {
     path: AUTH_ROUTES.REGISTER.path,
     name: AUTH_ROUTES.REGISTER.name,
     component: RegisterPage,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false, title: 'Crear cuenta' },
   },
 ]

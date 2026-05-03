@@ -9,7 +9,7 @@
  *   - Delegates state to tareasStore (Pinia) — composable is NEVER the state owner.
  *   - No Firebase calls directly; uses tareasApi from infrastructure/.
  *   - Returns domain types (TareaResponse from domain/entities/tarea.types.ts).
- *   - Composable is consumed by presentation layer (DashboardView).
+ *   - Composable is consumed by presentation layer (DashboardPage).
  */
 import { storeToRefs } from 'pinia'
 import { tareasApi } from '@/infrastructure/tareas/tareas.api'

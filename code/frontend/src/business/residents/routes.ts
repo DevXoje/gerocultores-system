@@ -16,19 +16,20 @@ export const residentsRoutes: RouteRecordRaw[] = [
     path: RESIDENTS_ROUTES.RESIDENTE_DETAIL.path,
     name: RESIDENTS_ROUTES.RESIDENTE_DETAIL.name,
     component: ResidenteView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: 'Ficha de residente' },
   },
   {
     path: RESIDENTS_ROUTES.RESIDENTE_INCIDENCIAS.path,
     name: RESIDENTS_ROUTES.RESIDENTE_INCIDENCIAS.name,
     component: IncidenciasResidenteView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: 'Incidencias del residente' },
   },
   // US-09: Gerocultor gestiona sus propios residentes
+  // Query params: ?status=active|archived|all, ?search=texto, ?habitacion=texto
   {
     path: RESIDENTS_ROUTES.RESIDENTS_LIST.path,
     name: RESIDENTS_ROUTES.RESIDENTS_LIST.name,
     component: ResidentsView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: 'Residentes' },
   },
 ]

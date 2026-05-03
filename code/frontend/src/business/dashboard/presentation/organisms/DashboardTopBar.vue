@@ -33,7 +33,7 @@ defineProps<{
 @reference "#/style.css";
 
 .dashboard-top-bar {
-  @apply flex flex-col gap-4 rounded-[28px] border px-6 py-5;
+  @apply flex flex-col gap-3 rounded-[24px] border px-4 py-4;
   background: rgba(255, 255, 255, 0.86);
   border-color: rgba(222, 229, 242, 0.9);
   box-shadow: 0 22px 45px rgba(214, 223, 240, 0.28);
@@ -41,21 +41,21 @@ defineProps<{
 }
 
 .dashboard-top-bar__lead {
-  @apply flex flex-col gap-3;
+  @apply flex flex-col gap-2;
 }
 
 .dashboard-top-bar__status {
-  @apply flex flex-col gap-3;
+  @apply grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3;
 }
 
 .dashboard-top-bar__clock-card {
-  @apply flex items-center gap-3 rounded-2xl px-4 py-3;
+  @apply flex items-center gap-3 rounded-2xl px-3 py-3;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 255, 0.88));
 }
 
 @media (min-width: 900px) {
   .dashboard-top-bar {
-    @apply flex-row items-stretch justify-between;
+    @apply flex-row items-stretch justify-between rounded-[28px] px-6 py-5;
   }
 
   .dashboard-top-bar__lead {
@@ -63,7 +63,7 @@ defineProps<{
   }
 
   .dashboard-top-bar__status {
-    @apply items-end;
+    @apply flex flex-col items-end;
   }
 
   .dashboard-top-bar__clock-card {
