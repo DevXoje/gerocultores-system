@@ -15,13 +15,13 @@
  *   - BEM class names; Tailwind via @apply in <style scoped>.
  */
 import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
-import { INCIDENTS_ROUTES } from '@/business/incidents/route-names'
 import { TASKS_ROUTES } from '@/views/route-names'
 import DashboardWidgetGrid from '@/business/agenda/presentation/components/dashboard/DashboardWidgetGrid.vue'
 import TasksSummaryWidget from '@/business/agenda/presentation/components/dashboard/TasksSummaryWidget.vue'
 import AlertsPreviewWidget from '@/business/agenda/presentation/components/dashboard/AlertsPreviewWidget.vue'
 import RecentResidentsWidget from '@/business/agenda/presentation/components/dashboard/RecentResidentsWidget.vue'
 import CreateTareaModal from '@/business/agenda/presentation/components/CreateTareaModal.vue'
+import IncidenceFormModal from '@/business/incidents/presentation/components/IncidenceFormModal.vue'
 import DashboardSidebar from '@/business/dashboard/presentation/organisms/DashboardSidebar.vue'
 import DashboardTopBar from '@/business/dashboard/presentation/organisms/DashboardTopBar.vue'
 import { useDashboardPage } from '@/business/dashboard/presentation/composables/useDashboardPage'
@@ -34,17 +34,25 @@ const {
   isOnline,
   nombreUsuario,
   showCreateModal,
+  showCreateIncidentModal,
   turnoLabel,
   turnoMeta,
   signOut,
   openCreateModal,
   closeCreateModal,
+  openIncidenceModal,
+  closeIncidenceModal,
 } = useDashboardPage()
 </script>
 
 <template>
   <div class="dashboard-page">
-    <DashboardSidebar :user-name="nombreUsuario" @sign-out="signOut" />
+    <DashboardSidebar
+      :user-name="nombreUsuario"
+      :is-incidence-open="showCreateIncidentModal"
+      @open-incidence="openIncidenceModal"
+      @sign-out="signOut"
+    />
 
     <div class="dashboard-page__main">
       <DashboardTopBar
@@ -97,12 +105,13 @@ const {
                 <RouterLink :to="{ name: TASKS_ROUTES.name }" class="dashboard-page__quick-action">
                   Tareas
                 </RouterLink>
-                <RouterLink
-                  :to="{ name: INCIDENTS_ROUTES.NUEVA_INCIDENCIA.name }"
-                  class="dashboard-page__quick-action"
+                <button
+                  type="button"
+                  class="dashboard-page__quick-action dashboard-page__quick-action-btn"
+                  @click="openIncidenceModal"
                 >
                   Incidencia
-                </RouterLink>
+                </button>
               </div>
             </article>
           </aside>
@@ -122,6 +131,12 @@ const {
     </div>
 
     <CreateTareaModal v-if="showCreateModal" @close="closeCreateModal" />
+
+    <IncidenceFormModal
+      v-if="showCreateIncidentModal"
+      v-model="showCreateIncidentModal"
+      @close="closeIncidenceModal"
+    />
   </div>
 </template>
 
@@ -228,6 +243,10 @@ const {
   border-color: rgba(94, 133, 243, 0.55);
   box-shadow: 0 12px 24px rgba(213, 222, 241, 0.28);
   transform: translateY(-1px);
+}
+
+.dashboard-page__quick-action-btn {
+  @apply cursor-pointer text-left;
 }
 
 .dashboard-page__fab {

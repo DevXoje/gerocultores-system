@@ -4,7 +4,6 @@ import { DASHBOARD_ROUTES } from '@/business/dashboard/route-names'
 import { TASKS_ROUTES } from '@/views/route-names'
 import { authRoutes } from '@/business/auth/routes'
 import { residentsRoutes } from '@/business/residents/routes'
-import { incidentsRoutes } from '@/business/incidents/routes'
 import { turnoRoutes } from '@/business/turno/routes'
 import DashboardView from '@/views/DashboardView.vue'
 
@@ -25,7 +24,6 @@ export const routes: RouteRecordRaw[] = [
   },
   ...authRoutes,
   ...residentsRoutes,
-  ...incidentsRoutes,
   ...turnoRoutes,
   {
     path: DASHBOARD_ROUTES.path,

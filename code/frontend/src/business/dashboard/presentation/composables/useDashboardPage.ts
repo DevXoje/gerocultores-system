@@ -8,6 +8,7 @@ export function useDashboardPage() {
   const router = useRouter()
   const auth = useAuthStore()
   const showCreateModal = ref(false)
+  const showCreateIncidentModal = ref(false)
   const now = ref(new Date())
   const isOnline = ref(navigator.onLine)
   const { turnoActivo, cargarTurnoActivo } = useTurno()
@@ -67,6 +68,14 @@ export function useDashboardPage() {
     showCreateModal.value = false
   }
 
+  function openIncidenceModal(): void {
+    showCreateIncidentModal.value = true
+  }
+
+  function closeIncidenceModal(): void {
+    showCreateIncidentModal.value = false
+  }
+
   function handleConnectivityChange(): void {
     isOnline.value = navigator.onLine
   }
@@ -77,8 +86,8 @@ export function useDashboardPage() {
       now.value = new Date()
     }, 60_000)
 
-    window.addEventListener('online', handleConnectivityChange)
-    window.addEventListener('offline', handleConnectivityChange)
+    globalThis.addEventListener('online', handleConnectivityChange)
+    globalThis.addEventListener('offline', handleConnectivityChange)
   })
 
   onUnmounted(() => {
@@ -86,8 +95,8 @@ export function useDashboardPage() {
       clearInterval(clockTimer)
     }
 
-    window.removeEventListener('online', handleConnectivityChange)
-    window.removeEventListener('offline', handleConnectivityChange)
+    globalThis.removeEventListener('online', handleConnectivityChange)
+    globalThis.removeEventListener('offline', handleConnectivityChange)
   })
 
   return {
@@ -97,10 +106,13 @@ export function useDashboardPage() {
     isOnline,
     nombreUsuario,
     showCreateModal,
+    showCreateIncidentModal,
     turnoLabel,
     turnoMeta,
     signOut,
     openCreateModal,
     closeCreateModal,
+    openIncidenceModal,
+    closeIncidenceModal,
   }
 }

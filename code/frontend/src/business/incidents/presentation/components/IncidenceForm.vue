@@ -111,12 +111,7 @@ function handleSeveritySelect(value: IncidenciaSeveridad): void {
 </script>
 
 <template>
-  <div
-    class="incidence-form"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="incidence-form-title"
-  >
+  <div class="incidence-form">
     <!-- Header -->
     <header class="incidence-form__header">
       <p class="incidence-form__section-label">DOCUMENTACIÓN CLÍNICA</p>
@@ -187,13 +182,9 @@ function handleSeveritySelect(value: IncidenciaSeveridad): void {
       </div>
 
       <!-- Severity toggle group -->
-      <div class="incidence-form__field">
-        <p id="incidence-severidad-label" class="incidence-form__label">Nivel de Gravedad</p>
-        <div
-          class="incidence-form__severity-group"
-          role="group"
-          aria-labelledby="incidence-severidad-label"
-        >
+      <fieldset class="incidence-form__field incidence-form__fieldset">
+        <legend class="incidence-form__label">Nivel de Gravedad</legend>
+        <div class="incidence-form__severity-group">
           <template v-for="opt in SEVERIDAD_OPTIONS" :key="opt.value">
             <button
               type="button"
@@ -212,7 +203,7 @@ function handleSeveritySelect(value: IncidenciaSeveridad): void {
         <p v-if="fieldErrors.severidad" class="incidence-form__field-error" role="alert">
           {{ fieldErrors.severidad }}
         </p>
-      </div>
+      </fieldset>
 
       <!-- Description textarea -->
       <div class="incidence-form__field">
@@ -343,6 +334,12 @@ function handleSeveritySelect(value: IncidenciaSeveridad): void {
   gap: 0.375rem;
 }
 
+.incidence-form__fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
 .incidence-form__label {
   font-size: 0.75rem;
   font-weight: 600;
@@ -420,7 +417,7 @@ function handleSeveritySelect(value: IncidenciaSeveridad): void {
 
 .incidence-form__severity-btn--moderada.incidence-form__severity-btn--active {
   background-color: #f59e0b;
-  color: #ffffff;
+  color: #111827;
 }
 
 .incidence-form__severity-btn--leve {

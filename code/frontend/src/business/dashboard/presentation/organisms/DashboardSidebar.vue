@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { DASHBOARD_ROUTES } from '@/business/dashboard/route-names'
 import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
-import { INCIDENTS_ROUTES } from '@/business/incidents/route-names'
 import { TURNO_ROUTES } from '@/business/turno/route-names'
 import { TASKS_ROUTES } from '@/views/route-names'
 import {
@@ -19,10 +18,12 @@ import SidebarUserProfile from '@/business/dashboard/presentation/molecules/Side
 
 const props = defineProps<{
   userName: string
+  isIncidenceOpen?: boolean
 }>()
 
 const emit = defineEmits<{
   signOut: []
+  openIncidence: []
 }>()
 
 const route = useRoute()
@@ -47,12 +48,6 @@ const navItems = [
     icon: UserGroupIcon,
   },
   {
-    label: 'Incidencias',
-    to: { name: INCIDENTS_ROUTES.NUEVA_INCIDENCIA.name },
-    routeName: INCIDENTS_ROUTES.NUEVA_INCIDENCIA.name,
-    icon: ExclamationTriangleIcon,
-  },
-  {
     label: 'Turno',
     to: { name: TURNO_ROUTES.DETAIL.name },
     routeName: TURNO_ROUTES.DETAIL.name,
@@ -62,6 +57,10 @@ const navItems = [
 
 function isActive(routeName: string): boolean {
   return route.name === routeName
+}
+
+function openIncidence(): void {
+  emit('openIncidence')
 }
 
 const userInitials = computed(() => {
@@ -86,6 +85,16 @@ const userInitials = computed(() => {
         :to="item.to"
         :is-active="isActive(item.routeName)"
       />
+
+      <button
+        type="button"
+        class="dashboard-sidebar__incidence-btn"
+        :class="{ 'dashboard-sidebar__incidence-btn--active': props.isIncidenceOpen }"
+        @click="openIncidence"
+      >
+        <ExclamationTriangleIcon class="dashboard-sidebar__incidence-icon" aria-hidden="true" />
+        <span>Incidencias</span>
+      </button>
     </nav>
 
     <div class="dashboard-sidebar__footer">
@@ -128,5 +137,31 @@ const userInitials = computed(() => {
 
 .dashboard-sidebar__signout:hover {
   background-color: #2b406c;
+}
+
+.dashboard-sidebar__incidence-btn {
+  @apply flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium border-none cursor-pointer;
+  color: rgba(247, 251, 255, 0.78);
+  background-color: transparent;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.dashboard-sidebar__incidence-btn:hover {
+  background-color: #22355c;
+  color: #f2f6ff;
+  transform: translateX(1px);
+}
+
+.dashboard-sidebar__incidence-btn--active {
+  background-color: #24488f;
+  color: #f2f6ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.dashboard-sidebar__incidence-icon {
+  @apply h-5 w-5 shrink-0;
 }
 </style>
