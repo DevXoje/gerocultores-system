@@ -15,6 +15,10 @@ const emit = defineEmits<{
   (e: 'open-incidence'): void
   (e: 'open-create-task'): void
 }>()
+
+function showTeamMessages(): void {
+  globalThis.alert('Mensajes de equipo en desarrollo')
+}
 </script>
 
 <template>
@@ -87,7 +91,7 @@ const emit = defineEmits<{
       <button
         type="button"
         class="dashboard-quick-actions__action dashboard-quick-actions__action--orange"
-        @click="() => alert('Mensajes de equipo en desarrollo')"
+        @click="showTeamMessages"
       >
         <div class="dashboard-quick-actions__icon-wrapper">
           <ChatBubbleLeftRightIcon class="dashboard-quick-actions__icon" />

@@ -40,6 +40,7 @@ const {
   turnoMeta,
   openCreateModal,
   closeCreateModal,
+  openIncidenceModal,
   openResidenteModal,
   closeResidenteModal,
 } = useDashboardPage()

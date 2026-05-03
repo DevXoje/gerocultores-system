@@ -16,10 +16,8 @@
  * View state/orchestration is delegated to useResidentsView().
  */
 import { ref } from 'vue'
-import {
-  useResidentsView,
-  type ResidentStatusFilter,
-} from '@/business/residents/presentation/composables/useResidentsView'
+import { useResidentsView } from '@/business/residents/presentation/composables/useResidentsView'
+import { type ResidenteFilter } from '@/business/residents/domain/Residente'
 import { onMounted } from 'vue'
 import ResidenteList from '@/business/residents/presentation/UI/molecules/ResidenteList.vue'
 import ResidenteFormModal from '@/business/residents/presentation/UI/molecules/dialogs/ResidenteFormModal.vue'
@@ -46,7 +44,7 @@ const {
 
 const showFilters = ref(false)
 
-function handleStatusBtnClick(status: ResidentStatusFilter): void {
+function handleStatusBtnClick(status: ResidenteFilter): void {
   handleStatusFilter(status)
 }
 
@@ -64,7 +62,7 @@ function handleHabitacionInput(event: Event): void {
   handleHabitacionChange(target.value)
 }
 
-function getStatusLabel(status: ResidentStatusFilter): string {
+function getStatusLabel(status: ResidenteFilter): string {
   switch (status) {
     case 'active':
       return 'Activos'
@@ -129,7 +127,7 @@ onMounted(async () => {
         <!-- Status filter pills -->
         <div class="residents-view__status-filters" role="group" aria-label="Filtrar por estado">
           <button
-            v-for="status in ['active', 'archived', 'all'] as ResidentStatusFilter[]"
+            v-for="status in ['active', 'archived', 'all'] as ResidenteFilter[]"
             :key="status"
             type="button"
             class="residents-view__status-btn"

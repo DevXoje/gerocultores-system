@@ -82,7 +82,9 @@ function close(): void {
 
 function handleOption(action: 'task' | 'incident' | 'resident'): void {
   close()
-  emit(`create-${action}`)
+  if (action === 'task') emit('create-task')
+  else if (action === 'incident') emit('create-incident')
+  else emit('create-resident')
 }
 </script>
 
