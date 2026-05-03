@@ -45,6 +45,13 @@ describe('IncidenceFormModal', () => {
     vi.clearAllMocks()
   })
 
+  const AppDialogStub = {
+    name: 'AppDialog',
+    props: ['modelValue', 'title', 'size'],
+    emits: ['update:modelValue', 'close'],
+    template: `<div class="app-dialog-stub"><slot /></div>`,
+  }
+
   function mountModal() {
     return mount(IncidenceFormModal, {
       props: {
@@ -53,6 +60,7 @@ describe('IncidenceFormModal', () => {
       global: {
         stubs: {
           IncidenceForm: IncidenceFormStub,
+          AppDialog: AppDialogStub,
         },
       },
     })
