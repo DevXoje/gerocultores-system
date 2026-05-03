@@ -8,11 +8,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { ref, computed } from 'vue'
+import type { TareaResponse } from '@/business/agenda/domain/entities/tarea.types'
 
 // ── Mock composables ───────────────────────────────────────────────────────────
 vi.mock('@/business/agenda/application/useAgendaHoy', () => ({
   useAgendaHoy: vi.fn(() => ({
-    tareas: [
+    tareas: ref([
       {
         id: 't-1',
         titulo: 'Aseo matutino',
@@ -25,8 +26,8 @@ vi.mock('@/business/agenda/application/useAgendaHoy', () => ({
         estado: 'pendiente',
         fechaHora: '2026-05-01T09:00:00Z',
       },
-    ],
-    isLoading: false,
+    ]),
+    isLoading: ref(false),
     cargarTareas: vi.fn(),
   })),
 }))
@@ -115,17 +116,18 @@ describe('DashboardWidgetGrid', () => {
     })
     await flushPromises()
 
-    expect(wrapper.find('.tasks-widget__count-number').text()).toBe('2')
+    const badges = wrapper.findAll('.tasks-widget__badge')
+    expect(badges[0].text()).toBe('2')
   })
 
   it('TasksSummaryWidget shows "No hay tareas" when no tasks', async () => {
     const { useAgendaHoy } = vi.mocked(await import('@/business/agenda/application/useAgendaHoy'))
     useAgendaHoy.mockReturnValueOnce({
-      tareas: ref([]),
+      tareas: ref<TareaResponse[]>([]),
       isLoading: ref(false),
-      cargarTareas: vi.fn(),
       isServerReachable: ref(true),
       error: ref(null),
+      cargarTareas: vi.fn(),
       retry: vi.fn(),
       actualizarEstado: vi.fn(),
       toggleComplete: vi.fn(),
@@ -136,7 +138,7 @@ describe('DashboardWidgetGrid', () => {
     })
     await flushPromises()
 
-    expect(wrapper.find('.tasks-widget__status--empty').text()).toBe('No hay tareas para hoy')
+    expect(wrapper.find('.tasks-widget__empty').text()).toBe('No hay tareas programadas.')
   })
 
   it('AlertsPreviewWidget shows critical alert count', async () => {
