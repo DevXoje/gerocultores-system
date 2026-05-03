@@ -13,62 +13,33 @@
  * - "Alta nuevo residente" button → navigates to creation form
  * - Per-row edit and archive actions
  *
- * All data-fetching and mutations are delegated to useResidents().
+ * View state/orchestration is delegated to useResidentsView().
  */
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useResidents } from '@/business/residents/presentation/composables/useResidents'
-import ResidenteList from '@/business/residents/presentation/components/ResidenteList.vue'
-import type { Residente } from '@/business/residents/domain/Residente'
-import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
+import { useResidentsView } from '@/business/residents/presentation/composables/useResidentsView'
+import { onMounted } from 'vue'
+import ResidenteList from '@/business/residents/presentation/UI/molecules/ResidenteList.vue'
+import ResidenteFormModal from '@/business/residents/presentation/UI/molecules/dialogs/ResidenteFormModal.vue'
 
-// ── Router & Composable ───────────────────────────────────────────────────
-const router = useRouter()
-const { residentes, isLoading, error, fetchResidentes, archiveResidente } = useResidents()
+const {
+  residentes,
+  isLoading,
+  error,
+  loadResidents,
+  showFormModal,
+  selectedResidentId,
+  activeTab,
+  tabs,
+  handleArchive,
+  handleEdit,
+  handleCreateNew,
+  handleFormSaved,
+  handleTabClick,
+  handleRetry,
+} = useResidentsView()
 
-// ── Filter state ──────────────────────────────────────────────────────────
-type FilterTab = 'active' | 'archived' | 'all'
-const activeTab = ref<FilterTab>('active')
-
-const TABS: { value: FilterTab; label: string }[] = [
-  { value: 'active', label: 'Activos' },
-  { value: 'archived', label: 'Archivados' },
-  { value: 'all', label: 'Todos' },
-]
-
-// ── Lifecycle ──────────────────────────────────────────────────────────
-onMounted(() => {
-  fetchResidentes('all')
+onMounted(async () => {
+  await loadResidents()
 })
-
-// ── Handlers ───────────────────────────────────────────────────────────
-
-async function handleArchive(residente: Residente): Promise<void> {
-  if (residente.archivado) {
-    // TODO: implement restore/unarchive if backend supports it
-    return
-  }
-  try {
-    await archiveResidente(residente.id)
-  } catch {
-    // error is managed in store
-  }
-}
-
-function handleEdit(residente: Residente): void {
-  router.push({
-    name: RESIDENTS_ROUTES.RESIDENTE_EDITAR.name,
-    params: { id: residente.id },
-  })
-}
-
-function handleCreateNew(): void {
-  router.push({ name: RESIDENTS_ROUTES.RESIDENTE_NUEVO.name })
-}
-
-function handleTabClick(tab: FilterTab): void {
-  activeTab.value = tab
-}
 </script>
 
 <template>
@@ -96,7 +67,7 @@ function handleTabClick(tab: FilterTab): void {
     <div v-if="error" class="residents-view__error" role="alert">
       <span class="residents-view__error-icon" aria-hidden="true">⚠</span>
       <span class="residents-view__error-message">{{ error }}</span>
-      <button type="button" class="residents-view__retry-btn" @click="fetchResidentes('all')">
+      <button type="button" class="residents-view__retry-btn" @click="handleRetry">
         Reintentar
       </button>
     </div>
@@ -117,7 +88,7 @@ function handleTabClick(tab: FilterTab): void {
     <div v-else class="residents-view__content">
       <!-- Filter tabs -->
       <nav class="residents-view__tabs" aria-label="Filtrar residentes">
-        <template v-for="tab in TABS" :key="tab.value">
+        <template v-for="tab in tabs" :key="tab.value">
           <button
             type="button"
             class="residents-view__tab"
@@ -140,6 +111,14 @@ function handleTabClick(tab: FilterTab): void {
         @archive="handleArchive"
       />
     </div>
+
+    <!-- Create/Edit Modal -->
+    <ResidenteFormModal
+      v-if="showFormModal"
+      v-model="showFormModal"
+      :resident-id="selectedResidentId"
+      @saved="handleFormSaved"
+    />
   </div>
 </template>
 
@@ -210,7 +189,7 @@ function handleTabClick(tab: FilterTab): void {
   border-radius: 0.5rem;
   background-color: #fef2f2;
   border: 1px solid #fecaca;
-  color: #dc2626;
+  color: #991b1b;
   font-size: 0.875rem;
 }
 
@@ -229,7 +208,7 @@ function handleTabClick(tab: FilterTab): void {
   cursor: pointer;
   background: none;
   border: none;
-  color: #dc2626;
+  color: #991b1b;
   font-size: 0.875rem;
 }
 

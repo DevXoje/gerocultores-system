@@ -39,8 +39,8 @@ vi.mock('@/business/notification/presentation/composables/useNotificacion', () =
   })),
 }))
 
-vi.mock('@/business/residents/application/useResidentes', () => ({
-  useResidentes: vi.fn(() => ({
+vi.mock('@/business/residents/presentation/composables/useResidents', () => ({
+  useResidents: vi.fn(() => ({
     residentes: ref([
       { id: 'r-1', nombre: 'Rosa Martínez', creadoEn: new Date('2026-05-01') },
       { id: 'r-2', nombre: 'Antonio López', creadoEn: new Date('2026-04-30') },
@@ -179,14 +179,14 @@ describe('DashboardWidgetGrid', () => {
   })
 
   it('RecentResidentsWidget shows "Sin residentes" when empty', async () => {
-    const { useResidentes } = vi.mocked(
-      await import('@/business/residents/application/useResidentes')
+    const { useResidents } = vi.mocked(
+      await import('@/business/residents/presentation/composables/useResidents')
     )
-    useResidentes.mockReturnValueOnce({
+    useResidents.mockReturnValueOnce({
       residentes: ref([]),
       isLoading: false,
       fetchResidentes: vi.fn(),
-    } as unknown as ReturnType<typeof useResidentes>)
+    } as unknown as ReturnType<typeof useResidents>)
 
     const wrapper = mount(RecentResidentsWidget, {
       global: { plugins: [router] },

@@ -16,10 +16,7 @@ import type { TareaTipo } from '@/business/agenda/domain/entities/tarea.types'
 import { useAuthStore } from '@/business/auth/useAuthStore'
 import type { CreateTareaDTO } from '@/business/agenda/domain/entities/tarea.types'
 import { useResidents } from '@/business/residents/presentation/composables/useResidents'
-import { createResidente as createResidenteUC } from '@/business/residents/domain/CreateResidenteUseCase'
-import type { CreateResidenteDto } from '@/business/residents/domain/Residente'
-import ResidenteForm from '@/business/residents/presentation/components/ResidenteForm.vue'
-import AppDialog from '@/ui/molecules/dialogs/AppDialog.vue'
+import ResidenteFormModal from '@/business/residents/presentation/UI/molecules/dialogs/ResidenteFormModal.vue'
 
 const modelValue = defineModel<boolean>()
 
@@ -56,37 +53,14 @@ onMounted(() => {
 
 function handleResidenteChange(): void {
   if (residenteId.value === '__create_new__') {
-    // Reset select display to placeholder
     residenteId.value = ''
     showCreateResidente.value = true
   }
 }
 
-async function handleCreateResidente(
-  data:
-    | CreateResidenteDto
-    | {
-        nombre?: string
-        apellidos?: string
-        fechaNacimiento?: string
-        habitacion?: string
-        foto?: string | null
-        diagnosticos?: string | null
-        alergias?: string | null
-        medicacion?: string | null
-        preferencias?: string | null
-      }
-): Promise<void> {
-  const dto = data as CreateResidenteDto
-  const { residente } = await createResidenteUC(dto)
-  residenteId.value = residente.id
-  showCreateResidente.value = false
+function handleResidenteFormSaved(): void {
   // Refresh list so the new resident appears
-  await fetchResidentes('active')
-}
-
-function handleCancelNewResidente(): void {
-  showCreateResidente.value = false
+  fetchResidentes('active')
 }
 
 function handleClose(): void {
@@ -277,18 +251,7 @@ async function handleSubmit(): Promise<void> {
     </template>
 
     <!-- Nested modal for resident creation -->
-    <AppDialog
-      v-if="showCreateResidente"
-      v-model="showCreateResidente"
-      title="Alta nuevo residente"
-      size="md"
-    >
-      <ResidenteForm
-        submit-label="Crear residente"
-        @submit="handleCreateResidente"
-        @cancelled="handleCancelNewResidente"
-      />
-    </AppDialog>
+    <ResidenteFormModal v-model="showCreateResidente" @saved="handleResidenteFormSaved" />
   </AppDialog>
 </template>
 

@@ -19,12 +19,4 @@ export const RESIDENTS_ROUTES = {
     name: 'residents-list',
     path: '/residentes',
   },
-  RESIDENTE_NUEVO: {
-    name: 'residente-nuevo',
-    path: '/residentes/nuevo',
-  },
-  RESIDENTE_EDITAR: {
-    name: 'residente-editar',
-    path: '/residentes/:id/editar',
-  },
 } as const

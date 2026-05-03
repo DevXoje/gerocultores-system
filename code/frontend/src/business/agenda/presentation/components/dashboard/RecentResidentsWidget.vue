@@ -3,16 +3,16 @@
  * RecentResidentsWidget — list of 3 resident names + "Ver todos" link.
  *
  * Phase 5 task 5.4
- * Uses existing useResidentes composable, shows top 3 by creation date.
+ * Usa useResidents (API pública), muestra top 3 por fecha de creación.
  */
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useResidentes } from '@/business/residents/application/useResidentes'
+import { useResidents } from '@/business/residents/presentation/composables/useResidents'
 import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
 import { UsersIcon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
-const { residentes, isLoading, fetchResidentes } = useResidentes()
+const { residentes, isLoading, fetchResidentes } = useResidents()
 
 onMounted(() => {
   fetchResidentes()

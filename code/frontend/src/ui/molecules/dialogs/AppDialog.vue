@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 const modelValue = defineModel<boolean>({ default: false })
 
 const props = defineProps<{
@@ -13,8 +11,6 @@ const emit = defineEmits<{
   close: []
   submit: [data: unknown]
 }>()
-
-const isOpen = computed(() => modelValue.value)
 
 function closeDialog() {
   modelValue.value = false
@@ -33,7 +29,7 @@ function handleBackdropClick() {
     <dialog
       class="app-dialog"
       :class="[`app-dialog--${size}`]"
-      :open="isOpen"
+      :open="modelValue"
       aria-modal="true"
       :aria-labelledby="title ? 'app-dialog-title' : undefined"
       @click.self="handleBackdropClick"
@@ -67,6 +63,11 @@ function handleBackdropClick() {
 @reference "#/style.css";
 
 .app-dialog {
+  display: none;
+}
+
+.app-dialog[open] {
+  display: flex;
   position: fixed;
   inset: 0;
   width: 100%;
@@ -77,7 +78,6 @@ function handleBackdropClick() {
   padding: 0;
   border: none;
   background: transparent;
-  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;

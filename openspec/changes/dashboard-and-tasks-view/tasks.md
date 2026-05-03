@@ -25,7 +25,7 @@
 - [x] 5.1 Create `code/frontend/src/business/agenda/presentation/components/dashboard/DashboardWidgetGrid.vue` — responsive 3-card grid layout
 - [x] 5.2 Create `code/frontend/src/business/agenda/presentation/components/dashboard/TasksSummaryWidget.vue` — card with task count + "Ver todas" link using `useAgendaHoy().tareas.length`
 - [x] 5.3 Create `code/frontend/src/business/agenda/presentation/components/dashboard/AlertsPreviewWidget.vue` — card with unread critical alert count + "Ver alertas" link using existing `useNotificaciones`
-- [x] 5.4 Create `code/frontend/src/business/agenda/presentation/components/dashboard/RecentResidentsWidget.vue` — list of 3 resident names + "Ver todos" link using existing `useResidentes`
+- [x] 5.4 Create `code/frontend/src/business/agenda/presentation/components/dashboard/RecentResidentsWidget.vue` — list of 3 resident names + "Ver todos" link using existing `useResidents`
 - [x] 5.5 Write integration tests for widget grid — verify each widget renders its count
 
 ## Phase 6: DashboardView Modification

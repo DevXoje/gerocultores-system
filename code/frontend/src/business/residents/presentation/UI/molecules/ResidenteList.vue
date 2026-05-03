@@ -18,7 +18,8 @@
  *   - archive(residente: Residente): user clicked archive
  */
 import { computed } from 'vue'
-import type { Residente } from '@/business/residents/domain/Residente'
+import { filterResidentesByState, type Residente } from '@/business/residents/domain/Residente'
+import { calcularEdad, formatResidenteDateShort } from '@/business/residents/domain/ResidenteDate'
 
 const props = withDefaults(
   defineProps<{
@@ -39,36 +40,8 @@ const emit = defineEmits<{
 // ── Computed ──────────────────────────────────────────────────────────────
 
 const filteredResidentes = computed<Residente[]>(() => {
-  if (props.filter === 'active') return props.residentes.filter((r) => !r.archivado)
-  if (props.filter === 'archived') return props.residentes.filter((r) => r.archivado)
-  return props.residentes
+  return filterResidentesByState(props.residentes, props.filter)
 })
-
-// ── Helpers ──────────────────────────────────────────────────────────────
-
-function formatDate(iso: string): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-}
-
-function calcularEdad(fechaNacimiento: string): number {
-  const nacimiento = new Date(fechaNacimiento)
-  const hoy = new Date()
-  let edad = hoy.getFullYear() - nacimiento.getFullYear()
-  const mesActual = hoy.getMonth()
-  const mesNacimiento = nacimiento.getMonth()
-  if (
-    mesActual < mesNacimiento ||
-    (mesActual === mesNacimiento && hoy.getDate() < nacimiento.getDate())
-  ) {
-    edad -= 1
-  }
-  return edad
-}
 
 function handleEdit(residente: Residente): void {
   emit('edit', residente)
@@ -124,7 +97,7 @@ function handleArchive(residente: Residente): void {
               </td>
               <td class="residente-list__td">
                 <div class="residente-list__birth-date">
-                  <span>{{ formatDate(residente.fechaNacimiento) }}</span>
+                  <span>{{ formatResidenteDateShort(residente.fechaNacimiento) }}</span>
                   <span class="residente-list__age"
                     >({{ calcularEdad(residente.fechaNacimiento) }} años)</span
                   >
@@ -322,7 +295,7 @@ function handleArchive(residente: Residente): void {
 
 .residente-list__badge--archived {
   background-color: #f3f4f6;
-  color: #6b7280;
+  color: #4b5563;
 }
 
 /* ── Actions ─────────────────────────────────────────────────────────────── */
@@ -358,7 +331,7 @@ function handleArchive(residente: Residente): void {
 .residente-list__action-btn--archive {
   border-color: #fca5a5;
   background-color: #fef2f2;
-  color: #dc2626;
+  color: #991b1b;
 }
 
 .residente-list__action-btn--archive:hover {

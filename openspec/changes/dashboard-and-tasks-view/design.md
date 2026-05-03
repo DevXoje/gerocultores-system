@@ -2,7 +2,7 @@
 
 ## Technical Approach
 
-Split `DashboardView.vue` into two: a **hub** at `/dashboard` (widgets + "Ver todas") and a new **TasksView.vue** at `/tareas` powered by FullCalendar. Widget data comes from existing composables (`useAgendaHoy`, `useNotificaciones`, `useResidentes`). Calendar data comes from a new `useAllTareas` composable that wraps `tareasApi.getTareas()` without a date filter. All state flows through the existing `useTareasStore` (Pinia), extended with a `allTareas` array for the calendar's full dataset.
+Split `DashboardView.vue` into two: a **hub** at `/dashboard` (widgets + "Ver todas") and a new **TasksView.vue** at `/tareas` powered by FullCalendar. Widget data comes from existing composables (`useAgendaHoy`, `useNotificaciones`, `useResidents`). Calendar data comes from a new `useAllTareas` composable that wraps `tareasApi.getTareas()` without a date filter. All state flows through the existing `useTareasStore` (Pinia), extended with a `allTareas` array for the calendar's full dataset.
 
 ---
 
@@ -64,7 +64,7 @@ Widget data (Dashboard):
 ```
 useAgendaHoy()  → tareasStore.tareas  → TasksSummaryWidget (count)
 useNotificaciones() → unread critical → AlertsPreviewWidget (count)
-useResidentes({ limit: 3 }) → residentes → RecentResidentsWidget (names)
+useResidents({ limit: 3 }) → residentes → RecentResidentsWidget (names)
 ```
 
 ---

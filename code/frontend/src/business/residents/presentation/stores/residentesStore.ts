@@ -6,7 +6,7 @@
  * Architecture (frontend-specialist.md §4):
  *   - State + getters + basic mutations ONLY.
  *   - NO async calls, NO Firebase, NO business logic.
- *   - Async data-fetching lives in useResidentes composable (application/).
+ *   - Async data-fetching lives in useResidents composable (presentation/composables/).
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'

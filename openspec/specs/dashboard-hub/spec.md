@@ -55,7 +55,7 @@ Enhanced `DashboardView.vue` (`/`) serves as a **navigation hub** instead of a t
 |------------|----------|----------------|
 | `useAgendaHoy` | EXISTING — `business/agenda/infrastructure/` | Already fetches today's tasks. Use to get `tareas.length`. |
 | `useNotificaciones` | EXISTING — `business/notification/infrastructure/` | Get count of unread `incidencia_critica` notifications. |
-| `useResidentes` | EXISTING — `business/residents/infrastructure/` | Get 3 most recently created residents (sorted by `creadoEn` desc). |
+| `useResidents` | EXISTING — `business/residents/presentation/composables/` | Get 3 most recently created residents (sorted by `creadoEn` desc). |
 
 ### 3.2 Widget Data Contract
 
@@ -63,7 +63,7 @@ Enhanced `DashboardView.vue` (`/`) serves as a **navigation hub** instead of a t
 |--------|-------|----------------|
 | Tareas hoy | `useAgendaHoy().tareas` | `Tarea[]` → count = `.length` |
 | Alertas | `useNotificaciones().unreadCritical` | `Notificacion[]` → count = `.length` |
-| Residentes recientes | `useResidentes().residentes` (limit 3) | `Residente[]` → first 3 by `creadoEn` |
+| Residentes recientes | `useResidents().residentes` (limit 3) | `Residente[]` → first 3 by `creadoEn` |
 
 ---
 

@@ -13,6 +13,7 @@ import { onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useResidente } from '@/business/residents/presentation/composables/useResidente'
 import { RESIDENTS_ROUTES } from '@/business/residents/route-names'
+import { calcularEdad, formatResidenteDateLong } from '@/business/residents/domain/ResidenteDate'
 
 const route = useRoute()
 const router = useRouter()
@@ -26,35 +27,6 @@ onMounted(() => {
 
 function goBack(): void {
   router.back()
-}
-
-/**
- * Calculates age in years from an ISO 8601 date string.
- */
-function calcularEdad(fechaNacimiento: string): number {
-  const nacimiento = new Date(fechaNacimiento)
-  const hoy = new Date()
-  let edad = hoy.getFullYear() - nacimiento.getFullYear()
-  const mesActual = hoy.getMonth()
-  const mesNacimiento = nacimiento.getMonth()
-  if (
-    mesActual < mesNacimiento ||
-    (mesActual === mesNacimiento && hoy.getDate() < nacimiento.getDate())
-  ) {
-    edad -= 1
-  }
-  return edad
-}
-
-/**
- * Formats an ISO 8601 date string to a short localized date.
- */
-function formatFecha(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
 }
 </script>
 
@@ -131,7 +103,7 @@ function formatFecha(iso: string): string {
             <span class="residente-view__meta-item">
               <span class="residente-view__meta-icon" aria-hidden="true">🎂</span>
               {{ calcularEdad(residente.fechaNacimiento) }} años ({{
-                formatFecha(residente.fechaNacimiento)
+                formatResidenteDateLong(residente.fechaNacimiento)
               }})
             </span>
           </div>
@@ -209,10 +181,10 @@ function formatFecha(iso: string): string {
       <!-- Record metadata -->
       <footer class="residente-view__footer">
         <span class="residente-view__meta-item">
-          Creado: {{ formatFecha(residente.creadoEn) }}
+          Creado: {{ formatResidenteDateLong(residente.creadoEn) }}
         </span>
         <span class="residente-view__meta-item">
-          Actualizado: {{ formatFecha(residente.actualizadoEn) }}
+          Actualizado: {{ formatResidenteDateLong(residente.actualizadoEn) }}
         </span>
       </footer>
     </div>
@@ -251,7 +223,7 @@ function formatFecha(iso: string): string {
 }
 
 .residente-view__error-icon {
-  @apply text-lg flex-shrink-0;
+  @apply text-lg shrink-0;
 }
 
 .residente-view__error-message {
@@ -272,7 +244,7 @@ function formatFecha(iso: string): string {
 }
 
 .residente-view__skeleton-avatar {
-  @apply w-24 h-24 rounded-full bg-gray-200 animate-pulse flex-shrink-0;
+  @apply w-24 h-24 rounded-full bg-gray-200 animate-pulse shrink-0;
 }
 
 .residente-view__skeleton-info {
@@ -309,7 +281,7 @@ function formatFecha(iso: string): string {
 }
 
 .residente-view__avatar-wrapper {
-  @apply flex-shrink-0;
+  @apply shrink-0;
 }
 
 .residente-view__avatar {
@@ -399,7 +371,7 @@ function formatFecha(iso: string): string {
 }
 
 .residente-view__quick-link-icon {
-  @apply text-base flex-shrink-0;
+  @apply text-base shrink-0;
 }
 
 .residente-view__quick-link-label {
@@ -407,7 +379,7 @@ function formatFecha(iso: string): string {
 }
 
 .residente-view__quick-link-arrow {
-  @apply text-indigo-400 text-base flex-shrink-0;
+  @apply text-indigo-400 text-base shrink-0;
 }
 
 /* ── Footer ─────────────────────────────────────────────────────────────── */

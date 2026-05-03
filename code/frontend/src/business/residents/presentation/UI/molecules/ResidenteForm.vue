@@ -17,24 +17,24 @@
  *   - cancelled: user dismissed the form
  */
 import { ref, computed } from 'vue'
-import type { CreateResidenteDto, UpdateResidenteDto } from '@/business/residents/domain/Residente'
-import { CreateResidenteDtoSchema } from '@/business/residents/domain/Residente'
+import type {
+  CreateResidenteDto,
+  UpdateResidenteDto,
+  ResidenteFormField,
+} from '@/business/residents/domain/Residente'
+import {
+  validateResidenteForm,
+  validateResidenteFormField,
+} from '@/business/residents/domain/Residente'
+import {
+  buildCreateResidenteDtoFromForm,
+  type ResidentFormData,
+} from '@/business/residents/domain/FormResident'
 
 // ── Props / Emit ─────────────────────────────────────────────────────────────
 
 interface Props {
-  initialData?: {
-    id?: string
-    nombre?: string
-    apellidos?: string
-    fechaNacimiento?: string
-    habitacion?: string
-    foto?: string | null
-    diagnosticos?: string | null
-    alergias?: string | null
-    medicacion?: string | null
-    preferencias?: string | null
-  }
+  initialData?: ResidentFormData
   submitLabel?: string
 }
 
@@ -60,50 +60,34 @@ const alergias = ref(props.initialData.alergias ?? '')
 const medicacion = ref(props.initialData.medicacion ?? '')
 const preferencias = ref(props.initialData.preferencias ?? '')
 
+function resetFormData(): void {
+  nombre.value = ''
+  apellidos.value = ''
+  fechaNacimiento.value = ''
+  habitacion.value = ''
+  foto.value = ''
+  diagnosticos.value = ''
+  alergias.value = ''
+  medicacion.value = ''
+  preferencias.value = ''
+}
+
 // ── Field-level error messages ─────────────────────────────────────────────
 
-const fieldErrors = ref<Record<string, string>>({})
+const fieldErrors = ref<Partial<Record<ResidenteFormField, string>>>({})
 
-function validateField(field: string, value: string): string {
-  switch (field) {
-    case 'nombre':
-      if (!value.trim()) return 'El nombre es requerido'
-      if (value.trim().length > 200) return 'Máximo 200 caracteres'
-      return ''
-    case 'apellidos':
-      if (!value.trim()) return 'Los apellidos son requeridos'
-      if (value.trim().length > 200) return 'Máximo 200 caracteres'
-      return ''
-    case 'fechaNacimiento':
-      if (!value) return 'La fecha de nacimiento es requerida'
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return 'Formato ISO 8601 (YYYY-MM-DD)'
-      return ''
-    case 'habitacion':
-      if (!value.trim()) return 'La habitación es requerida'
-      if (value.trim().length > 50) return 'Máximo 50 caracteres'
-      return ''
-    case 'foto':
-      if (value && !/^https?:\/\/.+/.test(value)) return 'URL inválida'
-      return ''
-    default:
-      return ''
+function getFormValidationData() {
+  return {
+    nombre: nombre.value,
+    apellidos: apellidos.value,
+    fechaNacimiento: fechaNacimiento.value,
+    habitacion: habitacion.value,
+    foto: foto.value,
   }
 }
 
 function validateAll(): boolean {
-  const errors: Record<string, string> = {}
-  const fields = ['nombre', 'apellidos', 'fechaNacimiento', 'habitacion', 'foto']
-  for (const field of fields) {
-    const val = {
-      nombre: nombre.value,
-      apellidos: apellidos.value,
-      fechaNacimiento: fechaNacimiento.value,
-      habitacion: habitacion.value,
-      foto: foto.value,
-    }[field]
-    const err = validateField(field, val as string)
-    if (err) errors[field] = err
-  }
+  const errors = validateResidenteForm(getFormValidationData())
   fieldErrors.value = errors
   return Object.keys(errors).length === 0
 }
@@ -111,16 +95,8 @@ function validateAll(): boolean {
 // ── Derived ───────────────────────────────────────────────────────────────────
 
 const isValid = computed(() => {
-  return (
-    nombre.value.trim().length > 0 &&
-    apellidos.value.trim().length > 0 &&
-    fechaNacimiento.value !== '' &&
-    habitacion.value.trim().length > 0 &&
-    (!foto.value || /^https?:\/\/.+/.test(foto.value))
-  )
+  return Object.keys(validateResidenteForm(getFormValidationData())).length === 0
 })
-
-const isEditMode = computed(() => !!props.initialData?.id)
 
 // ── Handlers ─────────────────────────────────────────────────────────────────
 
@@ -128,43 +104,29 @@ function handleSubmit(): void {
   fieldErrors.value = {}
   if (!validateAll()) return
 
-  const dto: CreateResidenteDto | UpdateResidenteDto = {
-    nombre: nombre.value.trim(),
-    apellidos: apellidos.value.trim(),
+  const dto: CreateResidenteDto | UpdateResidenteDto = buildCreateResidenteDtoFromForm({
+    nombre: nombre.value,
+    apellidos: apellidos.value,
     fechaNacimiento: fechaNacimiento.value,
-    habitacion: habitacion.value.trim(),
-    foto: foto.value.trim() || null,
-    diagnosticos: diagnosticos.value.trim() || null,
-    alergias: alergias.value.trim() || null,
-    medicacion: medicacion.value.trim() || null,
-    preferencias: preferencias.value.trim() || null,
-  }
-
-  try {
-    // Validate against Zod schema
-    CreateResidenteDtoSchema.parse(dto)
-  } catch {
-    // Zod validation failed — should not happen if field-level validation passed
-    return
-  }
+    habitacion: habitacion.value,
+    foto: foto.value,
+    diagnosticos: diagnosticos.value,
+    alergias: alergias.value,
+    medicacion: medicacion.value,
+    preferencias: preferencias.value,
+  })
 
   emit('submit', dto)
 }
 
 function handleCancel(): void {
+  resetFormData()
   emit('cancelled')
 }
 </script>
 
 <template>
-  <div class="residente-form" role="form" aria-labelledby="residente-form-title">
-    <header class="residente-form__header">
-      <p class="residente-form__section-label">GESTIÓN DE RESIDENTES</p>
-      <h2 id="residente-form-title" class="residente-form__title">
-        {{ isEditMode ? 'Editar residente' : 'Alta nuevo residente' }}
-      </h2>
-    </header>
-
+  <div class="residente-form">
     <form class="residente-form__body" novalidate @submit.prevent="handleSubmit">
       <!-- Row: Nombre + Apellidos -->
       <div class="residente-form__row">
@@ -180,7 +142,7 @@ function handleCancel(): void {
             aria-required="true"
             :aria-invalid="!!fieldErrors['nombre']"
             :aria-describedby="fieldErrors['nombre'] ? 'rf-nombre-err' : undefined"
-            @blur="fieldErrors['nombre'] = validateField('nombre', nombre)"
+            @blur="fieldErrors['nombre'] = validateResidenteFormField('nombre', nombre)"
           />
           <p
             v-if="fieldErrors['nombre']"
@@ -204,7 +166,7 @@ function handleCancel(): void {
             aria-required="true"
             :aria-invalid="!!fieldErrors['apellidos']"
             :aria-describedby="fieldErrors['apellidos'] ? 'rf-apellidos-err' : undefined"
-            @blur="fieldErrors['apellidos'] = validateField('apellidos', apellidos)"
+            @blur="fieldErrors['apellidos'] = validateResidenteFormField('apellidos', apellidos)"
           />
           <p
             v-if="fieldErrors['apellidos']"
@@ -231,7 +193,10 @@ function handleCancel(): void {
             :aria-invalid="!!fieldErrors['fechaNacimiento']"
             :aria-describedby="fieldErrors['fechaNacimiento'] ? 'rf-fecha-err' : undefined"
             @blur="
-              fieldErrors['fechaNacimiento'] = validateField('fechaNacimiento', fechaNacimiento)
+              fieldErrors['fechaNacimiento'] = validateResidenteFormField(
+                'fechaNacimiento',
+                fechaNacimiento
+              )
             "
           />
           <p
@@ -257,7 +222,7 @@ function handleCancel(): void {
             aria-required="true"
             :aria-invalid="!!fieldErrors['habitacion']"
             :aria-describedby="fieldErrors['habitacion'] ? 'rf-habitacion-err' : undefined"
-            @blur="fieldErrors['habitacion'] = validateField('habitacion', habitacion)"
+            @blur="fieldErrors['habitacion'] = validateResidenteFormField('habitacion', habitacion)"
           />
           <p
             v-if="fieldErrors['habitacion']"
@@ -285,7 +250,7 @@ function handleCancel(): void {
           placeholder="https://..."
           :aria-invalid="!!fieldErrors['foto']"
           :aria-describedby="fieldErrors['foto'] ? 'rf-foto-err' : undefined"
-          @blur="fieldErrors['foto'] = validateField('foto', foto)"
+          @blur="fieldErrors['foto'] = validateResidenteFormField('foto', foto)"
         />
         <p
           v-if="fieldErrors['foto']"
@@ -376,26 +341,6 @@ function handleCancel(): void {
   width: 100%;
   max-width: 640px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-}
-
-/* ── Header ──────────────────────────────────────────────────────────────── */
-.residente-form__header {
-  margin-bottom: 1.5rem;
-}
-
-.residente-form__section-label {
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
-}
-
-.residente-form__title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #111827;
 }
 
 /* ── Body ──────────────────────────────────────────────────────────────── */

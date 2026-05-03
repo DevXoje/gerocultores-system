@@ -34,7 +34,7 @@ Tests      24 failed | 314 passed (338)
 | File | Failed | Root cause |
 |------|--------|-----------|
 | `useIncidencias.spec.ts` | 23 tests | Missing `setActivePinia(createPinia())` in `beforeEach` — Pinia not initialized before `useIncidencias()` is called. **Pre-existing failure — unrelated to this change.** |
-| `DashboardWidgetGrid.spec.ts` | 3 tests | `useResidentes` mock uses raw array; component expects `residentes.value` (ref). **Pre-existing failure — unrelated to this change.** |
+| `DashboardWidgetGrid.spec.ts` | 0 tests | `useResidents` mock corrected — now returns `ref([])`. Fixed as part of composable rename. |
 | `TasksView.spec.ts` | 1 test | `vi.doMock()` called inside test body (line 207) — not supported by Vitest. **Introduced by this change's test file.** |
 
 ### Agenda module tests only
@@ -161,7 +161,7 @@ No `date-fns` import present. All 24 `tareaToCalendarEvent` tests pass.
    `beforeEach` missing `setActivePinia(createPinia())`. This is a pre-existing issue in the incidents module — not introduced by this change.
 
 2. **Pre-existing mock shape mismatch in `DashboardWidgetGrid.spec.ts`** (3 tests)  
-   `useResidentes` mock returns a raw array but `RecentResidentsWidget.vue` expects `residentes.value` (a ref). This is a pre-existing issue.
+   `useResidents` mock corrected — now returns `ref([])` as part of the composable rename from `useResidentes` to `useResidents`.
 
 3. **`TasksView.spec.ts` error-state test uses `vi.doMock()` inside test body** (1 test)  
    Vitest does not support `vi.doMock()` called after module load. Fix: hoist the mock to module level or restructure the test to use a factory function.

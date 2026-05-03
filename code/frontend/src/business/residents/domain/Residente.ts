@@ -13,6 +13,76 @@
 
 import { z } from 'zod'
 
+export const RESIDENTE_FORM_FIELDS = [
+  'nombre',
+  'apellidos',
+  'fechaNacimiento',
+  'habitacion',
+  'foto',
+] as const
+
+export type ResidenteFormField = (typeof RESIDENTE_FORM_FIELDS)[number]
+
+const HttpUrlSchema = z.string().regex(/^https?:\/\/.+/, 'URL inválida')
+
+const NombreSchema = z
+  .string()
+  .trim()
+  .min(1, 'El nombre es requerido')
+  .max(200, 'Máximo 200 caracteres')
+
+const ApellidosSchema = z
+  .string()
+  .trim()
+  .min(1, 'Los apellidos son requeridos')
+  .max(200, 'Máximo 200 caracteres')
+
+const FechaNacimientoSchema = z
+  .string()
+  .min(1, 'La fecha de nacimiento es requerida')
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato ISO 8601 (YYYY-MM-DD)')
+
+const HabitacionSchema = z
+  .string()
+  .trim()
+  .min(1, 'La habitación es requerida')
+  .max(50, 'Máximo 50 caracteres')
+
+const FotoSchema = HttpUrlSchema.nullable().optional()
+
+const ResidenteFormFieldSchemas: Record<ResidenteFormField, z.ZodType<string>> = {
+  nombre: NombreSchema,
+  apellidos: ApellidosSchema,
+  fechaNacimiento: FechaNacimientoSchema,
+  habitacion: HabitacionSchema,
+  foto: z.union([z.literal(''), HttpUrlSchema]),
+}
+
+export interface ResidenteFormValidationInput {
+  nombre: string
+  apellidos: string
+  fechaNacimiento: string
+  habitacion: string
+  foto: string
+}
+
+export function validateResidenteFormField(field: ResidenteFormField, value: string): string {
+  const result = ResidenteFormFieldSchemas[field].safeParse(value)
+  if (result.success) return ''
+  return result.error.issues[0]?.message ?? 'Valor inválido'
+}
+
+export function validateResidenteForm(
+  data: ResidenteFormValidationInput
+): Partial<Record<ResidenteFormField, string>> {
+  const errors: Partial<Record<ResidenteFormField, string>> = {}
+  for (const field of RESIDENTE_FORM_FIELDS) {
+    const error = validateResidenteFormField(field, data[field])
+    if (error) errors[field] = error
+  }
+  return errors
+}
+
 // ── Entity schema ──────────────────────────────────────────────────────────
 
 export const ResidenteSchema = z.object({
@@ -37,11 +107,11 @@ export type Residente = z.infer<typeof ResidenteSchema>
 // ── Create DTO schema ─────────────────────────────────────────────────────
 
 export const CreateResidenteDtoSchema = z.object({
-  nombre: z.string().min(1, 'El nombre es requerido').max(200),
-  apellidos: z.string().min(1, 'Los apellidos son requeridos').max(200),
-  fechaNacimiento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato ISO8601 (YYYY-MM-DD)'),
-  habitacion: z.string().min(1, 'La habitación es requerida').max(50),
-  foto: z.string().url().nullable().optional(),
+  nombre: NombreSchema,
+  apellidos: ApellidosSchema,
+  fechaNacimiento: FechaNacimientoSchema,
+  habitacion: HabitacionSchema,
+  foto: FotoSchema,
   diagnosticos: z.string().nullable().optional(),
   alergias: z.string().nullable().optional(),
   medicacion: z.string().nullable().optional(),
@@ -54,14 +124,11 @@ export type CreateResidenteDto = z.infer<typeof CreateResidenteDtoSchema>
 
 export const UpdateResidenteDtoSchema = z
   .object({
-    nombre: z.string().min(1).max(200).optional(),
-    apellidos: z.string().min(1).max(200).optional(),
-    fechaNacimiento: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .optional(),
-    habitacion: z.string().min(1).max(50).optional(),
-    foto: z.string().url().nullable().optional(),
+    nombre: NombreSchema.optional(),
+    apellidos: ApellidosSchema.optional(),
+    fechaNacimiento: FechaNacimientoSchema.optional(),
+    habitacion: HabitacionSchema.optional(),
+    foto: FotoSchema,
     diagnosticos: z.string().nullable().optional(),
     alergias: z.string().nullable().optional(),
     medicacion: z.string().nullable().optional(),
@@ -78,6 +145,15 @@ export type UpdateResidenteDto = z.infer<typeof UpdateResidenteDtoSchema>
 export const ResidenteFilterSchema = z.enum(['active', 'archived', 'all'])
 
 export type ResidenteFilter = z.infer<typeof ResidenteFilterSchema>
+
+export function filterResidentesByState(
+  residentes: Residente[],
+  filter: ResidenteFilter
+): Residente[] {
+  if (filter === 'active') return residentes.filter((residente) => !residente.archivado)
+  if (filter === 'archived') return residentes.filter((residente) => residente.archivado)
+  return residentes
+}
 
 // ── Type guard ────────────────────────────────────────────────────────────
 

@@ -119,7 +119,7 @@ All DOM events in Vue templates use named handlers:
 ## Pre-existing Issues (Not Fixed by This Change)
 
 1. **`useIncidencias.spec.ts`** — 23 tests fail due to missing `setActivePinia(createPinia())` in `beforeEach`
-2. **`DashboardWidgetGrid.spec.ts`** — 3 tests fail due to `useResidentes` mock returning raw array instead of `ref()`
+2. **`DashboardWidgetGrid.spec.ts`** — fixed as part of composable rename (`useResidentes` → `useResidents`); mock now returns `ref([])`
 3. **`TasksView.spec.ts` error-state test** — 1 test fails due to `vi.doMock()` called inside test body (Vitest limitation)
 
 ---
